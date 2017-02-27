@@ -1,0 +1,5 @@
+# project dependencies
+node_modules
+
+# workspace stuff
+.idea

@@ -1,0 +1,14 @@
+{
+  "name": "coder_dojo_timisoara",
+  "version": "1.0.0",
+  "description": "Website CoderDojo Timisoara",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.14.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Adina Paraschiv",
+  "license": "ISC"
+}

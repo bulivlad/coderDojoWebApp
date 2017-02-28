@@ -1,13 +1,12 @@
 
 <div>
-    <a id="menuNarrow" href="" ng-click="showMenuNarrow()">&#9776;</a>
     <div id="navigation-narrow">
         <div id="navigation-narrow-empty" ng-click="hideMenuNarrow()"></div>
         <div id="navigation-narrow-full">
             <ul>
                 <li><a href="">Register | Login</a></li>
-                <li><a href="\despre">Despre</a></li>
-                <li><a href="">Cum pot ajuta?</a></li>
+                <li><a href="#!despre" ng-click="hideMenuNarrow()">Despre</a></li>
+                <li><a href="#!cum_pot_ajuta" ng-click="hideMenuNarrow()">Cum pot ajuta?</a></li>
                 <li><a href="">Resurse</a></li>
                 <li><a href="">Parteneri</a></li>
                 <li><a href="">Evenimente</a></li>

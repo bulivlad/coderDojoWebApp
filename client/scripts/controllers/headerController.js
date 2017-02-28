@@ -19,6 +19,6 @@ angular.module("coderDojoTimisoara")
             $('#navigation-narrow-full').removeClass('slide');
             setTimeout(function(){
                 $('#navigation-narrow').hide();
-            }, 1000);
+            }, 400);
         }
     })

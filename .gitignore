@@ -3,3 +3,7 @@ node_modules
 
 # workspace stuff
 .idea
+
+# scss map files
+/client/styles/*.map
+/client/styles/main.css

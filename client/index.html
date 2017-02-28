@@ -2,19 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" >
     <title>Coder Dojo Timisoara</title>
-    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700|Ubuntu:400,700&amp;subset=latin-ext" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&amp;subset=latin-ext" rel="stylesheet">
     <link href="styles/normalize.css" rel="stylesheet" type="text/css">
     <link href="styles/main.css" rel="stylesheet" type="text/css">
 </head>
 <body ng-app="coderDojoTimisoara" ng-controller="mainController">
 <header ng-controller="headerController">
     <div class="wrapper" >
-        <img src="img/logo.png" class="logo" ng-click="showMenuNarrow()">
-        <h1>CoderDojo Timișoara</h1>
+        <div class="header-banner">
+            <img src="img/logo.png" class="logo header-banner-item header-banner-col1" ng-click="showMenuNarrow()">
+            <h1 class="header-banner-item header-banner-col2">CoderDojo<br>Timișoara</h1>
+            <div id="login-register-wide" class="header-banner-item header-banner-col3">Inregistrare | Login</div>
+            <a id="menuNarrowButton" class="header-banner-item header-banner-col3" href="" ng-click="showMenuNarrow()">&#9776;</a>
+        </div>
         <header-narrow></header-narrow>
         <header-wide></header-wide>
-        <div class="clearfix"></div>
     </div>
 </header>
 

@@ -1,6 +1,7 @@
 $test_border: 1px solid black;
 $button_hover_color: #f7f7f7;
 $color_navigation_list_wide: #f4f4f4;
+$transition_resolution: 700px;
 
 /******************************
 GENERAL
@@ -14,7 +15,7 @@ GENERAL
 body {
   background-color: #ededed;
   color: black;
-  font-family: 'Ubuntu', sans-serif;
+  font-family: 'Roboto', sans-serif;
   letter-spacing: 0.003em;
   min-width: 400px;
   width: 100%;
@@ -26,28 +27,64 @@ body {
 HEADER
 *******************************/
 header {
-  //height: 80px;
   margin: 0;
 
+  .header-banner {
+    display: flex;
+
+    .header-banner-item {
+      display: inline-flex;
+    }
+
+
+    .header-banner-col1{
+        margin: 5px 0 5px 5px;
+    }
+
+    .header-banner-col2{
+      margin: 12px 0 0 3px;
+    }
+
+    .header-banner-col3{
+      margin: 5px 5px 3px auto;
+    }
+  }
+
+  //Font for Logo
   h1 {
-    float: left;
-    font-family: 'Ubuntu Mono', monospace;
-    font-size: 1.8em;
-    margin: 10px 0 0 15%;
-    text-align: center;
+    font-size: 1.1em;
+    line-height: 0.8em;
+    font-weight: normal;
   }
 }
 
 .logo {
-  float: left;
   height: 40px;
-  margin: 5px 0 5px 10px;
   width: 40px;
 }
 
-.clearfix {
-  clear:both;
+//button for narrow menu
+#menuNarrowButton {
+  background-color: white;
+  border: 1px solid #b2b2b2;
+  border-radius: 5px;
+  color: lighten(black, 35);
+  font-size: 1.4em;
+  height: 24px;
+  padding: 8px 12px 14px 12px;
+  text-decoration: none;
+
+  &:hover {
+    background-color: $button_hover_color;
+  }
+  @media screen and (min-width: $transition_resolution){
+    display: none;
+  }
+
+
 }
+
+
 // Navigatie narrow
 #navigation-narrow {
   background: rgba(0, 0, 0, 0.4);
@@ -76,7 +113,7 @@ header {
   padding: 0;
   will-change: transform;
   transform: translateX(100%);
-  transition: transform 1s ease-in-out;
+  transition: transform 0.4s ease-in-out;
   width: 80%;
 
   &.slide {
@@ -105,37 +142,15 @@ header {
   }
 }
 
-#menuNarrow {
-  background-color: white;
-  border-radius: 5px;
-  color: black;
-  display: inline-block;
-  float: right;
-  margin: 10px 10px 0 0;
-  padding: 3px 7px;
-  text-decoration: none;
-
-  &:hover {
-    background-color: $button_hover_color;
-  }
-  @media screen and (min-width: 768px){
-    display: none;
-  }
-
-
-}
 
 // Wide screen navigation
 #register-login-wide {
   position: relative;
   top:8px;
 
-  #login-register-wide {
-    float: right;
-  }
+
   #navigation-list-wide {
     background-color: $color_navigation_list_wide;
-    clear: both;
     display: flex;
     list-style: none;
     padding: 0 5px;
@@ -166,8 +181,14 @@ header {
     }
 
   }
-  @media screen and (max-width: 768px){
+  @media screen and (max-width: $transition_resolution){
     display: none;
+  }
+}
+
+#login-register-wide {
+  @media screen and (max-width: $transition_resolution){
+    display:none;
   }
 }
 
@@ -183,7 +204,6 @@ Body
 #about {
   h1.despre-heading {
     font-size: 1.3em;
-    font-family: 'Ubuntu Mono', monospace;
     margin: 20px 0 15px 50px;
   }
 

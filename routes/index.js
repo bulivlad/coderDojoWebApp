@@ -6,11 +6,11 @@
 const express = require('express'),
     router = express.Router(),
     keys = require('../static_keys/project_keys'),
-    templating = require("../templating/info");
+    templating = require("../templating/info"),
+    authentification = require('../passport/authentification');
 
-router.get('/' + keys.despre, function(req, res){
-    console.log("rendering " + keys.despre);
-    res.json(templating.cache[keys.despre]);
+router.get('/' + keys.despre, authentification.ensureAuthenticated, function(req, res){
+    res.json({info:'This is authorized communication.'});
 
 });
 

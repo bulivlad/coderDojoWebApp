@@ -9,14 +9,25 @@ angular.module("coderDojoTimisoara", [
 ])
     .config(['$routeProvider', function($routeProvider){
         $routeProvider
-            .when('/' + "despre", {templateUrl:'../views/despre.html', controller: 'mainController'})
-            .when('/' + "cum_pot_ajuta", {templateUrl:'../views/cum-pot-ajuta.html', controller: 'mainController'})
-            //.otherwise({redirectTo: '/cum_pot_ajuta'})
-    }])
+            .when('/' + keys.despre, {templateUrl:'../views/despre.html'})
+            .when('/' + keys.cumPotAjuta, {templateUrl:'../views/cum-pot-ajuta.html', controller: 'howMayIHelpController'})
+            .when('/' + keys.login, {templateUrl:'../views/login.html'})
+            .when('/' + keys.register, {templateUrl:'../views/register.html'})
+            .otherwise({redirectTo: '/despre'})
+    }]);
 
 
 
 const keys = {
-    despre: 'despre'
-}
+    despre: 'despre',
+    cumPotAjuta: "cum_pot_ajuta",
+    login: 'login',
+    register: 'register',
+    amIAuthenticated: 'amIAuthenticated',
+    dbsUserCreationError: 'dbsUserCreationError',
+    dbsUserSearchError: 'dbsUserSearchError',
+    user: 'user',
+    admin:'admin',
+    teacher: 'teacher'
+};
 

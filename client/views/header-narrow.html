@@ -3,8 +3,16 @@
     <div id="navigation-narrow">
         <div id="navigation-narrow-empty" ng-click="hideMenuNarrow()"></div>
         <div id="navigation-narrow-full">
+            <div class="login-register-narrow" ng-hide="user">
+                <a href="#!register" ng-click="hideMenuNarrow()">Cont nou </a> |
+                <a href="#!login" ng-click="hideMenuNarrow()"> Intră în cont</a>
+            </div>
+            <div class="user-logout" ng-show="user" ng-click="showUserMenuNarrow()">
+                <img src="../img/arrow-left.png" alt="Sageata stanga">
+                <span >{{user.firstName + ' ' + user.lastName}}</span>
+            </div>
             <ul>
-                <li><a href="">Register | Login</a></li>
+
                 <li><a href="#!despre" ng-click="hideMenuNarrow()">Despre</a></li>
                 <li><a href="#!cum_pot_ajuta" ng-click="hideMenuNarrow()">Cum pot ajuta?</a></li>
                 <li><a href="">Resurse</a></li>
@@ -15,6 +23,23 @@
                 <li><a href="">Contact</a></li>
                 <li><a href="">Inregistrare Saptamanala</a></li>
             </ul>
+
+        </div>
+        <div id="navigation-narrow-full-user">
+            <div id="close-and-back">
+                <img src="../img/arrow-right.png" alt="Sageata dreapta" ng-click="hideUserMenuNarrow()">
+                <img src="../img/close.png" alt="Inchis meniul" ng-click="hideMenuNarrow()"></div>
+            <div id="user-image-narrow">
+                <img src="../img/poza_profil.png" alt="Poza profil">
+            </div>
+            <ul>
+
+                <li><a href="#!despre" ng-click="hideMenuNarrow()">Profilul meu</a></li>
+                <li><a href="#!cum_pot_ajuta" ng-click="hideMenuNarrow()">Dojourile mele</a></li>
+                <li><a href="">Evenimentele mele</a></li>
+                <li><a href="">Logout</a></li>
+            </ul>
+        </div>
         </div>
     </div>
 

@@ -5,26 +5,92 @@
 const express = require("express"),
       path = require("path"),
       templating = require("./templating/info.js"),
-      routes = require('./routes/index');
+      routes = require('./routes/index'),
+      usersRoute = require('./routes/usersRoute'),
+      bodyParser = require('body-parser'),
+      expressValidator = require("express-validator"),
+      mongoose = require('mongoose'),
+      expressSession = require('express-session'),
+      cookieParser = require('cookie-parser'),
+      passport = require('passport'),
+      passportLocal =   require('passport-local');
+
+
+
+let dataBaseName = 'coderDojoTimisoara';
+//Connecting to the database
+mongoose.connect('mongodb://localhost/' + dataBaseName, function(err){
+    if (err){
+        console.log("Error:", err);
+    } else {
+        console.log('Connected to dbs: ' + dataBaseName);
+    }
+});
+
 
 
 //Read data files
-templating.initiate();
+//templating.initiate();
 
 
 let app = express();
 
+//Body parser middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
+app.use(expressSession({
+    secret:'hj9g9897532u8904fsuig34534gggd',
+    resave: false,
+    saveUninitialized: false
+}));
 
-//Setam directorul static de unde se iau fisierele pentru aplicatia client
+//Setting the static directory where the client files(css, js) are kept
 app.use(express.static(path.join(__dirname, 'client')));
 
+app.use(passport.initialize());//Grabs the data from the session
+app.use(passport.session())//Puts data into local session
+
+
+
+// This middleware is used for validating fields, the error formater is used to format the error message which will be
+// send to the client.
+app.use(expressValidator({
+    errorFormatter: function(param, msg, value){
+        let namespace = param.split("."),
+            root = namespace.shift(),
+            formParam = root;
+
+        while(namespace.length){
+            formParam += "[" + namespace.shift() + "]";
+        }
+        return {
+            param: formParam,
+            msg: msg,
+            value: value
+        };
+    }
+}));
 
 // We set the routes the data will take
 app.use("/", routes);
+app.use("/user", usersRoute);
 
 
 
-//Pornit aplicatia sa asculte pe portul 3000
+
+function ensureAuthenticated(req, res, next){
+    if(req.isAuthenticated()){
+        next();
+    } else {
+        res.send(403);
+    }
+}
+
+
+
+
+//Starting the server on port 3000
 //Set port
 app.set("port", (process.env.PORT || 3000));
 

@@ -1,0 +1,49 @@
+<div id="register" ng-controller="registerController">
+    <form name="register">
+        <div class="register">
+            <div class="input_and_error">
+                <input type="text" placeholder="Nume" name="lastName" ng-model="register.lastName" ng-click="register.errors.lastName = undefined"><br>
+                <p class="error" ng-show="register.errors && register.errors.lastName">{{register.errors.lastName}}</p>
+            </div>
+
+            <div class="input_and_error">
+                <input type="text" placeholder="Prenume" name="firstName" ng-model="register.firstName" ng-click="register.errors.firstName = undefined">
+                <p class="error" ng-show="register.errors && register.errors.firstName">{{register.errors.firstName}}</p>
+            </div>
+            <div class="input_and_error">
+                <input type="text" placeholder="adresa de email" name="email" ng-model="register.email" ng-click="register.errors.email = undefined"><br>
+                <p class="error" ng-show="register.errors && register.errors.email">{{register.errors.email}}</p>
+            </div>
+            <div class="input_and_error">
+                <input type="password" placeholder="parola" name="password" ng-model="register.password" ng-click="register.errors.password = undefined">
+                <p class="error" ng-show="register.errors && register.errors.password">{{register.errors.password}}</p>
+            </div>
+            <div class="input_and_error">
+                <input type="password" placeholder="reintrodu parola" name="password2" ng-model="register.password2" ng-click="register.errors.password2 = undefined"><br>
+                <p class="error" ng-show="register.errors && register.errors.password2">{{register.errors.password2}}</p>
+            </div>
+            <div class="input_and_error input_and_error_date_container">
+                <div class="input_and_error_date">
+                    <date-day></date-day>
+                    <p class="error" ng-show="register.errors && register.errors.dateDay">{{register.errors.dateDay}}</p>
+                </div>
+                <div class="input_and_error_date">
+                    <date-month></date-month>
+                    <p class="error" ng-show="register.errors && register.errors.dateMonth">{{register.errors.dateMonth}}</p>
+                </div>
+
+                <div class="input_and_error_date">
+                    <date-year></date-year>
+                    <p class="error" ng-show="register.errors && register.errors.dateYear">{{register.errors.dateYear}}</p>
+                </div>
+            </div>
+
+            <div class="input_and_error">
+                <input type="button"  value="Înregistrare" ng-click="registerUser()"><br>
+            </div>
+
+
+        </div>
+    </form>
+
+</div>

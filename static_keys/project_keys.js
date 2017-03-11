@@ -3,9 +3,20 @@
  */
 
 
-let keyMap = {};
+let keyMap = {
+    despre: "despre",
+    cumPotAjuta: "cum_pot_ajuta",
+    login: 'login',
+    register: 'register',
+    amIAuthenticated: 'amIAuthenticated',
+    dbsUserCreationError: 'dbsUserCreationError',
+    dbsUserSearchError: 'dbsUserSearchError',
+    user: 'user',
+    admin:'admin',
+    teacher: 'teacher'
+};
 
-keyMap.despre = "despre";
+
 
 
 

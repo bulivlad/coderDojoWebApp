@@ -1,13 +1,14 @@
 <div id="login" ng-controller="loginController">
-    <form name="register">
+    <form name="login">
         <div>
             <p class="just_registered" ng-show="justRegistered">Cont creat</p>
+            <p class="just_registered" ng-show="needLogin">Trebuie sa fi inregistrat pentru a accesa {{needLogin}}</p>
             <div class="input_and_error">
-                <input type="text" placeholder="adresa de email" name="email" ng-model="login.email" ng-click="login.errors.email = undefined"><br>
+                <input type="text" placeholder="adresa de email" name="emailForm" ng-model="login.email" ng-click="login.errors.email = undefined"><br>
                 <p class="error" ng-show="login.errors && login.errors.email">{{login.errors.email}}</p>
             </div>
             <div class="input_and_error">
-                <input type="password" placeholder="parola"  name='password' ng-model="login.password" ng-click="login.errors.password = undefined"><br>
+                <input type="password" placeholder="parola"  name='passwordForm' ng-model="login.password" ng-click="login.errors.password = undefined"><br>
                 <p class="error" ng-show="login.errors && login.errors.password">{{login.errors.password}}</p>
             </div>
             <div class="input_and_error">

@@ -1,0 +1,109 @@
+<div id="edit-profiles" ng-controller="editProfilesCtrl">
+    <div id="edit-profile-picture">
+        <div></div>
+        <img src="../img/poza_profil.png">
+        <p>{{user.firstName}}</p>
+    </div>
+
+
+    <div class="personal-data">
+
+        <h3>Date personale</h3>
+        <div class="label-and-value">
+             <label for="personal-data-lastname">Nume</label>
+             <input type="text" id="personal-data-lastname" ng-model="myProfile.user.lastName"
+                    ng-click="myProfile.errors.lastName = undefined"> <br>
+            <p ng-show="myProfile.errors && myProfile.errors.lastName">{{myProfile.errors.lastName}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-firstname">Prenume</label>
+            <input type="text" id="personal-data-firstname" ng-model="myProfile.user.firstName"
+                   ng-click="myProfile.errors.firstName = undefined"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.firstName">{{myProfile.errors.firstName}}</p>
+        </div>
+        <div class="label-and-value">
+            <label for="personal-data-birthdate">Data nașterii</label>
+            <input type="date" id="personal-data-birthdate" ng-model="myProfile.user.birthDate"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.birthDate">{{myProfile.errors.birthDate}}</p>
+        </div>
+        <div class="label-and-value">
+            <label for="personal-data-address">Adresa</label>
+            <textarea type="text" id="personal-data-address" ng-model="myProfile.user.address">
+
+            </textarea><br>
+            <p ng-show="myProfile.errors && myProfile.errors.address">{{myProfile.errors.address}}</p>
+        </div>
+        <br>
+        <button ng-click="modifyAccountInfo()">Salveaza</button>
+        <div class="clear-fix"></div>
+    </div>
+
+    <div class="personal-data">
+        <h3>Contact</h3>
+
+        <div class="label-and-value">
+            <label for="personal-data-email">Email</label>
+            <input type="text" id="personal-data-email" ng-model="myProfile.user.email" readonly><br>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-phone">Telefon</label>
+            <input type="text" id="personal-data-phone"  placeholder="07xxxxx" ng-model="myProfile.user.phone"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.phone">{{myProfile.errors.phone}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-facebook">Facebook</label>
+            <input type="text" id="personal-data-facebook"  placeholder="Cont Facebook" ng-model="myProfile.user.facebook"><br>
+        </div>
+        <div class="label-and-value">
+            <label for="personal-data-Linkedin">Linkedin</label>
+            <input type="text" id="personal-data-Linkedin"  placeholder="Cont Linkedin" ng-model="myProfile.user.linkedin"><br>
+        </div>
+
+        <button ng-click="modifyAccountInfo()">Salveaza</button>
+        <div class="clear-fix"></div>
+    </div>
+
+
+    <div class="personal-data">
+        <h3>Despre tine</h3>
+        <div class="label-and-value biography-container">
+            <label for="personal-data-biography">Bio</label>
+            <textarea type="text" id="personal-data-biography" placeholder="Scurtă descriere" ng-model="myProfile.user.biography"></textarea>
+            <div class="clear-fix"></div>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-phone">Limbaje de programare</label>
+            <input type="text" id="personal-data-programmingLanguages"  placeholder="Ex: Java, Javascript, Python"
+                   ng-model="myProfile.user.programmingLanguages"><br>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-languagesSpoken">Limbi străine</label>
+            <input type="text" id="personal-data-languagesSpoken"  placeholder="Ex: Engleză, Germană, Chineză"
+                   ng-model="myProfile.user.languagesSpoken"><br>
+        </div>
+        <div class="label-and-value">
+            <label for="personal-data-gender">Sexul</label>
+            <div id="personal-data-gender" ng-model="myProfile.user.gender">
+                <label>
+                    <input  type="radio" name="gender" ng-model="myProfile.user.gender" value="male"> Masculin
+                </label>
+                <label>
+                    <input type="radio" name="gender" ng-model="myProfile.user.gender" value="female"> Feminin
+                </label>
+                <label>
+                    <input type="radio" name="gender" ng-model="myProfile.user.gender" value="other"> Altul
+                </label>
+            </div>
+        </div>
+
+        <button ng-click="modifyAccountInfo()">Salveaza</button>
+        <div class="clear-fix"></div>
+
+    </div>
+
+</div>

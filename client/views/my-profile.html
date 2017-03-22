@@ -1,0 +1,42 @@
+<div id="my-profile" ng-controller="editProfilesCtrl">
+    <div id="edit-profile-picture">
+        <div></div>
+        <img src="../img/poza_profil.png">
+        <p>{{user.firstName}}</p>
+    </div>
+
+
+    <button class="edit-profile-button" ng-click="goToEditProfiles()">Editare profil</button>
+    <div class="page-content">
+
+
+        <div class="col1-my-profile">
+            <div class=".block-div">
+                 <label>Data nașterii</label>
+                <p>{{ getPrettyDate() }}</p>
+
+                <label>Sexul</label>
+                <p>{{myProfile.user.gender}}</p>
+
+                <label>Adresa</label>
+                <p>{{myProfile.user.address}}</p>
+
+            </div>
+        </div>
+
+
+            <div class="col2-my-profile">
+                <div class=".block-div" id="col2-my-profile-block-div">
+                    <h3>Copii</h3>
+                    <hr>
+                    <div></div>
+                    <h3>Membru al dojos</h3>
+                    <hr>
+            </div>
+        </div>
+
+    </div>
+
+
+
+</div>

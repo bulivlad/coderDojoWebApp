@@ -6,31 +6,60 @@
 
 
 angular.module("coderDojoTimisoara")
-    .controller("mainController", function($scope, dataService){
-
-
+    .controller("mainController", function($scope, $rootScope, $location, dataService){
         $scope.amIAuthenticated = function(){
-            dataService.amIAuthenticated(function(err, response){
-                if (err){
+            dataService.amIAuthenticated()
+                .then(function(response){
+                    if (response.data.user){
+                        $rootScope.user = response.data.user;
+                        $rootScope.user.birthDate = new Date($rootScope.user.birthDate);
+                    } else {
+                        console.log('Server responded with no user');
+                    }
+                })
+                .catch(function(err){
                     if (err.status === 401){
                         console.log('You are not authenticated')
                     } else {
                         console.log('Problems communicating')
                     }
-                } else {
-                    if (response.data.user){
-                        $scope.user = response.data.user;
-                    } else {
-                        console.log('Server responded with no user');
-                    }
-                }
-            })
+                });
         };
 
         $scope.amIAuthenticated();
 
+        $scope.setCorrectPathForWideNavigation = function(){
+            var currentPath = $location.path();
+            if(currentPath === '/' + keys.despre){
+                $scope.navLink = 'Despre';
+            } else  if(currentPath === '/' + keys.getDojos){
+                $scope.navLink = 'Inscriere Saptamanala';
+            }
+        }
 
-        $scope.pageInfo = generatePageInfo();
+        $scope.setCorrectPathForWideNavigation();
+
+        $scope.isChildRegisterAlert = function(){
+            return $rootScope.alert === keys.childRegisterAlert;
+        };
+
+        $scope.isUserModifiedAlert = function(){
+            return $rootScope.alert === keys.userModifiedAlert;
+        };
+
+        $scope.goToLogin = function(){
+            $location.path('/' + keys.login);
+            $rootScope.alert = undefined;
+        };
+
+        $scope.goToRegister = function(){
+            $location.path('/' + keys.register);
+            $rootScope.alert = undefined;
+        };
+
+        $scope.resetAlerts = function(){
+                $rootScope.alert = undefined;
+        }
 
         $scope.getDespre = function(){
             dataService.getDespre(function(response){
@@ -46,14 +75,3 @@ angular.module("coderDojoTimisoara")
 
 
 
-function generatePageInfo(){
-    let pageInfo = {};
-    //Creating the panels value
-    pageInfo.panelsContent = {};
-
-    //Creating the panels to displayObject
-    pageInfo.panelToDisplay = {};
-    pageInfo.panelToDisplay[keys.despre] = false;
-
-    return pageInfo;
-}

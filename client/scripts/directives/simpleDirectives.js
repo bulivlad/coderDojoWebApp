@@ -5,21 +5,21 @@
     angular.module("coderDojoTimisoara")
         .directive("despre", function(){
             return {
-                templateUrl: 'views/despre.html',
+                templateUrl: 'directives/despre.html',
                 controller: 'mainController',
                 replace: true
             }
         })
         .directive("headerWide", function(){
             return {
-                templateUrl: 'views/header-wide.html',
+                templateUrl: 'directives/header-wide.html',
                 controller: 'headerController',
                 replace: true
             }
         })
         .directive("headerNarrow", function(){
             return {
-                templateUrl: 'views/header-narrow.html',
+                templateUrl: 'directives/header-narrow.html',
                 controller: 'headerController',
                 replace: true
             }

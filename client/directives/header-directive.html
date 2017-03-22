@@ -1,0 +1,22 @@
+<div class="wrapper" >
+    <div class="header-banner">
+        <img src="img/logo.png" class="logo header-banner-item header-banner-col1" ng-click="showMenuNarrow()">
+        <h1 class="header-banner-item header-banner-col2">CoderDojo<br>Timișoara</h1>
+        <div id="login-register-wide" class="header-banner-item header-banner-col3">
+            <div class="login-register-wide" ng-hide="user">
+                <a href="#!register" >Cont nou </a> |
+                <a href="#!login"> Intră în cont</a>
+            </div>
+            <div class="user-logout" ng-show="user">
+                <span >{{user.firstName + ' ' + user.lastName}}</span>
+            </div>
+
+
+
+
+        </div>
+        <a id="menuNarrowButton" class="header-banner-item header-banner-col3" href="" ng-click="showMenuNarrow()">&#9776;</a>
+    </div>
+    <header-narrow></header-narrow>
+    <header-wide></header-wide>
+</div>

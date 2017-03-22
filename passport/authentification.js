@@ -2,18 +2,17 @@
  * Created by Adina Paraschiv on 3/8/2017.
  */
 
+const logger = require('winston');
+
 let authentification = {};
 
-
-
 authentification.ensureAuthenticated = function (req, res, next){
-    console.log('ensure authentificated');
     if(req.isAuthenticated()){
-        console.log('is authentificated')
+        logger.debug(`User  +  ${req.user.email} +  is authentificated`)
         next();
     } else {
-        console.log('is not authentificated')
-        res.sendStatus(403);
+        logger.debug(`User is NOT authentificated`);
+        res.sendStatus(401);
     }
 }
 

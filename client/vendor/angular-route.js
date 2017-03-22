@@ -147,7 +147,7 @@ function $RouteProvider() {
    *      For easier access to the resolved dependencies from the template, the `resolve` map will
    *      be available on the scope of the route, under `$resolve` (by default) or a custom name
    *      specified by the `resolveAs` property (see below). This can be particularly useful, when
-   *      working with {@link angular.Module#component components} as route templates.<br />
+   *      working with {@link angular.Module#component components} as route directives.<br />
    *      <div class="alert alert-warning">
    *        **Note:** If your scope already contains a property with this name, it will be hidden
    *        or overwritten. Make sure, you specify an appropriate name for this property, that

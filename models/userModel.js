@@ -13,16 +13,23 @@ let UserSchema = mongoose.Schema({
         index: true
     },
     password: {
-        type: String
+        type: String,
+        required: true
     },
     firstName: {
-        type: String
+        type: String,
+        required: true
     },
     lastName: {
+        type: String,
+        required: true
+    },
+    alias: {
         type: String
     },
-    birthdate: {
-        type: Date
+    birthDate: {
+        type: Date,
+        required: true
     },
     creationDate: {
         type: Date,
@@ -33,6 +40,41 @@ let UserSchema = mongoose.Schema({
         type: String,
         required: true,
         default: keys.user
+    },
+    address: {
+        type: String,
+        required: true
+    },
+    phone: {
+        type: String,
+        required: true
+    },
+    facebook: {
+        type: String
+    },
+    linkedin: {
+        type: String
+    },
+    languagesSpoken: {
+        type: String
+    },
+    programmingLanguages: {
+        type: String
+    },
+    biography: {
+        type: String
+    },
+    gender: {
+      type: String
+    },
+    children: {
+        type: Array
+    },
+    parents: {
+        type: Array
+    },
+    badges: {
+        type:Array
     }
 });
 

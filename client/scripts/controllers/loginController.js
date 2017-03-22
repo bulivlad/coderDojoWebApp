@@ -9,6 +9,7 @@ angular.module("coderDojoTimisoara")
         $scope.login.password = undefined;
 
         $scope.loginUser = function(){
+            $rootScope.needLogin = undefined;
             $rootScope.justRegistered = undefined;
             var errors = validateLoginFields($scope.login);
             if (errors){
@@ -18,8 +19,19 @@ angular.module("coderDojoTimisoara")
                     email:$scope.login.email,
                     password: $scope.login.password
                 };
-                dataService.loginUser(user, function(err, response){
-                    if (err){
+
+                dataService.loginUser(user)
+                    .then(function(response){
+                        if(response.data.errors){
+                            $scope.login.errors = response.data.errors;
+                        }else if (response.data.user){
+                            $rootScope.user = response.data.user;
+                            $rootScope.user.birthdate = new Date($rootScope.user.birthdate);
+                            resetValues($scope.login);
+                            $location.path('/' + keys.despre);
+                        }
+                    })
+                    .catch(function(err){
                         if(err.status === 401){
                             $scope.login.errors = {email:'Email-ul sau parola nu sunt corecte'};
                         } else if (err.status === -1){
@@ -28,16 +40,7 @@ angular.module("coderDojoTimisoara")
                             $scope.login.errors = {email:'Probleme de comunicare cu serverul'};
                         }
                         console.log("there was an error: ", err);
-                    } else {
-                        if(response.data.errors){
-                            $scope.login.errors = response.data.errors;
-                        }else if (response.data.user){
-                            $rootScope.user = response.data.user;
-                            resetValues($scope.login);
-                            $location.path('/' + keys.despre);
-                        }
-                    }
-                });
+                    });
             }
 
         };

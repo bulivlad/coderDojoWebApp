@@ -5,7 +5,7 @@
 let fs = require('fs'),
     keys = require('../static_keys/project_keys');
 
-const DESPRE = "templating/templates/despre.json";
+const DESPRE = "templating/directives/despre.json";
 
 let readInfo = {};
 

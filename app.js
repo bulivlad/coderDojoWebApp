@@ -7,13 +7,15 @@ const express = require("express"),
       templating = require("./templating/info.js"),
       routes = require('./routes/index'),
       usersRoute = require('./routes/usersRoute'),
+      dojosRoute = require('./routes/dojosRoute'),
       bodyParser = require('body-parser'),
       expressValidator = require("express-validator"),
       mongoose = require('mongoose'),
       expressSession = require('express-session'),
       cookieParser = require('cookie-parser'),
       passport = require('passport'),
-      passportLocal =   require('passport-local');
+      passportLocal =   require('passport-local'),
+      logger = require('./logger/logger');
 
 
 
@@ -22,8 +24,9 @@ let dataBaseName = 'coderDojoTimisoara';
 mongoose.connect('mongodb://localhost/' + dataBaseName, function(err){
     if (err){
         console.log("Error:", err);
+        logger.error('Cannot connect to database: ' + err);
     } else {
-        console.log('Connected to dbs: ' + dataBaseName);
+        logger.info('Connected to dbs: ' + dataBaseName);
     }
 });
 
@@ -69,23 +72,26 @@ app.use(expressValidator({
             msg: msg,
             value: value
         };
+    },
+    customValidators: {
+        isAgeGreaterThen14: function(birthDateRaw){
+            var ret = false;
+            var dateFourteenYearsAgo = new Date();
+            dateFourteenYearsAgo.setFullYear((new Date()).getFullYear() - 14);// 14 years ago
+            var birthDate = new Date(birthDateRaw);
+            if (birthDate < dateFourteenYearsAgo){
+                ret =  true;
+            }
+            return ret;
+        }
     }
 }));
 
 // We set the routes the data will take
 app.use("/", routes);
 app.use("/user", usersRoute);
+app.use("/dojos", dojosRoute);
 
-
-
-
-function ensureAuthenticated(req, res, next){
-    if(req.isAuthenticated()){
-        next();
-    } else {
-        res.send(403);
-    }
-}
 
 
 
@@ -95,5 +101,6 @@ function ensureAuthenticated(req, res, next){
 app.set("port", (process.env.PORT || 3000));
 
 app.listen(app.get("port"), function(){
-    console.log(`LOGGING:Server started on port ${app.get("port")}`);
+    logger.info(`LOGGING:Server started on port ${app.get("port")}`);
+
 });

@@ -2,6 +2,9 @@ $test_border: 1px solid black;
 $button_hover_color: #f7f7f7;
 $color_navigation_list_wide: #f4f4f4;
 $transition_resolution: 700px;
+$my_profile_color: #004889;
+$coder_dojo_log: #bc36f2;
+$profile_banner_height: 70px;
 
 /******************************
 GENERAL
@@ -12,12 +15,18 @@ GENERAL
   width: 100%;
 }
 
+.clear-fix {
+  clear: both;
+}
+
 body {
   background-color: #ededed;
   color: black;
-  font-family: 'Roboto', sans-serif;
+  //font-family: 'Roboto', sans-serif;
+  font-family: 'Cabin', sans-serif;
   letter-spacing: 0.003em;
-  min-width: 400px;
+  min-width: 350px;
+  position: relative;
   width: 100%;
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
@@ -29,13 +38,158 @@ body {
 
 }
 
+.stop-scrolling {
+  height: 100%;
+  overflow: hidden;
+}
+
+button {
+  border-radius: 3px;
+  border: 1px solid grey;
+  background-color: white;
+  font-size: 0.65em;
+  padding: 5px 3px;
+  &:hover {
+    background-color: $my_profile_color;
+    border: 1px solid $my_profile_color;
+    color: white;
+  }
+
+}
+
+a {
+
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+}
+
+.pages-banner {  //The banners on various pages
+  position: relative;
+  background-color: $my_profile_color;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  height: 40px;
+  letter-spacing: 1.5px;
+  margin: 0 auto 20px auto;
+  width: 80%;
+
+  h2 {
+    border-radius: 5px;
+    color:white;
+    font-size: 1.2em;
+    margin: 0 auto;
+    padding:10px 0 0 15px ;
+  }
+
+  @media screen and (min-width: $transition_resolution) {
+    margin-top: 8px;
+  }
+}
+
+
+/***************
+ALERTS
+****************/
+
+
+#alert {
+  background-color: rgba(150, 150, 150, 0.8);
+  height: 100%;
+  left:0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  .inner {
+    background-color: #e9ebee;
+    border: 2px solid $my_profile_color;
+    border-radius: 10px;
+    box-shadow: 0 0 10px $my_profile_color;
+    height: 300px;
+    margin: 110px auto 0 auto;
+    position: relative;
+    width: 350px;
+  }
+
+
+  #child-register-alert {
+    button {
+      border-radius: 15px;
+      box-shadow: 0 0 3px $my_profile_color;
+      display: block;
+      font-size: 1.4em;
+      margin: 10px auto;
+      padding: 10px 10px;
+      &:hover {
+        box-shadow: 0 0 3px white;
+      }
+    }
+    hr {
+      color: $my_profile_color;
+      margin: -10px 0 10px 0;
+    }
+
+    button:first-child {
+      background-color: #e9ebee;
+      border: none;
+      box-shadow: none;
+      margin-left: 87%;
+      margin-bottom: 0;
+      margin-top: 0;
+      font-size: 2em;
+      padding-left: 10px;
+      padding-right: 10px;
+      &:hover {
+        background-color: #e9ebee;
+        color: $my_profile_color;
+      }
+
+    }
+
+    p {
+      text-align: center;
+      font-weight: bold;
+    }
+  }
+
+  #user-modified-alert { //For the alert when a user was modified
+    height: 130px;
+    margin: 110px auto 0 auto;
+    width: 200px;
+
+
+    p {
+      color: #028302;
+      font-size: 1em;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      margin: 15px 0 30px 0;
+      text-align: center;
+    }
+
+    button {
+      border-radius: 15px;
+      box-shadow: 0 0 3px $my_profile_color;
+      display: block;
+      margin: 0 auto;
+      width: 80px;
+    }
+  }
+}
+
 
 
 /******************************
 HEADER
 *******************************/
 header {
-  margin: 0;
+  margin:0;
+
 
   .header-banner {
     display: flex;
@@ -81,17 +235,13 @@ header {
   height: 24px;
   padding: 8px 12px 14px 12px;
   text-decoration: none;
-
   &:hover {
     background-color: $button_hover_color;
   }
   @media screen and (min-width: $transition_resolution){
     display: none;
   }
-
-
 }
-
 
 // Navigatie narrow
 #navigation-narrow {
@@ -99,10 +249,13 @@ header {
   display: none;
   left: 0;
   height:100%;
+  min-height: 600px;
   padding: 0;
   position: absolute;
   margin: 0;
-  overflow-y: hidden;
+  overflow: hidden;
+
+  //min-height: 700px;
   text-align: center;
   z-index: 15;
   width: 100%;
@@ -119,12 +272,42 @@ header {
   display: block;
   float: right;
   height: 100%;
+  max-height: 600px;
   padding: 0;
   transform: translateX(100%);
   transition: transform 0.4s ease-in-out;
   width: 80%;
 
-  .user-logout {
+  //Login and register buttons on the narrow navigation
+  .login-register-narrow {
+    border-bottom: 1px solid grey;
+    text-align: left;
+
+    &:hover {
+      background-color: $button_hover_color;
+    }
+
+    a {
+      //border-top: 2px solid white;
+      color: $my_profile_color;
+      display: inline-block;
+      font-weight: bold;
+      padding: 15px 3px;
+      text-decoration: none;
+
+      &:hover {
+        color: #630e63;
+        transition: all 1s;
+        text-decoration: underline;
+
+      }
+
+    }
+  }
+
+
+
+  .user-logout { // Display the user and the user menu
     border-bottom: 1px solid grey;
     cursor: pointer;
     display: flex;
@@ -176,27 +359,12 @@ header {
         background-color: $button_hover_color;
       }
     }
-    //Login and register buttons
-    &.login-register-narrow {
-      text-align: left;
-      a {
-        //border-top: 2px solid white;
-        display: inline-block;
 
-        &:hover {
-          background-color: white;
-          color: #630e63;
-          transition: all 1s;
-          text-decoration: underline;
-
-        }
-
-      }
-    }
   }
 }
 
 #navigation-narrow-full-user {
+  display: none;
   left:20%;
   position: absolute;
   transform: translateX(100%);
@@ -229,7 +397,7 @@ header {
 }
 
 
-// Wide screen navigation
+// Wide navigation
 #register-login-wide {
   position: relative;
   top:8px;
@@ -249,19 +417,29 @@ header {
     }
 
     a{
-      border-top: 4px solid $color_navigation_list_wide;
-      border-bottom: 4px solid $color_navigation_list_wide;
+      border-top: 2px solid $color_navigation_list_wide;
+      //border-bottom: 4px solid $color_navigation_list_wide;
       color: black;
       display: inline-block;
       font-size: .8em;
       padding: 10px 3px;
-      transition: 0.5s;
+      transition: 1s;
       text-decoration: none;
       text-transform: capitalize;
 
       &:hover {
-        border-top: 4px solid white;
-        border-bottom: 4px solid white;
+        border-top: 2px solid $my_profile_color;
+        //border-bottom: 4px solid $my_profile_color;
+        color: rgba(75, 75, 75, 1);
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &.selected {
+        border-top: 2px solid $my_profile_color;
+        //border-bottom: 4px solid $my_profile_color;
         color: rgba(75, 75, 75, 1);
       }
     }
@@ -278,11 +456,6 @@ header {
   }
 }
 
-
-
-
-
-
 /******************************
 BODY
 *******************************/
@@ -292,58 +465,112 @@ BODY
   border: 1px solid white;
 }
 
-#about {
-  h1.despre-heading {
-    font-size: 1.3em;
-    margin: 20px 0 15px 50px;
+
+/******************************
+DESPRE
+*******************************/
+
+#despre {
+  h3 {
+    color: $my_profile_color;
+    font-size: 1em;
+    margin-left: 50px;
+  }
+
+  img {
+    display: block;
+    //margin-top: -25px;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
   }
 
   p {
-    font-size: .8em;
-    margin: 5px 10px;
     text-align: justify;
-    text-indent: 40px;
+    font-size: 0.75em;
+    margin:0 auto;
+    width: 90%;
+    text-indent: 25px;
+  }
+
+
+  a {
+    color: $my_profile_color;
+    background-color: rgba(220, 220, 220, 0.2);
+    border-radius: 15px;
+    font-weight: 600;
+    transition: 0.2s;
+
+    &:hover {
+      background-color: rgba(220, 220, 220, 0.4);
+    }
+  }
+
+  &:last-child { //Margin at the bottom before the footer
+    margin-bottom: 20px;
   }
 }
 
 
 /**************
-Login
+Login and Register
 **************/
 #login, #register {
-  form {
+  padding-bottom: 15px; //Space at the bottom of the page
 
-    input {
-      background: transparent;
+
+  h3 {
+    background: $my_profile_color;
+    background: rgba(0, 72, 137, 0.9);
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    color: white;
+    margin: 0 auto 0 auto;
+    padding: 3px 0 3px 0;
+    letter-spacing: 2px;
+    text-align: center;
+  }
+
+  form {
+    text-align: center;
+    padding-top: 95px;
+    input, textarea {
+      background: rgba(255,255,255, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 2px;
-      color: #fff;
+      //border-radius: 2px;
+      color: $my_profile_color;
       font-family: "Exo", sans-serif;
       font-size: 1em;
       font-weight: 400;
       height: 40px;
       padding: 4px;
+      margin-bottom: 1px;
       text-align: center;
       width: 250px;
 
       &:hover {
-        background: rgba(255,255,255, 0.3);
+        background: $my_profile_color;
+        background: rgba(0, 72, 137, 0.9);
+        background: rgba(255,255,255, 0.80);
       }
       &:focus {
         border: 1px solid rgba(255, 255, 255, 0.9);
-        background: rgba(255,255,255, 0.3);
+        background: rgba(255,255,255, 1);
         outline: none;
       }
 
 
     }
+    textarea {
+      max-width: 250px;
+    }
     input[type="button"]{
       background: #fff;
       border: 2px solid white;
-      border-radius: 2px;
       color: #a18d6c;
+      color: $my_profile_color;
       font-size: 1em;
-      font-weight: 400;
+      font-weight: 700;
       height: 45px;
       padding: 4px;
       width: 260px;
@@ -359,6 +586,23 @@ Login
       }
     }
 
+    .input_and_error {
+      position: relative;
+      margin: 0 auto;
+      width: 250px;
+
+      p {
+        background-color: rgba(255, 0, 0, 0.3);
+        border-radius: 3px;
+        color: white;
+        font-size: 0.6em;
+        position: absolute;
+        padding:0 5px;
+        top: 25px;
+        width: 250px;
+        z-index: 1;
+      }
+    }
   }
 }
 
@@ -370,96 +614,18 @@ Login
     text-align: center;
     padding-top: 135px;
   }
-
 }
 
 #register {
-  background: url('../img/register_picture.jpg') no-repeat center;
+  background: url('../img/register_picture2.jpg') no-repeat center;
   background-size: cover;
-  height: 500px;
 
-
-  }
-
-#register, #login {
   form {
-    text-align: center;
-    padding-top: 95px;
+    padding-top: 25px;
   }
-
-  .input_and_error {
-    position: relative;
-    margin: 0 auto;
-    width: 250px;
-
-    p {
-      background-color: rgba(255, 0, 0, 0.3);
-      border-radius: 3px;
-      color: white;
-      font-size: 0.6em;
-      position: absolute;
-      padding:0 5px;
-      top: 25px;
-      width: 250px;
-      z-index: 1;
-    }
-
-
-  }
-
-  .input_and_error_date_container {
-    display: flex;
-    width: 250px;
-    //align-items: flex-end;
-  }
-
-  .input_and_error_date {
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 2px;
-    display: inline-flex;
-    padding: 0 1px 0 1px;
-    width: 83.3px;
-
-    &:hover{
-      background: rgba(255,255,255, 0.3);
-    }
-
-    p {
-      width: 70px;
-    }
-
 }
 
 
-
-  .birthday-menu {
-    background: transparent;
-    color: #bbbaba;
-    display: inline-block;
-    font-family: "Exo", sans-serif;
-    font-size: 0.8em;
-    font-weight: 400;
-    height: 45px;
-    width: 83px;
-    padding-left: 7px;
-    outline: none;
-    -webkit-appearance: none;
-
-
-
-    option {
-      background: transparent;
-    }
-
-  }
-  #birthday-month-menu {
-    padding-left: 4px;
-  }
-
-  select {
-    border: none;
-  }
- }
 .just_registered {
   background-color: rgba(14, 127, 3, 0.6);
   border-radius: 4px;
@@ -468,6 +634,308 @@ Login
   width: 260px;
 }
 
+
+/******************************
+EDIT PROFILE
+*******************************/
+
+#edit-profile-picture { //Banner for profiles
+  ground-size: contain;
+  height: 110px;
+  margin:0 auto;
+  position: relative;
+  width: 80%;
+
+  div {
+    border: $my_profile_color;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: $my_profile_color;
+    height: $profile_banner_height;
+  }
+
+  img {
+    height:80px;
+    left: 50px;
+    position: absolute;
+    top: 15px;
+  }
+
+  p {
+    color: white;
+    position: absolute;
+    font-size: 0.7em;
+    font-weight: bold;
+    left: 40%;
+    text-transform: uppercase;
+    top: 25px;
+
+  }
+
+  @media screen and (min-width: $transition_resolution){
+    top: 8px;
+  }
+}
+.personal-data {
+  margin:0 auto;
+  padding-bottom: 15px;
+  width: 80%;
+  
+
+
+  h3 {
+    color: $my_profile_color;
+  }
+
+  .label-and-value {
+    clear: both;
+    position: relative;
+    height: 40px;
+
+    label {
+      display: inline-block;
+      font-size: .8em;
+      margin-right: 2%;
+      text-align: right;
+      width: 28%;
+    }
+
+    input, textarea {
+      border: 1px solid gray;
+      border-radius: 3px;
+      float: right;
+      font-size: 0.8em;
+      margin-bottom: 8px;
+      padding: 5px;
+      max-width: 66%;
+      width: 65%;
+      min-width: 30%;
+
+      &:focus {               //When focusing on input modify properties
+        border: 1px solid white;
+        box-shadow:  0 0 5px $my_profile_color;
+        outline: none;
+      }
+
+      &::-webkit-inner-spin-button { // To remove spinner from date picker
+        display: none;
+      }
+
+      &::-webkit-clear-button { //Do remove date picker clear date
+        display: none;
+      }
+
+      &[readonly] { // For disabled inputs in editProfiles
+        background-color: #f3f3f3;
+      }
+    }
+
+    p { //The error
+      border-radius: 3px;
+      color: red;
+      display: inline-block;
+      font-size: 0.45em;
+      position: relative;
+      left: 38%;
+      top: -36px;
+    }
+
+    #personal-data-gender {
+      display: inline;
+      float: right;
+      max-width: 66%;
+      //padding: 0 15px 0 0;
+      width: 65%;
+      min-width: 30%;
+
+      label {
+        font-size: 0.7em;
+        margin: 0 3px;
+        text-align: left;
+        width: auto;
+      }
+
+     input {
+        float: none;
+        min-width: 0;
+        position: relative;
+        top: 3px;
+        width: auto;
+      }
+    }
+  }
+
+  .biography-container {
+    //height: 60px;
+  }
+
+  button { //The save profile buttons
+    clear: both;
+    float: right;
+    text-align: right;
+  }
+
+}
+
+/******************************
+My profile
+*******************************/
+
+#my-profile {
+  position: relative;
+
+  .edit-profile-button {
+    border: none;
+    box-shadow: 3px 3px 3px #1b4f7d;
+    position: absolute;
+    right: 10%;
+    top: $profile_banner_height + 5px;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .page-content {
+    .col1-my-profile, .col2-my-profile {
+      margin:0 auto;
+      width: 80%;
+    }
+
+    p {
+      //color: grey;
+      font-size: 0.8em;
+      margin: 3px 0 10px 0;
+      text-align: center;
+    }
+    label {
+      color: $my_profile_color;
+      display: block;
+      font-size: 0.75em;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    h3 {
+      color: $my_profile_color;
+      margin-bottom: -10px;
+    }
+  }
+
+  @media screen and (min-width: $transition_resolution){
+    #edit-profile-picture { //Profile picture at the top
+    }
+
+    .edit-profile-button {
+      top: $profile_banner_height + 13px;
+    }
+
+    .page-content {
+      display: flex;
+      margin: 0 auto;
+      width: 70%;
+
+      .col1-my-profile {
+        display: inline-flex;
+        margin: 0;
+        width: 35%;
+      }
+
+      .col2-my-profile {
+        display: inline-flex;
+        margin: 0;
+        width: 65%;
+
+        #col2-my-profile-block-div {//Selected the wrapping div for col 2 because of some specificity issues
+          width: 100%;
+
+          h3:first-child {
+            margin-top: 0;
+          }
+        }
+      }
+      label {
+        text-align: left;
+      }
+
+      p {
+        text-align: left;
+      }
+    }
+  }
+}
+
+
+
+/******************************
+DOJOS (INSCRIERE SAPTAMANALE)
+*******************************/
+#dojos {
+  table {
+    margin: 0 auto;
+    width: 80%;
+
+    button { //Register (button)
+      font-size: 1.1em;
+      padding: 15px 15px;
+    }
+
+    button.dojo-full { //Button used to indicate that the dojo is full
+      border-color: tomato;
+      color:tomato;
+
+      &:hover {
+        background-color: white;
+        border-color: grey;
+        color: tomato;
+        cursor: default;
+      }
+    }
+
+    button.registered-in-dojo {//Button used to show that a child is registered for this dojo, and to cancel the register
+      color: #00802b;
+      border-color: #00802b;
+      height: 45px;
+      overflow: hidden;
+      padding:0;
+      width: 65px;
+
+      &:hover {
+        background-color: white;
+        border-color: #00802b;
+        color: green;
+        cursor: default;
+      }
+    }
+
+    button.registered-in-dojo-cancel {
+      height: 25px;
+      padding: 0;
+      margin-top: 5px;
+      width: 65px;
+    }
+
+    td {
+      font-size: 0.7em;
+      padding: 8px;
+    }
+
+
+    tr:first-child { //Table header
+      background-color: white;
+      //border-bottom: 1px solid $my_profile_color;
+      color: $my_profile_color;
+      text-align: left;
+      th {
+        padding-left: 8px;
+      }
+    }
+
+    tr:nth-child(even){
+      background-color: #f2f2f2;
+    }
+  }
+}
 
 
 /******************************
@@ -487,7 +955,6 @@ footer {
       display: block;
     }
 
-
     div {
       display: inline-flex;
     }
@@ -495,9 +962,9 @@ footer {
     .footer-col1 {
       margin-left: 3%;
       img {
-        height: 60px;
+        height: 40px;
         margin-left: 20px;
-        width: 60px;
+        width: 40px;
       }
     }
 
@@ -512,10 +979,5 @@ footer {
         text-decoration:none;
       }
     }
-
-
   }
-
-
-
 }

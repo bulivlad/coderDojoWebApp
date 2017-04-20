@@ -6,12 +6,37 @@ angular.module('coderDojoTimisoara')
     .service('dataService', function($http){
 
         //Services that asks if users is authenticated (logged in)
-        this.amIAuthenticated = function(){
+        this.getUserFromServer = function(){
             return $http({
                 method: 'GET',
-                url: '/user/' + keys.amIAuthenticated,
+                url: '/user/' + keys.amIAuthenticatedUserRoute,
             });
 
+        };
+
+        //Service that asks for user's children
+        this.getChildren = function(){
+            return $http({
+                method: 'GET',
+                url: 'user/' + keys.getChildrenRoute
+            });
+        };
+
+        //Service that asks for user's parents
+        this.getUsersParents = function(){
+            return $http({
+                method: 'GET',
+                url: 'user/' + keys.getUsersParentsRoute
+            });
+        };
+
+        //Service that asks for user's parents
+        this.getChildsParents = function(parents){
+            return $http({
+                method: 'POST',
+                url: 'user/' + keys.getChildsParentsRoute,
+                data: {parents: parents}
+            });
         };
 
         //Service that returns the upcoming dojos
@@ -19,6 +44,14 @@ angular.module('coderDojoTimisoara')
             return $http({
                 method: 'get',
                 url:'dojos/' + keys.getDojos
+            });
+        };
+
+        //Service that returns the upcoming dojos for authenticated users
+        this.getAuthDojos = function(){
+            return $http({
+                method: 'get',
+                url:'dojos/' + keys.getAuthDojos
             });
         };
 
@@ -56,7 +89,7 @@ angular.module('coderDojoTimisoara')
         }
 
         // Service that registers a user
-        this.registerUser = function(user, callback){
+        this.registerUser = function(user){
             return $http({
                 method: 'post',
                 url: '/user/' + keys.register,
@@ -64,6 +97,14 @@ angular.module('coderDojoTimisoara')
             });
 
         };
+
+        this.registerChild = function(childUser){
+            return $http({
+                method: 'POST',
+                url: '/user/' + keys.registerChildRoute,
+                data: {user: childUser}
+            });
+        }
 
         //Service that logs in a user
         this.loginUser = function(user){
@@ -90,6 +131,38 @@ angular.module('coderDojoTimisoara')
             });
         };
 
+        this.editUsersChild = function(usersChild){
+            return $http({
+                method: 'POST',
+                url: '/user/' + keys.editUsersChild,
+                data: {user: usersChild}
+            });
+        };
+
+
+        this.getNotificationsForUser = function(){
+            return $http({
+                method: "GET",
+                url: '/user/' + keys.getUsersNotificationsRoute
+            });
+        };
+
+        this.getNotificationsForUsersChild = function(child){
+            return $http({
+                method: "POST",
+                url: '/user/' + keys.getUsersChildNotificationsRoute,
+                data: child
+            });
+        };
+
+        this.inviteParent = function(invitation){
+            return $http({
+                method: 'POST',
+                url: '/user/' + keys.inviteUserToBeParentRoute,
+                data: invitation
+            });
+        };
+
         //Function that gets the despre values from the server
         this.getDespre = function(callback){
             console.log('get despre');
@@ -105,5 +178,86 @@ angular.module('coderDojoTimisoara')
                     callback(err)
                 });
 
+        };
+
+        this.deleteNotificationForUser = function(notification){
+            return $http({
+                method: 'POST',
+                url: '/user/' + keys.deleteNotificationForUserRoute,
+                data: notification
+            });
+        };
+
+        this.deleteNotificationForUsersChild = function(notificationAndChild){
+            return $http({
+                method: 'POST',
+                url: '/user/' + keys.deleteNotificationForUsersChildRoute,
+                data: notificationAndChild
+            });
+        };
+
+        this.acceptChildInvite = function(notification){
+            return $http({
+                method: 'POST',
+                url: '/user/' + keys.acceptChildInviteRoute,
+                data: notification
+            });
         }
+
+        this.addDojo = function(dojo){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.addDojoRoute,
+                data: {dojo: dojo}
+            });
+        };
+
+        this.becomeMemberOfDojo = function(data){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.becomeMemberOfDojoRoute,
+                data: data
+            });
+        };
+
+        this.leaveDojo = function(data){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.leaveDojoRoute,
+                data: data
+            });
+        };
+
+        this.getUsersForMember = function(data){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.getUsersForMember,
+                data: data
+            });
+        };
+
+        this.getDetailedUserForMember = function(data){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.getDetailedUserForMemberRoute,
+                data: data
+            });
+        };
+
+        this.acceptPendingMemberForDojo  = function(data){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.acceptPendingMemberRoute,
+                data: data
+            });
+        };
+
+        this.rejectPendingMemberForDojo  = function(data){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.rejectPendingMemberRoute,
+                data: data
+            });
+        };
+
     });

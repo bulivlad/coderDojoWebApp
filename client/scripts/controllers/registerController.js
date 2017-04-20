@@ -18,7 +18,8 @@ angular.module("coderDojoTimisoara")
         //Method that validates the fields from the register panel and sends the request to the server for registration
         $scope.registerUser = function(){
             console.log('Entering registerUser');
-            var errors = helperSvc.validateFields($scope.register, true);
+            var errors = helperSvc.validateFields($scope.register, keys.regUserOver14Profile);
+            errors = null;
             if (errors){
                 $scope.register.errors = errors;
             } else {
@@ -36,26 +37,8 @@ angular.module("coderDojoTimisoara")
                 dataService.registerUser(user)
                     .then(function(response){
                         if(response.data.errors){
-                            $scope.register.errors = {};
-                            response.data.errors.forEach(function(error){
-                               if (error.param.includes('birthDate')){
-                                   $scope.register.errors.birthDate = error.msg;
-                               } else if (error.param.includes('address')){
-                                   $scope.register.errors.address = error.msg;
-                               } else if (error.param.includes('firstName')){
-                                   $scope.register.errors.firstName = error.msg;
-                               } else if (error.param.includes('lastName')){
-                                   $scope.register.errors.lastName = error.msg;
-                               } else if (error.param.includes('email')){
-                                   $scope.register.errors.email = error.msg;
-                               } else if (error.param.includes('password')){
-                                   $scope.register.errors.password = error.msg;
-                               } else if (error.param.includes('password2')){
-                                   $scope.register.errors.password2 = error.msg;
-                               } else if (error.param.includes('phone')){
-                                   $scope.register.errors.phone = error.msg;
-                               }
-                            });
+                            $scope.register.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
+
                         }else if (response.data.success){
                             resetValues($scope.register);
                             $rootScope.justRegistered = true;

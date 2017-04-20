@@ -14,8 +14,9 @@ const express = require("express"),
       expressSession = require('express-session'),
       cookieParser = require('cookie-parser'),
       passport = require('passport'),
-      passportLocal =   require('passport-local'),
-      logger = require('./logger/logger');
+      //passportLocal =   require('passport-local'),
+      logger = require('./logger/logger'),
+      validator = require('./validator/validator');
 
 
 
@@ -50,41 +51,16 @@ app.use(expressSession({
 
 //Setting the static directory where the client files(css, js) are kept
 app.use(express.static(path.join(__dirname, 'client')));
-
 app.use(passport.initialize());//Grabs the data from the session
-app.use(passport.session())//Puts data into local session
+app.use(passport.session());//Puts data into local session
 
 
 
 // This middleware is used for validating fields, the error formater is used to format the error message which will be
 // send to the client.
 app.use(expressValidator({
-    errorFormatter: function(param, msg, value){
-        let namespace = param.split("."),
-            root = namespace.shift(),
-            formParam = root;
-
-        while(namespace.length){
-            formParam += "[" + namespace.shift() + "]";
-        }
-        return {
-            param: formParam,
-            msg: msg,
-            value: value
-        };
-    },
-    customValidators: {
-        isAgeGreaterThen14: function(birthDateRaw){
-            var ret = false;
-            var dateFourteenYearsAgo = new Date();
-            dateFourteenYearsAgo.setFullYear((new Date()).getFullYear() - 14);// 14 years ago
-            var birthDate = new Date(birthDateRaw);
-            if (birthDate < dateFourteenYearsAgo){
-                ret =  true;
-            }
-            return ret;
-        }
-    }
+    errorFormatter: validator.errorFormatter,
+    customValidators: validator.customValidators
 }));
 
 // We set the routes the data will take

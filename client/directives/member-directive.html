@@ -1,0 +1,77 @@
+<div class="member-container" ng-controller="memberCtrl">
+    <div class="pages-banner dojo-banner">
+        <h2>{{dojoViewer.dojo.name}} - Membrii dojo</h2>
+    </div>
+    <button class="back-button" ng-click="goBackAction()" ng-if="dojoViewer.views[localKeys.showBackButton]">Inapoi</button>
+    <div class="container">
+        <label>Selecteaza utilizatorul:</label>
+        <select ng-model="typeOfUser" ng-change="selectUserAction()">
+            <option>Parinti</option>
+            <option>Copii</option>
+            <option>Mentori</option>
+            <option ng-if="dojoViewer.dojo[keys.canAcceptMembers]">Mentori in asteptare</option>
+            <option>Voluntari</option>
+            <option ng-if="dojoViewer.dojo[keys.canAcceptMembers]">Voluntari  in asteptare</option>
+            <option>Campioni</option>
+            <option ng-if="dojoViewer.dojo[keys.canAcceptMembers]">Campioni in asteptare</option>
+        </select>
+        <hr>
+        <div ng-if="users && users.length > 0">
+            <div class="flex-container">
+                <span class="nr-crt flex-item">Nr.crt</span>
+                <span class="name flex-item">Nume</span>
+                <span class="expand-collapse flex-item">Expandează<br>Restrânge</span>
+                <span class="reject-approve-bttns flex-item" ng-if="showAcceptReject">Acceptă<br>Șterge</span>
+            </div>
+            <hr>
+            <div ng-repeat="memberUser in users">
+                <div class="contracted-part">
+                    <div class="flex-container">
+                        <span class="nr-crt flex-item">{{memberUser.nrCrt}}</span>
+                        <div class="name flex-item">
+                            <div class="block-div">
+                                <strong>
+                                    {{memberUser.firstName + " " + memberUser.lastName}}
+                                </strong>
+                            </div>
+                        </div>
+                        <span class="expand-collapse flex-item">
+                             <button class="expand-contract" ng-click="memberUser.expand = true;getUserInfoForExpandedLook(memberUser)"
+                                     ng-if="!memberUser.expand">
+                                 <i class="fa fa-chevron-down" aria-hidden="true"></i>
+                             </button>
+                        </span>
+                        <span class="reject-approve-bttns flex-item" ng-if="showAcceptReject">
+                            <button ng-click="acceptPendingMemberForDojo(memberUser)"><img src="../img/approve.png"></button>
+                            <button ng-click="rejectPendingMemberForDojo(memberUser)"><img src="../img/reject.png"></button>
+                        </span>
+                    </div>
+                </div>
+                <div class="expanded-part" ng-if="memberUser.expand">
+                    <p><strong>Data nasterii</strong>: {{memberUser.birthDate}}</p>
+                    <p><strong>Adresa</strong>: {{memberUser.address}}</p>
+                    <p ng-if="memberUser.email"><strong>Email</strong>: {{memberUser.email}}</p>
+                    <p ng-if="memberUser.alias"><strong>Alias</strong>: {{memberUser.alias}}</p>
+                    <p><strong>Telefon</strong>: {{memberUser.phone}}</p>
+                    <p ng-if="memberUser.facebook"><strong>Facebook</strong>:
+                        <a href="{{memberUser.facebook}}" target="_blank">{{memberUser.firstName + " " + memberUser.lastName}}</a>
+                    </p>
+                    <p ng-if="memberUser.linkedin"><strong>LinkedIn</strong>: {{memberUser.linkedin}}</p>
+                    <p ng-if="memberUser.biography"><strong>Biografie</strong>: {{memberUser.biography}}</p>
+                    <p ng-if="memberUser.programmingLanguages"><strong>Limbaje de programare</strong>: {{memberUser.programmingLanguages}}</p>
+                    <p ng-if="memberUser.languagesSpoken"><strong>Limbi vorbite</strong>: {{memberUser.languagesSpoken}}</p>
+                    <p ng-if="memberUser.gender"><strong>Sexul</strong>: {{memberUser.gender == "male" ? "masculin" : "feminin"}}</p>
+                    <button class="expand-contract" ng-click="memberUser.expand = false">
+                        <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <hr>
+            </div>
+
+        </div>
+        <span ng-if="!users || users.length == 0">
+            Nu exista {{typeOfUser}} pentru dojo.
+        </span>
+
+    </div>
+</div>

@@ -3,6 +3,7 @@ $button_hover_color: #f7f7f7;
 $color_navigation_list_wide: #f4f4f4;
 $transition_resolution: 700px;
 $my_profile_color: #004889;
+$my_dojo_color: #73449b;
 $coder_dojo_log: #bc36f2;
 $profile_banner_height: 70px;
 
@@ -43,7 +44,7 @@ body {
   overflow: hidden;
 }
 
-button {
+button, a.a-button {
   border-radius: 3px;
   border: 1px solid grey;
   background-color: white;
@@ -57,10 +58,26 @@ button {
 
 }
 
+.back-button {
+  float: right;
+  margin-right: 15%;
+}
+
+a.a-button {//A anchor that looks like a button
+  display: inline-block;
+  margin-bottom: 10px;
+  margin-bottom: 15px;
+  &:hover, &:visited, &:link, &:active {
+    text-decoration: none;
+    color: $my_profile_color;
+  }
+  &:hover {
+    color: white;
+  }
+}
+
 a {
-
   text-decoration: none;
-
   &:hover {
     text-decoration: underline;
   }
@@ -107,13 +124,10 @@ ALERTS
   z-index: 100;
   .inner {
     background-color: #e9ebee;
-    border: 2px solid $my_profile_color;
-    border-radius: 10px;
-    box-shadow: 0 0 10px $my_profile_color;
-    height: 300px;
-    margin: 110px auto 0 auto;
+    border: 1px solid $my_profile_color;
+    margin: 43% auto 0 auto;
     position: relative;
-    width: 350px;
+    width: 50%;
   }
 
 
@@ -157,27 +171,28 @@ ALERTS
     }
   }
 
-  #user-modified-alert { //For the alert when a user was modified
-    height: 130px;
-    margin: 110px auto 0 auto;
-    width: 200px;
-
-
+  #info-alert, #error-alert {
+    padding: 15px 15px;
     p {
-      color: #028302;
+      color: $my_profile_color;
       font-size: 1em;
       font-weight: bold;
-      letter-spacing: 1.5px;
-      margin: 15px 0 30px 0;
+      margin: auto 0;
       text-align: center;
     }
 
     button {
       border-radius: 15px;
-      box-shadow: 0 0 3px $my_profile_color;
+      //box-shadow: 0 0 3px $my_profile_color;
       display: block;
-      margin: 0 auto;
+      margin: 15px auto 0 auto;
       width: 80px;
+    }
+  }
+
+  #error-alert {
+    p {
+      color: red;
     }
   }
 }
@@ -200,7 +215,7 @@ header {
 
 
     .header-banner-col1{
-        margin: 5px 0 5px 5px;
+      margin: 5px 0 5px 5px;
     }
 
     .header-banner-col2{
@@ -349,14 +364,25 @@ header {
     border-bottom: 1px solid grey;
 
     a {
-      color: black;
+      color: $my_profile_color;
       display: block;
       margin-left: 5px;
       padding: 15px 0;
+      position: relative;
       text-align: left;
       text-decoration: none;
       &:hover {
         background-color: $button_hover_color;
+      }
+    }
+    a.search-for-dojo {
+      //color: grey;
+
+      img { //Search icon
+        height: 40px;
+        float: left;
+        margin: -11px 10px 0 15px;
+
       }
     }
 
@@ -389,10 +415,10 @@ header {
     }
   }
   #user-image-narrow {
-      img {
-        height: 100px;
-        margin: 0 auto;
-      }
+    img {
+      height: 100px;
+      margin: 0 auto;
+    }
   }
 }
 
@@ -636,11 +662,10 @@ Login and Register
 
 
 /******************************
-EDIT PROFILE
+My PROFILE
 *******************************/
 
 #edit-profile-picture { //Banner for profiles
-  ground-size: contain;
   height: 110px;
   margin:0 auto;
   position: relative;
@@ -672,114 +697,197 @@ EDIT PROFILE
 
   }
 
-  @media screen and (min-width: $transition_resolution){
+
+
+  @media screen and (min-width: $transition_resolution){//Fix for overlapping navigation
     top: 8px;
   }
 }
-.personal-data {
-  margin:0 auto;
-  padding-bottom: 15px;
-  width: 80%;
-  
 
 
-  h3 {
-    color: $my_profile_color;
-  }
-
-  .label-and-value {
-    clear: both;
-    position: relative;
-    height: 40px;
-
-    label {
-      display: inline-block;
-      font-size: .8em;
-      margin-right: 2%;
-      text-align: right;
-      width: 28%;
+#my-profile, #add-dojo {
+  .personal-data {
+    margin:0 auto;
+    padding-bottom: 15px;
+    width: 80%;
+    h3 {
+      color: $my_profile_color;
     }
 
-    input, textarea {
-      border: 1px solid gray;
-      border-radius: 3px;
-      float: right;
-      font-size: 0.8em;
-      margin-bottom: 8px;
-      padding: 5px;
-      max-width: 66%;
-      width: 65%;
-      min-width: 30%;
-
-      &:focus {               //When focusing on input modify properties
-        border: 1px solid white;
-        box-shadow:  0 0 5px $my_profile_color;
-        outline: none;
-      }
-
-      &::-webkit-inner-spin-button { // To remove spinner from date picker
-        display: none;
-      }
-
-      &::-webkit-clear-button { //Do remove date picker clear date
-        display: none;
-      }
-
-      &[readonly] { // For disabled inputs in editProfiles
-        background-color: #f3f3f3;
-      }
-    }
-
-    p { //The error
-      border-radius: 3px;
-      color: red;
-      display: inline-block;
-      font-size: 0.45em;
+    .label-and-value {
+      clear: both;
       position: relative;
-      left: 38%;
-      top: -36px;
-    }
-
-    #personal-data-gender {
-      display: inline;
-      float: right;
-      max-width: 66%;
-      //padding: 0 15px 0 0;
-      width: 65%;
-      min-width: 30%;
+      height: 40px;
 
       label {
-        font-size: 0.7em;
-        margin: 0 3px;
-        text-align: left;
-        width: auto;
+        display: inline-block;
+        font-size: .8em;
+        margin-right: 2%;
+        text-align: right;
+        width: 28%;
       }
 
-     input {
-        float: none;
-        min-width: 0;
-        position: relative;
-        top: 3px;
-        width: auto;
+      input, textarea {
+        border: 1px solid gray;
+        border-radius: 3px;
+        float: right;
+        font-size: 0.8em;
+        margin-bottom: 8px;
+        padding: 5px;
+        max-width: 66%;
+        width: 65%;
+        min-width: 30%;
+
+        &:focus {               //When focusing on input modify properties
+          border: 1px solid white;
+          box-shadow:  0 0 5px $my_profile_color;
+          outline: none;
+        }
+
+        &::-webkit-inner-spin-button { // To remove spinner from date picker
+          display: none;
+        }
+
+        &::-webkit-clear-button { //Do remove date picker clear date
+          display: none;
+        }
+
+        &[readonly] { // For disabled inputs in editProfiles
+          background-color: #f3f3f3;
+        }
+      }
+
+      p { //The error
+        border-radius: 3px;
+        color: red;
+        display: inline-block;
+        font-size: 0.45em;
+        position: absolute;
+        left: 38%;
+        top: -16px;
+      }
+
+      #personal-data-gender {
+        display: inline;
+        float: right;
+        max-width: 66%;
+        //padding: 0 15px 0 0;
+        width: 65%;
+        min-width: 30%;
+
+        label {
+          font-size: 0.7em;
+          margin: 0 3px;
+          text-align: left;
+          width: auto;
+        }
+
+        input {
+          float: none;
+          min-width: 0;
+          position: relative;
+          top: 3px;
+          width: auto;
+        }
+      }
+    }
+
+
+    button.save-profile { //The save profile buttons
+      clear: both;
+      float: right;
+      text-align: right;
+    }
+
+    div.add-kids-panel {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      margin-bottom: -8px;
+
+
+      button {
+        background-color: lighten($my_profile_color, 10);
+        color: white;
+        display: inline-flex;
+        font-size: .55em;
+        letter-spacing: .01px;
+
+        &:nth-child(2) {
+          margin: 0 0 0 auto; //To position to the left
+        }
+        &:last-child {
+          margin: 0 0 0 5px;
+        }
+
+        &:hover {
+          background-color: white;
+          color: $my_profile_color;
+        }
+      }
+    }
+
+  }
+
+  .my-profile-children { //The children of the current user
+    .my-profile-child {
+      cursor: pointer;
+      display: inline-block;
+      vertical-align: top;
+      img {
+        border: 3px solid white;
+        border-radius: 100%;
+
+        width: 70px;
+
+        &:hover {
+          border: 3px solid $my_profile_color;
+        }
+      }
+
+      p { //child name
+        text-align: center;
+        font-size: 0.7em;
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
   }
+  .my-profile-notifications {
+    .my-profile-notification-container {
+      border-radius: 5px;
+      background-color: #f6f4f4;
+      margin: 0 auto 10px auto;
+      padding: 5px;
+      width: 95%;
+    }
 
-  .biography-container {
-    //height: 60px;
-  }
+    .parent-invite {
+      font-size: 0.8em;
+      height: 42px;
 
-  button { //The save profile buttons
-    clear: both;
-    float: right;
-    text-align: right;
+      span {
+      }
+      strong, code {
+        color: $my_profile_color;
+      }
+
+      button {
+        float: right;
+        height: 30px;
+        margin-left: 5px;
+
+        img {
+          height: 20px;
+        }
+      }
+    }
+
   }
 
 }
 
-/******************************
-My profile
-*******************************/
 
 #my-profile {
   position: relative;
@@ -937,6 +1045,466 @@ DOJOS (INSCRIERE SAPTAMANALE)
   }
 }
 
+
+/******************************
+DOJOS (CAUTA UN DOJO)
+*******************************/
+.map-or-list-buttons-holder { //Buttons for selecting map or list
+  height: 24px;
+  margin: 1%;
+  width:98%;
+
+  button {
+    border-radius: 0;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    display: block;
+    float: left;
+    width: 50%;
+
+    &:hover {
+      background-color: #f0f0f0;
+      color: $my_profile_color;
+    }
+    &:focus {
+      outline: none;
+    }
+  }
+
+  button.selected {
+    background-color: $my_profile_color;
+    color: white;
+    cursor: default;
+  }
+}
+
+div.dojo-list {  //List of dojos
+  div.dojo-list-inner {
+    ul {
+      list-style: none;
+      li {
+        a{
+          color: $my_profile_color;
+          background-color: #ededed;
+          border-radius: 5px;
+          cursor: pointer;
+          display: inline-block;
+          margin: 2px 0;
+          padding: 6px;
+          width: 250px;
+        }
+      }
+
+    }
+  }
+}
+
+.dojo-map-holder {
+  height: 300px;
+  margin: 0 auto;
+  width:100%;
+
+  #dojo-map, #dojo-map-single-dojo {
+    height:98%;
+    margin: 1%;
+    width:98%;
+
+    a.info-window {
+      color: $my_profile_color;
+      font-weight: bold;
+    }
+  }
+}
+
+div.dojos-view-container {
+  div.dojo-banner {
+    background-color: #73449b;
+    position: relative;
+  }
+
+  button:hover {
+    background-color: $my_dojo_color;
+  }
+
+  .dojo-description, .dojo-events, .dojo-map-holder {
+    margin: 0 auto;
+    width: 80%;
+  }
+
+  div.dojo-description {
+
+    .text-color {
+      color: $my_dojo_color;
+    }
+
+    label {
+      color: $my_profile_color;
+      display: block;
+      font-size: 0.75em;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .col1-dojo-description {
+      margin:0 auto;
+      padding-left:10px;
+      width: 80%;
+
+      .leave-join-button {
+        margin-bottom: 17px;
+        text-align: center;
+        width: 80px;
+      }
+
+      p {
+        font-size: 0.8em;
+        margin: 3px 0 10px 0;
+        text-align: center;
+
+        a { //For social network icons
+
+          &:hover {
+            text-decoration: none;
+          }
+
+          &:focus{
+            outline: none;
+          }
+
+          img {
+            width: 25px;
+            margin: 0 2px;
+          }
+        }
+      }
+      .join-leave-container {
+        .join-dojo-screen{
+          background-color: rgba(0, 0, 0, 0.8);
+          height: 100%;
+          position: fixed;
+          left: 0;
+          top: 0;
+          width: 100%;
+          z-index: 100;
+
+          .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            height: 100%;
+            overflow: scroll;
+
+            .role {
+              background-color: white;
+              display: flex;
+              flex-direction: column;
+              height: 250px;
+              margin: 40px 2.5%;
+              width: 250px;
+
+              img {
+                display: block;
+                margin: 10px auto;
+                height: 120px;
+              }
+
+              button {
+                border-radius: 0;
+                margin: 0 auto;
+                width: 80%;
+              }
+
+              h3 {
+                text-align: center;
+              }
+
+
+            }
+
+            .mentor {
+              h3 {
+                background-color: green;
+
+              }
+              button {
+                border: 3px solid green;
+                &:hover {
+                  background-color: green;
+                }
+              }
+
+            }
+            .attendee {
+              h3 {
+                background-color: green;
+              }
+
+              button {
+                border: 3px solid green;
+                &:hover {
+                  background-color: green;
+                }
+              }
+            }
+
+            .champion {
+              h3 {
+                background-color: yellow;
+              }
+
+              button {
+                  border: 3px solid yellow;
+                &:hover {
+                  background-color: yellow;
+                  color: $my_profile_color;
+                }
+              }
+
+            }
+
+            .volunteer {
+              h3 {
+                background-color: violet;
+              }
+
+              button {
+                border: 3px solid violet;
+                &:hover {
+                  background-color: violet;
+                }
+              }
+            }
+
+            .parent {
+              h3 {
+                background-color: blue;
+                color: white;
+              }
+              button {
+                border: 3px solid blue;
+                &:hover {
+                  background-color: blue;
+                }
+              }
+            }
+
+
+
+
+
+
+          }
+        }
+      }
+
+    }
+
+    .col2-dojo-description {
+      margin:0 auto;
+      padding-right: 10px;
+      width: 80%;
+
+      label {
+        text-align: left;
+      }
+
+      p.location {
+        font-size: 0.8em;
+        width: 300px;
+      }
+
+      a.locate-dojo-button {//Localizeaza button
+        margin-bottom: 15px;
+      }
+
+      ul.requirements-list {
+        color: $my_profile_color;
+        margin-top: 5px;
+
+        li {
+          color: black;
+          font-size: 0.8em;
+          margin-bottom: 7px;
+        }
+      }
+    }
+    .dojo-description-container {
+      @media screen and (min-width: $transition_resolution){
+        display: flex;
+
+        .col1-dojo-description {
+          display: inline-flex;
+          width: 25%;
+
+          p, label {
+            text-align: left;
+          }
+        }
+
+        .col2-dojo-description {
+          display: inline-flex;
+          margin-left: 5%;
+          width: 70%;
+
+          a.a-button {
+            &:hover {
+              background-color: $my_dojo_color;
+            }
+          }
+
+          div.container {//This div is needed for resetting display to block (it was flex)
+            display: block;
+            width: 100%;
+            p {
+              width: 100%;
+            }
+          }
+        }
+      }
+    }
+
+
+  }
+
+  h3 {
+    color: $my_profile_color;
+    text-align: center;
+
+  }
+
+  .dojo-events {
+
+
+  }
+
+  .dojo-map-holder {
+
+  }
+
+}
+
+/***************
+Dojo members
+***************/
+
+.member-container {
+  .pages-banner {
+    background-color: $my_dojo_color;
+    height: auto;
+    min-height: 40px;
+  }
+
+  .container {
+    margin: 0 auto;
+    width: 95%;
+  }
+
+  select {
+    padding: 5px;
+  }
+
+  button.expand-contract {
+    border: none;
+    display: block;
+    color: $my_profile_color;
+    float: right;
+    font-size: 0.9rem;
+    margin: 3px auto;
+    padding:3px 10px;
+    text-align: center;
+  }
+
+  .flex-container {
+    display: flex;
+    //border-bottom: 1px solid #bfbfbf;
+
+    .flex-item {
+      display: inline-flex;
+    }
+
+    span {
+      font-size: 0.7em;
+    }
+
+    .nr-crt {
+      border-right: 1px solid #bfbfbf;
+      display: inline-block;
+      text-align: center;
+      width: 13%;
+    }
+
+    .name {
+      padding-left: 5px;
+      width: 42%;
+
+      .block-div {
+        display: block;
+        width: 100%;
+      }
+
+      strong {
+        color: $my_profile_color;
+      }
+
+    }
+
+    .expand-collapse, .reject-approve-bttns {
+      display: block;
+      text-align: center;
+    }
+
+    .expand-collapse {
+      width: 20%;
+    }
+
+    .reject-approve-bttns{
+      width: 25%;
+      white-space: nowrap;
+      button {
+        border: none;
+        padding: 0;
+        width: 50%;
+        img {
+          margin:2.5% 2.5%;
+          width: 45%;
+        }
+
+      }
+    }
+
+
+  }
+
+  .contracted-part {
+
+    .flex-container {
+      //height: 40px;
+    }
+
+
+  }
+
+  .expanded-part {
+    button {
+      float: none;
+    }
+
+    p {
+      margin: 5px 15px;
+
+      strong {
+        color: $my_profile_color;
+      }
+
+      a {
+        text-decoration: underline;
+      }
+
+
+    }
+  }
+
+}
 
 /******************************
 FOOTER

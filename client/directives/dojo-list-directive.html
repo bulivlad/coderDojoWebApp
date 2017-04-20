@@ -1,0 +1,9 @@
+<div class="dojo-list">
+    <div class="dojo-list-inner">
+        <ul>
+            <li ng-repeat="dojo in dojoViewer.dojos | orderBy: 'name' ">
+                <a ng-click="selectDojoAction(dojo)">{{dojo.name}}</a>
+            </li>
+        </ul>
+    </div>
+</div>

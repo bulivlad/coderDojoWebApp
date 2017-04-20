@@ -1,0 +1,145 @@
+<div>
+    <button class="edit-profile-button" ng-click="goBackAction()">Înapoi la profil</button>
+    <div class="personal-data">
+        <h3>Date personale</h3>
+        <div class="label-and-value">
+
+            <label for="personal-data-lastname">Nume</label>
+            <input type="text" id="personal-data-lastname" ng-model="myProfile.user.lastName"
+                   ng-click="myProfile.errors.lastName = undefined"> <br>
+            <p ng-show="myProfile.errors && myProfile.errors.lastName">{{myProfile.errors.lastName}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-firstname">Prenume</label>
+            <input type="text" id="personal-data-firstname" ng-model="myProfile.user.firstName"
+                   ng-click="myProfile.errors.firstName = undefined"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.firstName">{{myProfile.errors.firstName}}</p>
+        </div>
+        <div class="label-and-value" ng-show="myProfile.views.showAlias">
+            <label for="personal-data-alias">Alias</label>
+            <input type="text" id="personal-data-alias" ng-model="myProfile.user.alias"
+                   ng-click="myProfile.errors.alias = undefined"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.alias">{{myProfile.errors.alias}}</p>
+        </div>
+        <div class="label-and-value">
+            <label for="personal-data-birthdate">Data nașterii</label>
+            <input type="date" id="personal-data-birthdate" ng-model="myProfile.user.birthDate"
+                   ng-click="myProfile.errors.birthDate = undefined"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.birthDate">{{myProfile.errors.birthDate}}</p>
+        </div>
+        <div class="label-and-value">
+            <label for="personal-data-address">Adresa</label>
+            <textarea type="text" id="personal-data-address" ng-model="myProfile.user.address"
+                      ng-click="myProfile.errors.address = undefined">
+
+            </textarea><br>
+            <p ng-show="myProfile.errors && myProfile.errors.address">{{myProfile.errors.address}}</p>
+        </div>
+        <br>
+        <!--<button ng-click="saveAction()">Salveaza</button>TODO Adina liked it removed-->
+        <div class="clear-fix"></div>
+    </div>
+
+    <div class="personal-data">
+        <h3>Contact</h3>
+
+        <div class="label-and-value" ng-hide="isChildUnder14()">
+            <label for="personal-data-email">E-mail</label>
+            <input type="text" id="personal-data-email" ng-model="myProfile.user.email" readonly><br>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-phone">Telefon</label>
+            <input type="text" id="personal-data-phone"  placeholder="07xxxxx" ng-model="myProfile.user.phone"
+                   ng-click="myProfile.errors.phone = undefined"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.phone">{{myProfile.errors.phone}}</p>
+        </div>
+
+        <div class="label-and-value" ng-hide="isChildUnder14()">
+            <label for="personal-data-facebook">Facebook</label>
+            <input type="text" id="personal-data-facebook"  placeholder="Cont Facebook" ng-model="myProfile.user.facebook"><br>
+        </div>
+        <div class="label-and-value" ng-hide="isChildUnder14()">
+            <label for="personal-data-Linkedin">Linkedin</label>
+            <input type="text" id="personal-data-Linkedin"  placeholder="Cont Linkedin" ng-model="myProfile.user.linkedin"><br>
+        </div>
+
+        <!--<button ng-click="saveAction()">Salveaza</button>TODO Adina liked it removed-->
+        <div class="clear-fix"></div>
+    </div>
+
+
+    <div class="personal-data">
+        <h3>Despre tine</h3>
+        <div class="label-and-value biography-container">
+            <label for="personal-data-biography">Bio</label>
+            <textarea type="text" id="personal-data-biography" placeholder="Scurtă descriere" ng-model="myProfile.user.biography"></textarea>
+            <div class="clear-fix"></div>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-phone">Limbaje de programare</label>
+            <input type="text" id="personal-data-programmingLanguages"  placeholder="Ex: Java, Javascript, Python"
+                   ng-model="myProfile.user.programmingLanguages"><br>
+        </div>
+
+        <div class="label-and-value">
+            <label for="personal-data-languagesSpoken">Limbi străine</label>
+            <input type="text" id="personal-data-languagesSpoken"  placeholder="Ex: Engleză, Germană, Chineză"
+                   ng-model="myProfile.user.languagesSpoken"><br>
+        </div>
+        <div class="label-and-value">
+            <label for="personal-data-gender">Sexul</label>
+            <div id="personal-data-gender" ng-model="myProfile.user.gender">
+                <label>
+                    <input  type="radio" name="gender" ng-model="myProfile.user.gender" value="male"> Masculin
+                </label>
+                <label>
+                    <input type="radio" name="gender" ng-model="myProfile.user.gender" value="female"> Feminin
+                </label>
+                <label>
+                    <input type="radio" name="gender" ng-model="myProfile.user.gender" value="other"> Altul
+                </label>
+            </div>
+        </div>
+        <div class="label-and-value" ng-show="myProfile.views.password">
+            <label for="personal-data-password">Parola</label>
+            <input type="password" placeholder="parola" id="personal-data-password" ng-model="myProfile.user.password"
+                   ng-click="myProfile.errors.password = undefined"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.password">{{myProfile.errors.password}}</p>
+        </div>
+        <div class="label-and-value" ng-show="myProfile.views.password">
+            <label for="personal-data-password2">Confirmare parola</label>
+            <input type="password" id="personal-data-password2" placeholder="confirmare parolă"  ng-model="myProfile.user.password2"
+                   ng-click="myProfile.errors.password2 = undefined"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.password2">{{myProfile.errors.password2}}</p>
+        </div>
+
+        <button class="save-profile" ng-click="saveAction()">Salvează</button>
+        <div class="clear-fix"></div>
+
+        <div class="kids-myprofile" ng-show="">
+            <h3>Copii</h3>
+            <div></div>
+        </div>
+        <div class="add-kids-panel" ng-show="myProfile.views.showAddChildren">
+            <button ng-click="addChildUnder14Action()">Adaugă copil <br>sub 14 ani</button>
+            <button ng-click="addChildOver14Action()">Adaugă copil <br>peste 14 ani</button>
+            <button>Invită copil <br>peste 14 ani</button>
+        </div>
+
+
+    </div>
+    <div class="personal-data" ng-show="myProfile.views.showInviteParent">
+        <h3>Parinți</h3>
+        <div class="label-and-value">
+            <label for="personal-data-invite-parent">Invită</label>
+            <input type="text" placeholder="Email parinte" id="personal-data-invite-parent"
+                   ng-model="myProfile.emailParent" ng-click="myProfile.errors.inviteEmail = undefined"><br>
+            <p ng-show="myProfile.errors && myProfile.errors.inviteEmail">{{myProfile.errors.inviteEmail}}</p>
+            <button class="save-profile" ng-click="inviteParent()">Invită părinte</button>
+        </div>
+
+    </div>
+</div>

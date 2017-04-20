@@ -24,11 +24,10 @@ angular.module("coderDojoTimisoara")
                     .then(function(response){
                         if(response.data.errors){
                             $scope.login.errors = response.data.errors;
-                        }else if (response.data.user){
-                            $rootScope.user = response.data.user;
-                            $rootScope.user.birthdate = new Date($rootScope.user.birthdate);
+                        }else if (response.data.success){
                             resetValues($scope.login);
                             $location.path('/' + keys.despre);
+                            $scope.getUserFromServer();//We get the use from the server
                         }
                     })
                     .catch(function(err){

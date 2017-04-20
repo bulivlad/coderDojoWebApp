@@ -1,0 +1,72 @@
+<div>
+    <button class="edit-profile-button" ng-click="editAction()" ng-hide="myProfile.views.hideEditButton">Editare profil</button>
+    <div class="page-content">
+        <div class="col1-my-profile">
+            <div class=".block-div">
+                <label>Data nașterii</label>
+                <p>{{ getPrettyDate() }}</p>
+
+                <label>Sexul</label>
+                <p>{{myProfile.user.gender}}</p>
+
+                <label>Adresa</label>
+                <p>{{myProfile.user.address}}</p>
+
+            </div>
+        </div>
+        <div class="col2-my-profile">
+            <div class=".block-div" id="col2-my-profile-block-div">
+                <div ng-show="myProfile.user.children.length > 0">
+                    <h3>Copii</h3>
+                    <hr>
+                    <div class="my-profile-children">
+                        <div class="my-profile-child" ng-repeat="child in myProfile.user.children"
+                             ng-click="viewChildAction(child)">
+                            <img src="../img/poza_profil.png" alt="Poza profil copil">
+                            <p>{{child.firstName + " " + child.lastName}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div >
+                    <h3>Membru al dojo</h3>
+                    <hr>
+                </div>
+                <div ng-show="myProfile.user.parents.length > 0">
+                    <h3>Părinți</h3>
+                    <hr>
+                    <div class="my-profile-children">
+                        <div class="my-profile-child" ng-repeat="parent in myProfile.user.parents"
+                             ng-click="viewParentAction(parent)">
+                            <img src="../img/poza_profil.png" alt="Poza profil parinte">
+                            <p>{{parent.firstName + " " + parent.lastName}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="my-profile-notifications" ng-show="myProfile.user.notifications.length > 0">
+                    <h3>Notificări</h3>
+                    <hr>
+                    <div class="my-profile-notification-container" ng-repeat="notification in myProfile.user.notifications">
+                        <div class="parent-invite" ng-if="notification.typeOfNot === keys.parentInviteNotification">
+                            <button ng-click="cancelChildInvite(notification)"><img src="../img/reject.png"></button>
+                            <button ng-click="acceptChildInvite(notification)"><img src="../img/approve.png"></button>
+                            <span><strong>{{notification.data.firstName + " " + notification.data.lastName}}</strong>
+                                      alias <strong>{{notification.data.alias}}</strong>, ți-a trimis o invitație să îi fi
+                                    părinte pe <code>Coder Dojo Timișoara</code>
+                            </span>
+
+                        </div>
+                        <div class="parent-invite" ng-if="notification.typeOfNot === keys.infoNotification">
+                            <button ng-click="dismissNotification(notification)"><img src="../img/reject.png"></button>
+                           <span>
+                               <strong>{{notification.data.msg}} </strong>
+                            </span>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -10,7 +10,7 @@ angular.module("coderDojoTimisoara")
                 .then(function(response){
                     if (response.data && response.data.success){
                         //Erasing current user
-                        $rootScope.user = undefined;
+                        $scope.deleteUser('logoutUser');
                         $scope.hideUserMenuNarrow();
                         $location.path('/' + keys.despre);
                     } else {

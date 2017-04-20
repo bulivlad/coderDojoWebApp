@@ -5,16 +5,18 @@
 'use strict';
 const mongoose = require('mongoose'),
       bcrypt = require('bcryptjs'),
-      keys = require('../static_keys/project_keys');
+      keys = require('../static_keys/project_keys'),
+      logger = require('winston');
 
 let UserSchema = mongoose.Schema({
     email: {
         type: String,
-        index: true
+        index: true,
+        unique: true
     },
     password: {
         type: String,
-        required: true
+        select: false
     },
     firstName: {
         type: String,
@@ -25,7 +27,9 @@ let UserSchema = mongoose.Schema({
         required: true
     },
     alias: {
-        type: String
+        type: String,
+        index: true,
+        unique: true
     },
     birthDate: {
         type: Date,
@@ -34,7 +38,8 @@ let UserSchema = mongoose.Schema({
     creationDate: {
         type: Date,
         default: Date.now,
-        required: true
+        required: true,
+        select:false
     },
     authorizationLevel: {
         type: String,
@@ -74,38 +79,88 @@ let UserSchema = mongoose.Schema({
         type: Array
     },
     badges: {
-        type:Array
-    }
+        type:Array,
+        select:false
+    },
+    notifications: [
+        {
+            typeOfNot: String,
+            data: mongoose.Schema.Types.Mixed //TODO make notifications not selectable by default
+        }
+    ]
 });
 
 // Here we export the DataBase interface to our other modules
 let User = module.exports = mongoose.model("User", UserSchema);
 
 module.exports.createUser = function(newUser, callback){
-    console.log('LOGGING: creating user');
-    bcrypt.genSalt(10, function(err, salt){
-        if (err){
-            console.log('LOGGING: error obtaining salt');
-            callback(new Error());
-        }
-        bcrypt.hash(newUser.password, salt, function(err, hash){
-            newUser.password = hash;
-            newUser.save(callback);
+    logger.debug('Creating user ' + JSON.stringify(newUser, undefined, 2));
+    if(newUser.password){
+        //If the user is saved with a password, we need to hash it
+        bcrypt.genSalt(10, function(err, salt){
+            if (err){
+                logger.error('Error obtaining salt: ' + err);
+                callback(err);
+            }
+            bcrypt.hash(newUser.password, salt, function(err, hash){
+                newUser.password = hash;
+                newUser.save(callback);
+            });
         });
+    } else {
+        newUser.save(callback);
+    }
+};
+
+module.exports.findUserByEmailOrAlias = function(emailOrAlias, callback){
+    let query = {email: emailOrAlias};
+    if(!emailOrAlias.match(/@/g)){//If the entry does not have an "@" it is an alias
+        query = {alias: emailOrAlias};
+    }
+    User.findOne(query, {password: true},  callback);
+};
+
+module.exports.findUserByIdForDeserialization = function(id, fieldsToGet, callback){
+    User.findById(id, fieldsToGet, callback);
+};
+
+
+module.exports.getUsersForMember = function(userIds, callback){
+    User.find({_id: {$in: userIds}}, fieldsToGetForUsersForMember, callback);
+};
+
+let fieldsToGetForUsersForMember = {
+    firstName: true,
+    lastName: true
+};
+
+//Method for adding a notification for a user
+module.exports.addNotificationForUser = function(userId, notification, callback){
+    logger.silly(`enter addNotification, notification =${JSON.stringify(notification)}`);
+    User.findOneAndUpdate({_id: userId}, {$addToSet: {notifications: notification}}, function(err, user){
+        callback(err, user);
     });
-}
+};
 
-module.exports.findUserByEmail = function(email, callback){
-    let query = {email: email};
-    try {
-        User.findOne(query, callback);
-    }
-    catch (error){
-        console.log('error communicating with database');
-    }
-}
 
-module.exports.findUserById = function(id, callback){
-    User.findById(id, callback);
-}
+module.exports.getDetailedUserForMember = function(userId, callback){
+    console.log('getDetailedUserForMember called');
+    User.findOne({_id:userId}, fieldsToGetUserForMember,  callback);
+};
+
+let fieldsToGetUserForMember = {
+    firstName: true,
+    lastName: true,
+    phone:true,
+    address: true,
+    email: true,
+    alias: true,
+    facebook: true,
+    linkedin: true,
+    languagesSpoken: true,
+    programmingLanguages: true,
+    biography: true,
+    gender: true,
+    birthDate: true
+};
 

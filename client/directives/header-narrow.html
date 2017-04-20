@@ -12,8 +12,14 @@
                 <span >{{user.firstName + ' ' + user.lastName}}</span>
             </div>
             <ul>
+                <li>
+                    <a href="{{'#!' + keys.cautaUnDojo}}" class="search-for-dojo" ng-click="hideMenuNarrow()">
+                        <img src="../img/search_icon.png" alt="">
+                        Cauta un dojo...
 
-                <li><a href="#!despre" ng-click="hideMenuNarrow()">Despre</a></li>
+                    </a>
+                </li>
+                <li><a href="{{'#!' + keys.despre}}" ng-click="hideMenuNarrow()">Despre</a></li>
                 <li><a href="#!cum_pot_ajuta" ng-click="hideMenuNarrow()">Cum pot ajuta?</a></li>
                 <li><a href="">Resurse</a></li>
                 <li><a href="">Parteneri</a></li>
@@ -36,6 +42,9 @@
 
                 <li><a href="#!myProfile" ng-click="hideMenuNarrow()">Profilul meu</a></li>
                 <li><a href="#!getMyDojos" ng-click="hideMenuNarrow()">Dojourile mele</a></li>
+                <li ng-show="user.authorizationLevel === keys.admin">
+                    <a href="#!addDojo" ng-click="hideMenuNarrow()">Adauga Dojo</a>
+                </li>
                 <li><a href="">Evenimentele mele</a></li>
                 <li><a href="" ng-click="logoutUser()">Logout</a></li>
             </ul>

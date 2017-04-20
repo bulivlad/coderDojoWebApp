@@ -6,27 +6,61 @@
 
 
 angular.module("coderDojoTimisoara")
-    .controller("mainController", function($scope, $rootScope, $location, dataService){
-        $scope.amIAuthenticated = function(){
-            dataService.amIAuthenticated()
+    .controller("mainController", function($scope, $rootScope, $location, dataService, helperSvc){
+        //Copying the keys to the scope for user in the view
+        $scope.keys = keys;
+        $scope.getUserFromServer = function(callback){
+            dataService.getUserFromServer()
                 .then(function(response){
                     if (response.data.user){
                         $rootScope.user = response.data.user;
                         $rootScope.user.birthDate = new Date($rootScope.user.birthDate);
+                        if(callback){
+                            callback(null);
+                        }
                     } else {
                         console.log('Server responded with no user');
                     }
                 })
                 .catch(function(err){
                     if (err.status === 401){
+                        //If not authorized, we must delete the current user
+                        $rootScope.user = undefined;
                         console.log('You are not authenticated')
                     } else {
                         console.log('Problems communicating')
                     }
+                    if(callback){
+                        callback(err);
+                    }
+
                 });
         };
 
-        $scope.amIAuthenticated();
+        $scope.setAlert = function(alertType, alertMessage){
+            $rootScope.alert = alertType;
+            $rootScope.alertMessage = alertMessage;
+            helperSvc.scrollToTop();
+        };
+
+
+        $scope.getPrettyDate = function(date){
+            return helperSvc.prettyDate(date, false);
+        }
+
+
+
+        $rootScope.deleteUser = function(methodName){
+            $rootScope.user = undefined;
+            console.log('User deleted by: ' + methodName);
+        }
+
+        $scope.deleteUser = $rootScope.deleteUser;
+
+        $scope.getUserFromServer();
+        $scope.isError = function(){
+            $rootScope.alert === 'savingUserErrorAlert'
+        }
 
         $scope.setCorrectPathForWideNavigation = function(){
             var currentPath = $location.path();
@@ -38,14 +72,6 @@ angular.module("coderDojoTimisoara")
         }
 
         $scope.setCorrectPathForWideNavigation();
-
-        $scope.isChildRegisterAlert = function(){
-            return $rootScope.alert === keys.childRegisterAlert;
-        };
-
-        $scope.isUserModifiedAlert = function(){
-            return $rootScope.alert === keys.userModifiedAlert;
-        };
 
         $scope.goToLogin = function(){
             $location.path('/' + keys.login);
@@ -59,6 +85,13 @@ angular.module("coderDojoTimisoara")
 
         $scope.resetAlerts = function(){
                 $rootScope.alert = undefined;
+                $rootScope.alertMessage = undefined;
+        };
+
+        $scope.isUserLoggedIn = function(){
+            if($rootScope.user){
+                return true;
+            }
         }
 
         $scope.getDespre = function(){
@@ -69,6 +102,8 @@ angular.module("coderDojoTimisoara")
 
 
         };
+
+
 
 
     });

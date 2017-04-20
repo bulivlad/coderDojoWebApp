@@ -39,4 +39,34 @@ angular.module("coderDojoTimisoara")
             templateUrl: "directives/header-directive.html",
             replace: true
         }
+    })
+    .directive("myProfile", function(){
+        return {
+            templateUrl: "directives/my-profile.html",
+            replace: true
+        }
+    })
+    .directive("editProfile", function(){
+        return {
+            templateUrl: "directives/edit-profile.html",
+            replace: true
+        }
+    })
+    .directive("dojoListDirective", function(){
+        return {
+            templateUrl: "directives/dojo-list-directive.html",
+            replace: true
+        }
+    })
+    .directive("dojoDirective", function(){
+        return {
+            templateUrl: "directives/dojo-directive.html",
+            replace: true
+        }
+    })
+    .directive("memberDirective", function(){
+        return {
+            templateUrl: "directives/member-directive.html",
+            replace: true
+        }
     });

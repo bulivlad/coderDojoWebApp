@@ -1,17 +1,24 @@
 <div id="alert">
-        <div id="child-register-alert" class="inner" ng-show="isChildRegisterAlert()">
-            <button ng-click="resetAlerts()">x</button>
-            <hr>
-            <p>Te rugăm</p>
-            <button ng-click="goToLogin()">Intra in cont</button>
-            <p>sau</p>
-            <button ng-click="goToRegister()">Inregistreaza-te</button>
-        </div>
+    <div class="inner" id="child-register-alert" ng-show="alert === keys.childRegisterAlert">
+        <button ng-click="resetAlerts()">x</button>
+        <hr>
+        <p>Te rugăm</p>
+        <button ng-click="goToLogin()">Intra in cont</button>
+        <p>sau</p>
+        <button ng-click="goToRegister()">Inregistreaza-te</button>
+    </div>
 
-        <div class="inner" id="user-modified-alert" ng-show="isUserModifiedAlert()">
-            <p>Modificări salvate cu succes.</p>
-            <button ng-click="resetAlerts()">OK</button>
-        </div>
+    <p></p>
 
+
+    <div class="inner"  id="error-alert" ng-show="alert === keys.errorAlert">
+        <p>{{alertMessage}}</p>
+        <button ng-click="resetAlerts()">OK</button>
+    </div>
+
+    <div class="inner"  id="info-alert" ng-show="alert === keys.infoAlert">
+        <p>{{alertMessage}}</p>
+        <button ng-click="resetAlerts()">OK</button>
+    </div>
 
 </div>

@@ -9,31 +9,13 @@ angular.module("coderDojoTimisoara")
             replace: true
         }
     })
-    .directive('dojosDirective', function(){
+    .directive('myDojos', function(){
         return {
-            templateUrl: "directives/dojos.html",
+            templateUrl: "directives/my-dojos.html",
             replace: true
         }
     })
 
-    .directive("dateDay", function(){
-        return {
-            templateUrl: "directives/date-day.html",
-            replace: true
-        };
-    })
-    .directive("dateMonth", function(){
-        return {
-            templateUrl: "directives/date-month.html",
-            replace: true
-        };
-    })
-    .directive("dateYear", function(){
-        return {
-            templateUrl: "directives/date-year.html",
-            replace: true
-        }
-    })
     .directive("headerDirective", function(){
         return {
             templateUrl: "directives/header-directive.html",
@@ -58,6 +40,12 @@ angular.module("coderDojoTimisoara")
             replace: true
         }
     })
+    .directive("dojoBubbleDirective", function(){
+        return {
+            templateUrl: "directives/dojo-bubble-directive.html",
+            replace: true
+        }
+    })
     .directive("dojoDirective", function(){
         return {
             templateUrl: "directives/dojo-directive.html",
@@ -67,6 +55,12 @@ angular.module("coderDojoTimisoara")
     .directive("memberDirective", function(){
         return {
             templateUrl: "directives/member-directive.html",
+            replace: true
+        }
+    })
+    .directive("createOrEditDojoDirective", function(){
+        return {
+            templateUrl: "directives/create-or-edit-dojo-directive.html",
             replace: true
         }
     });

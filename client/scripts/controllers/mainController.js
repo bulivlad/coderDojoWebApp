@@ -46,30 +46,27 @@ angular.module("coderDojoTimisoara")
 
         $scope.getPrettyDate = function(date){
             return helperSvc.prettyDate(date, false);
-        }
+        };
 
 
 
         $rootScope.deleteUser = function(methodName){
             $rootScope.user = undefined;
             console.log('User deleted by: ' + methodName);
-        }
+        };
 
         $scope.deleteUser = $rootScope.deleteUser;
 
         $scope.getUserFromServer();
-        $scope.isError = function(){
-            $rootScope.alert === 'savingUserErrorAlert'
-        }
 
         $scope.setCorrectPathForWideNavigation = function(){
             var currentPath = $location.path();
             if(currentPath === '/' + keys.despre){
                 $scope.navLink = 'Despre';
-            } else  if(currentPath === '/' + keys.getDojos){
+            } else  if(currentPath === '/' + keys.getDojosRoute){
                 $scope.navLink = 'Inscriere Saptamanala';
             }
-        }
+        };
 
         $scope.setCorrectPathForWideNavigation();
 
@@ -92,19 +89,17 @@ angular.module("coderDojoTimisoara")
             if($rootScope.user){
                 return true;
             }
-        }
-
-        $scope.getDespre = function(){
-            dataService.getDespre(function(response){
-                console.log('response', JSON.stringify(response.data));
-                $rootScope.pageInfo.panelToDisplay[keys.despre] = true;
-            });
-
-
         };
 
+        //Method for setting the dojo to be viewed
+        $scope.setToBeViewedDojoId = function(dojoId){
+            $scope.toBeViewedDojoId = dojoId;
+        };
 
-
+        //Method for getting the current dojo to be viewed
+        $scope.getToBeViewedDojoId = function(){
+            return $scope.toBeViewedDojoId;
+        }
 
     });
 

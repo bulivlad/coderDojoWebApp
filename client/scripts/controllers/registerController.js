@@ -4,6 +4,7 @@
 
 angular.module("coderDojoTimisoara")
     .controller('registerController', function($scope, $rootScope, dataService, helperSvc, $location){
+        //This method initialized the date picker (Jquery)
         $( function() {
             $( "#datepicker" ).datepicker({
                 changeMonth: true,
@@ -13,43 +14,41 @@ angular.module("coderDojoTimisoara")
             });
         } );
 
-        $scope.register = {};
+        //We declare the register object, with an empty errors object.
+        $scope.register = {errors:{}};
 
         //Method that validates the fields from the register panel and sends the request to the server for registration
         $scope.registerUser = function(){
-            console.log('Entering registerUser');
-            var errors = helperSvc.validateFields($scope.register, keys.regUserOver14Profile);
-            errors = null;
+            //First we reset any existing connection error
+            $scope.register.errors.connectionError = undefined;
+
+            //Second we validate the fields extracted from the html
+            var errors = helperSvc.validateFields($scope.register.user, keys.regUserOver14Profile);
             if (errors){
+                //If there are errors in the fields, we set the errors to the scope (and share it with the html)
                 $scope.register.errors = errors;
             } else {
-                var user = {
-                    firstName: $scope.register.firstName,
-                    lastName: $scope.register.lastName,
-                    email: $scope.register.email,
-                    password: $scope.register.password,
-                    password2: $scope.register.password2,
-                    birthDate: $scope.register.birthDate,
-                    address: $scope.register.address,
-                    phone: $scope.register.phone
-
-                };
-                dataService.registerUser(user)
+                //If there were no errors, we sent the register request to the server
+                dataService.registerUser($scope.register.user)
                     .then(function(response){
                         if(response.data.errors){
+                            // If there are validation errors received from the server (there is sever side validation as well), we
+                            // set the errors to the scope (and share it with the html)
                             $scope.register.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
-
                         }else if (response.data.success){
-                            resetValues($scope.register);
+                            //IF the request was successful, we set a just register flag, and
+                            // go to the login page.
                             $rootScope.justRegistered = true;
                             $location.path('/' + keys.login);
                         }
                     })
                     .catch(function(err){
-                        if (err.status === -1){
-                            $scope.register.errors = {name:'Verificati conexiunea la internet'}
+                        //No connection error
+                        if(err.status === -1){
+                            $scope.register.errors.connectionError = 'Probleme cu conexiunea';
                         } else {
-                            $scope.register.errors = {name:'Probleme de comunicare cu serverul'};
+                            // If the communication was unsuccessful for another reason, we handle the error
+                            helperSvc.handlerCommunicationErrors(err, 'registerController - registerUser', $scope);
                         }
                     });
             }

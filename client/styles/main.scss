@@ -976,7 +976,7 @@ My PROFILE
 
 
 /******************************
-DOJOS (INSCRIERE SAPTAMANALE)
+DOJOS
 *******************************/
 #dojos {
   table {
@@ -1287,12 +1287,6 @@ div.dojos-view-container {
                 }
               }
             }
-
-
-
-
-
-
           }
         }
       }
@@ -1471,17 +1465,6 @@ Dojo members
 
       }
     }
-
-
-  }
-
-  .contracted-part {
-
-    .flex-container {
-      //height: 40px;
-    }
-
-
   }
 
   .expanded-part {
@@ -1502,6 +1485,137 @@ Dojo members
 
 
     }
+  }
+
+}
+
+/*******************
+Add or create dojos
+********************/
+
+#add-dojo {
+
+  label {
+    color: $my_profile_color;
+  }
+
+  .weekly-schedule-body, #requirements-body, #status-body {
+    border: 1px solid gray;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    float: right;
+    padding: 1%;
+    max-width: 66%;
+    margin-bottom: 10px;
+    width: 65%;
+    min-width: 30%;
+
+    h5 {
+      color: $my_profile_color;
+      margin: 0 auto 0.4em auto;
+      text-align: center;
+    }
+
+    label.schedule-label {
+      display: inline-block;
+      text-align: left;
+      max-width: 20%;
+      width: 20%;
+      width: auto;
+
+    }
+
+    input.hour-schedule, input.min-schedule, input.day-schedule, input.workshops-schedule {
+      border: 1px solid $my_dojo_color;
+      color: $my_dojo_color;
+
+      i {
+       font-weight: 400;
+      }
+    }
+
+    input.hour-schedule, input.min-schedule, input.day-schedule {
+
+      float: none;
+      display: inline-block;
+      margin-right: 2px;
+      min-width: 10px;
+      width: 10%;
+    }
+
+    input.day-schedule {
+      width: 20%;
+    }
+    input.workshops-schedule {
+      float: none;
+      display: inline-block;
+      margin: 0 auto;
+      width: 77%;
+      max-width: none;
+    }
+
+    div.buttons-div {
+      display: block;
+      margin: 8px auto 2px auto;
+      text-align: center;
+    }
+
+    textarea.requirement {
+      border: 1px solid $my_dojo_color;
+      color: $my_dojo_color;
+      display: block;
+      float: none;
+      height: auto;
+      padding: 1%;
+      margin: 0 auto;
+      max-width: none;
+      width: 98%;
+    }
+  }
+
+}
+
+/******************
+Dojo bubble viewer
+*******************/
+
+div.dojo-bubble-container {
+  div.dojo-bubble {
+    cursor: pointer;
+    display: inline-block;
+    margin: 10px;
+    vertical-align: top;
+    width: 60px;
+
+    img {
+      border: 3px solid white;
+      border-radius: 100%;
+      padding: 3px;
+      width: 100%;
+    }
+
+    &:hover {
+      img {
+        border: 3px solid $my_dojo_color;
+      }
+
+      p {
+        color: $my_dojo_color;
+      }
+    }
+  }
+}
+
+
+/******************************
+MY DOJOS
+*******************************/
+
+.my-dojos {
+
+  div.my-dojos-container {
+    margin: 0 auto;
+    width: 80%;
   }
 
 }

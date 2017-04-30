@@ -16,8 +16,9 @@ angular.module("coderDojoTimisoara", [
             .when('/' + keys.register, {templateUrl:'../views/register.html'})
             .when('/' + keys.editProfiles, {templateUrl:'../views/edit-profiles.html'})
             .when('/' + keys.myProfile, {templateUrl:'../views/my-profile.html'})
-            .when('/' + keys.getDojos, {templateUrl:'../views/inscrieri-saptamanale.html'})
-            .when('/' + keys.getMyDojos, {templateUrl:'../views/dojourile-mele.html'})
+            .when('/' + keys.getDojosRoute, {templateUrl:'../views/inscrieri-saptamanale.html'})
+            .when('/' + keys.getMyDojosRoute, {templateUrl:'../views/dojourile-mele.html'})
+            .when('/' + keys.getDojoRoute, {templateUrl:'../views/view-dojo.html'})
             .when('/' + keys.addDojoRoute, {templateUrl:'../views/adauga-dojo.html'})
             .when('/' + keys.cautaUnDojo, {templateUrl:'../views/cauta-un-dojo.html'})
             .otherwise({redirectTo: '/despre'})
@@ -36,9 +37,11 @@ const keys = {
     editUsersChild: 'editUsersChild',
     myProfile: 'myProfile',
     editProfiles: 'editProfiles',
-    getDojos: 'getDojos',
-    getAuthDojos: 'getAuthDojos',
-    getMyDojos: 'getMyDojos',
+    getDojosRoute: 'getDojos',
+    getMyDojosRoute: 'getMyDojos',
+    getMyChildsDojosRoute: 'getMyChildsDojos',
+    getDojoRoute: 'getDojo',
+    getAuthDojoRoute: 'getAuthDojo',
     registerChildForDojo: 'registerChildForDojo',
     cancelChildRegistryForDojo: 'cancelChildRegistryForDojo',
     amIAuthenticatedUserRoute: 'amIAuthenticatedUserRoute',
@@ -53,6 +56,7 @@ const keys = {
     deleteNotificationForUsersChildRoute: 'deleteNotificationForUsersChild',
     acceptChildInviteRoute: 'acceptChildInvite',
     addDojoRoute: 'addDojo',
+    editDojoRoute: 'editDojo',
     cautaUnDojo: 'cautaUnDojo',
     becomeMemberOfDojoRoute: 'becomeMemberOfDojo',
     leaveDojoRoute: 'leaveDojo',
@@ -88,8 +92,11 @@ const keys = {
     user: 'user',
     admin: 'admin',
     mentor: 'mentor',
+    pendingMentor: 'pendingMentor',
     volunteer: 'volunteer',
+    pendingVolunteer: 'pendingVolunteer',
     champion: 'champion',
+    pendingChampion: 'pendingChampion',
     parent: 'parent',
     attendee: 'attendee',
 
@@ -108,6 +115,12 @@ const keys = {
     viewUsersChildProfile: 'viewUsersChildProfile',
     addChildUnder14Profile: 'addChildUnder14Profile',
     addChildOver14Profile: 'addChildOver14Profile',
+    showDojoInUserProfile: 'showDojoInUserProfile',
+    showPasswords: 'showPasswords',
+    showAlias: 'showAlias',
+    showAddChildren: 'showAddChildren',
+    showInviteParent: 'showInviteParent',
+    hideEditButton: 'hideEditButton',
 
     //View for dojos
     viewMap: 'viewMap',
@@ -117,6 +130,10 @@ const keys = {
     editDojo: 'editDojo',
     editEvent: 'editEvent',
     viewMembers: 'viewMembers',
+
+    //View keys for various views
+    showBackButton: 'showBackButton',
+    showMapAndList: 'showMapAndList',
 
     //PermissionsForDojo
     canEditDojo: 'canEditDojo',

@@ -4,7 +4,8 @@
 
 'use strict';
 const mongoose = require('mongoose'),
-    keys = require('../static_keys/project_keys');
+    keys = require('../static_keys/project_keys'),
+    logger = require('winston');
 
 let dojoEventSchema = new mongoose.Schema({
     subject: {
@@ -37,12 +38,13 @@ let dojoEventSchema = new mongoose.Schema({
     ]
 });
 
-let orarSchema = mongoose.Schema({
-    startHour: {type: Number, max: 24, min: 0},
-    endHour: {type: Number, max: 24, min: 0},
-    startMinute: {type: Number, max: 60, min: 0},
-    endMinute: {type: Number, max: 60, min: 0},
-    day: String
+let scheduleSchema = mongoose.Schema({
+    startHour: {type: Number, max: 24, min: 0, required: true},
+    endHour: {type: Number, max: 24, min: 0, required: true},
+    startMinute: {type: Number, max: 60, min: 0, required: true},
+    endMinute: {type: Number, max: 60, min: 0, required: true},
+    day: {type: String, required: true},
+    workshops: [String]
 });
 
 let DojoSchema = mongoose.Schema({
@@ -54,8 +56,8 @@ let DojoSchema = mongoose.Schema({
     latitude: Number,
     longitude: Number,
     email: String,
-    status: String,
-    orar: [orarSchema],
+    statuses: [String],
+    schedules: [scheduleSchema],
     facebook: String,
     twitter: String,
     requirements: [String],
@@ -72,29 +74,31 @@ let DojoSchema = mongoose.Schema({
 });
 
 
-
 // Here we export the DataBase interface to our other modules
 let Dojo = module.exports = mongoose.model("Dojo", DojoSchema);
 
-let dojoFields = {
+let dojosFields = {
     name: true,
-    address: true,
     latitude: true,
-    longitude: true,
-    email: true,
-    status: true,
-    orar: true,
-    facebook: true,
-    twitter: true,
-    requirements: true,
-    dojoEvents: true,
-    pictureUrl: true
+    longitude: true
 };
 
-//This are dojos for users that are NOT authenticated
-module.exports.getDojos = function(callback){
+let myDojosFields = {
+    name: true,
+    latitude: true,
+    longitude: true,
+    champion: true,
+    mentors: true,
+    parents: true,
+    attendees: true,
+    volunteers: true
+};
+
+//This are are basic dojo information, to show it on a map and a name for the dojo.
+module.exports.getDojos = function(isForMyDojos, callback){
+    let tempDojosFields = isForMyDojos ? myDojosFields : dojosFields;
     Dojo.find({},
-        dojoFields, //Filter for dojo fields
+        tempDojosFields, //Filter for dojo fields
         function(err, dojos){
         if(err){
             callback(err);
@@ -104,14 +108,43 @@ module.exports.getDojos = function(callback){
     });
 };
 
+let dojoFields = {
+    name: true,
+    address: true,
+    latitude: true,
+    longitude: true,
+    email: true,
+    statuses: true,
+    schedules: true,
+    facebook: true,
+    twitter: true,
+    requirements: true,
+    dojoEvents: true,
+    pictureUrl: true
+};
+
+//This are dojos for users that ARE NOT authenticated
+module.exports.getDojo = function(dojoId, callback){
+    Dojo.findOne({_id: dojoId},
+        dojoFields, //Filter for dojo fields
+        function(err, dojo){
+            if(err){
+                callback(err);
+            } else {
+                callback(null, dojo);
+            }
+        });
+};
+
+
 let dojoAuthFields = {
     name: true,
     address: true,
     latitude: true,
     longitude: true,
     email: true,
-    status: true,
-    orar: true,
+    statuses: true,
+    schedules: true,
     facebook: true,
     twitter: true,
     requirements: true,
@@ -128,14 +161,51 @@ let dojoAuthFields = {
 };
 
 //This are dojos for users that ARE authenticated
-module.exports.getAuthDojos = function(callback){
-    Dojo.find({},//getting entries only after the current date
+module.exports.getAuthDojo = function(dojoId, callback){
+    Dojo.findOne({_id: dojoId},
         dojoAuthFields, //Filter for dojo fields
-        function(err, dojos){
+        function(err, dojo){
             if(err){
                 callback(err);
             } else {
-                callback(null, dojos);
+                callback(null, dojo);
             }
         });
+};
+
+let fieldsForInternalDojoAuthentication = {
+    champion:true,
+    pendingChampions:true,
+    mentors: true,
+    pendingMentors:true,
+    volunteers: true,
+    pendingVolunteers:true,
+    attendees:true,
+    parents: true
+};
+
+//This method retrieves a dojos used for internal app verifications, the fields retrieved are mentioned above
+module.exports.getDojoForInternalAuthentication = function(dojoId, callback){
+    Dojo.findOne({_id: dojoId},
+        fieldsForInternalDojoAuthentication, //Filter for dojo fields
+        function(err, dojo){
+            if(err){
+                callback(err);
+            } else {
+                callback(null, dojo);
+            }
+        });
+};
+
+//We only modify the fields that can be edited
+module.exports.updateDojo = function(dojo, callback){
+    Dojo.findOneAndUpdate({_id:dojo._id},
+        {$set: {name: dojo.name, address: dojo.address, latitude: dojo.latitude, longitude: dojo.longitude, email: dojo.email,
+            statuses: dojo.statuses, schedules: dojo.schedules, facebook: dojo.facebook, twitter: dojo.twitter,
+            requirements: dojo.requirements}},
+        {new:true},
+        function(err, dojo){
+            logger.silly(`Updated dojo: ${JSON.stringify(dojo, null, 2)}`);
+            callback(err);
+        })
 };

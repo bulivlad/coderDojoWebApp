@@ -1,0 +1,137 @@
+<div id="add-dojo" ng-controller="addOrEditDojoCtrl">
+    <div class="pages-banner dojo-banner">
+        <h2>{{title}}</h2>
+    </div>
+    <button class="back-button" ng-click="goBackAction()" ng-if="showBackButton">Inapoi</button>
+    <div class="personal-data">
+        <h3>Info dojo</h3>
+
+        <div class="label-and-value">
+            <label for="dojo-name">Nume</label>
+            <input type="text" id="dojo-name" ng-model="localDojo.name"
+                   ng-click="errors.name = undefined"> <br>
+            <p ng-show="errors.name">{{errors.name}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label for="dojo-address">Adresa</label>
+            <input type="text" id="dojo-address" ng-model="localDojo.address"
+                   ng-click="errors.address = undefined"> <br>
+            <p ng-show="errors.address">{{errors.address}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label for="dojo-latitude">Latitudine</label>
+            <input type="number" id="dojo-latitude" ng-model="localDojo.latitude"
+                   ng-click="errors.latitude = undefined"> <br>
+            <p ng-show="errors.latitude">{{errors.latitude}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label for="dojo-longitude">Longitudine</label>
+            <input type="number" id="dojo-longitude" ng-model="localDojo.longitude"
+                   ng-click="errors.longitude = undefined"> <br>
+            <p ng-show="errors.longitude">{{errors.longitude}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label for="dojo-email">Email</label>
+            <input type="email" id="dojo-email" ng-model="localDojo.email"
+                   ng-click="errors.email = undefined"> <br>
+            <p ng-show="errors.email">{{errors.email}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label>Status</label>
+            <div id="status-body">
+                <div ng-repeat="status in localDojo.statuses">
+                    <h5>Status {{$index + 1}}</h5>
+                    <textarea class="requirement" ng-model="status.data" placeholder="Scrie un status pentru dojo">
+                    </textarea>
+                    <div class="buttons-div">
+                        <button ng-click="deleteStatus($index)">Sterge status</button>
+                        <button ng-if="localDojo.statuses.length - 1 == $index" ng-click="addStatus()">Adauga status</button>
+                    </div>
+                    <hr ng-if="!(localDojo.statuses.length - 1 == $index)">
+                </div>
+
+            </div>
+        </div>
+
+        <div class="label-and-value weekly-schedule">
+            <label>Orar</label>
+            <div class="weekly-schedule-body">
+                <div ng-repeat="schedule in localDojo.schedules">
+                    <h5>Eveniment {{$index + 1}}</h5>
+                    <label  class="schedule-label">
+                        Start <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                    </label>
+                    <input type="number" min="0" max="24" placeholder="ora" class="hour-schedule" ng-model="schedule.startHour">:
+                    <input type="number" min="0" max="60" placeholder="min" class="min-schedule" ng-model="schedule.startMinute">
+
+                    <label  class="schedule-label" >Sfarsit <i class="fa fa-arrow-right" aria-hidden="true"></i></label>
+                    <input type="number" min="0" max="24" placeholder="ora" class="hour-schedule" ng-model="schedule.endHour">:
+                    <input type="number" min="0" max="60" placeholder="min" class="min-schedule" ng-model="schedule.endMinute">
+
+                    <div>
+                        <label  class="schedule-label">
+                            Ziua <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </label>
+                        <input type="text" placeholder="ziua" class="day-schedule" ng-model="schedule.day">
+
+                        <br>
+                        <label  class="schedule-label">
+                            Atelier <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </label>
+
+                        <input type="text" placeholder="Atelierele (eg Scratch, Java, Python (separate cu virgulă)"
+                               class="workshops-schedule" ng-model="schedule.workshops">
+                    </div>
+
+                    <div class="buttons-div">
+                        <button ng-click="deleteEvent($index)">Sterge eveniment</button>
+                        <button ng-if="localDojo.schedules.length - 1 == $index" ng-click="localDojo.schedules.push({})">
+                            Adauga eveniment
+                        </button>
+                    </div>
+                    <hr style="clear:both" ng-if="!(localDojo.schedules.length - 1 == $index)">
+                </div>
+
+
+            </div>
+            <br>
+            <p ng-show="errors.schedules">{{errors.schedules}}</p>
+        </div>
+
+        <div class="label-and-value">
+            <label for="dojo-facebook">Facebook</label>
+            <input type="text" id="dojo-facebook" ng-model="localDojo.facebook"
+                   ng-click="errors.facebook = undefined"> <br>
+        </div>
+
+        <div class="label-and-value">
+            <label for="dojo-twitter">Twitter</label>
+            <input type="text" id="dojo-twitter" ng-model="localDojo.twitter"
+                   ng-click="errors.twitter = undefined"> <br>
+        </div>
+
+        <div class="label-and-value">
+            <label>Cerinte</label>
+            <div id="requirements-body">
+                <div ng-repeat="requirement in localDojo.requirements">
+                    <h5>Cerință {{$index + 1}}</h5>
+                    <textarea class="requirement" ng-model="requirement.data" placeholder="Scrie o cerință pentru dojo">
+                    </textarea>
+                    <div class="buttons-div">
+                        <button ng-click="deleteRequirement($index)">Sterge cerință</button>
+                        <button ng-if="localDojo.requirements.length - 1 == $index" ng-click="addRequirement()">Adauga cerință</button>
+                    </div>
+                    <hr ng-if="!(localDojo.requirements.length - 1 == $index)">
+                </div>
+
+            </div>
+        </div>
+        <button class="save-profile" ng-click="addOrEditDojo()">Salveaza</button>
+        <div class="clear-fix"></div>
+    </div>
+</div>

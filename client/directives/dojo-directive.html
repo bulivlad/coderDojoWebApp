@@ -1,42 +1,42 @@
 <div class="dojos-view-container">
     <div class="pages-banner dojo-banner">
-        <h2>{{dojoViewer.dojo.name}}</h2>
+        <h2>{{dojo.name}}</h2>
     </div>
-    <button class="back-button" ng-click="goBackAction()" ng-if="dojoViewer.views[localKeys.showBackButton]">
+    <button class="back-button" ng-click="goBackAction()" ng-if="views[keys.showBackButton]">
         Inapoi
     </button>
     <div class="dojo-description">
         <div class="dojo-description-container">
             <div class="col1-dojo-description">
                 <div class="">
-                    <span class="join-leave-container" ng-if="!dojoViewer.dojo[keys.admin]">
-                        <button class="leave-join-button" ng-if="!dojoViewer.dojo[keys.hasJoined] && !dojoViewer.dojo[keys.isPendingJoining]"
+                    <span class="join-leave-container" ng-if="!dojo[keys.admin]">
+                        <button class="leave-join-button" ng-if="!dojo[keys.hasJoined] && !dojo[keys.isPendingJoining]"
                                 ng-click="joinDojoAction()">
                             Participă
                         </button>
-                        <div class="join-dojo-screen" ng-show="dojoViewer.views.showJoin" ng-click="closeJoinModal()">
+                        <div class="join-dojo-screen" ng-if="views.showJoin" ng-click="closeJoinModal()">
                             <div class="container">
-                                <div class="role mentor" ng-if="dojoViewer.views.isAdult">
+                                <div class="role mentor" ng-if="views.isAdult">
                                     <img src="../img/dojos/mentor.png" alt="Mentor">
                                     <h3 >Mentor</h3>
                                     <button ng-click="becomeMemberOfDojo($event, keys.mentor)">Trimite cerere</button>
                                 </div>
-                                <div class="role champion" ng-if="dojoViewer.views.isAdult">
+                                <div class="role champion" ng-if="views.isAdult">
                                     <img src="../img/dojos/champion.png" alt="Campion">
                                     <h3 >Campion</h3>
                                     <button ng-click="becomeMemberOfDojo($event, keys.champion)">Trimite cerere</button>
                                 </div>
-                                <div class="role volunteer" ng-if="dojoViewer.views.isAdult">
+                                <div class="role volunteer" ng-if="views.isAdult">
                                     <img src="../img/dojos/volunteer.png" alt="Voluntar">
                                     <h3 >Voluntar</h3>
                                     <button ng-click="becomeMemberOfDojo($event, keys.volunteer)">Trimite cerere</button>
                                 </div>
-                                <div class="role parent" ng-if="dojoViewer.views.isAdult">
+                                <div class="role parent" ng-if="views.isAdult">
                                     <img src="../img/dojos/parent.png" alt="Parinte">
                                     <h3 >Parinte/Gardian</h3>
                                     <button ng-click="becomeMemberOfDojo($event, keys.parent)">Participă</button>
                                 </div>
-                                <div class="role attendee" ng-if="!dojoViewer.views.isAdult">
+                                <div class="role attendee" ng-if="!views.isAdult">
                                     <img src="../img/dojos/attendee.png" alt="Cursant">
                                     <h3 >Cursant</h3>
                                     <button ng-click="becomeMemberOfDojo($event, keys.attendee)">Participă</button>
@@ -44,27 +44,29 @@
                             </div> <!--container-->
                         </div>
                         <button class="leave-join-button" ng-click="leaveDojoAction()"
-                                ng-if="dojoViewer.dojo[keys.isPendingJoining]">
+                                ng-if="dojo[keys.isPendingJoining]">
                             Cancel joining
                         </button>
-                        <button class="leave-join-button" ng-if="dojoViewer.dojo[keys.hasJoined]" ng-click="leaveDojoAction()">
+                        <button class="leave-join-button" ng-if="dojo[keys.hasJoined]" ng-click="leaveDojoAction()">
                             Părăsește dojo
                         </button>
                     </span>
-                    <label><i class="fa fa-envelope"></i>     Email</label>
-                    <p>{{dojoViewer.dojo.email }}</p>
+                    <label><i class="fa fa-user-o"></i> Rol in dojo</label>
+                    <p>{{getUserRoleInDojo()}}</p>
+                    <label><i class="fa fa-envelope"></i> Email</label>
+                    <p>{{dojo.email }}</p>
 
                     <label><i class="fa fa-flag"></i> Status</label>
-                    <p>{{dojoViewer.dojo.status}}</p>
+                    <p ng-repeat="status in dojo.statuses">{{status}}</p>
 
                     <label><i class="fa fa-clock-o"></i> Orar</label>
-                    <p>{{createSchedule(dojoViewer.dojo.orar)}}</p>
+                    <p ng-repeat="schedule in dojo.schedules">{{createSchedule(schedule)}}</p>
                     <label><i class="fa fa-clock"></i>Social</label>
                     <p>
-                        <a target="_blank" ng-if="dojoViewer.dojo.twitter" href="{{dojoViewer.dojo.twitter}}">
+                        <a target="_blank" ng-if="dojo.twitter" href="{{dojo.twitter}}">
                             <img src="../img/dojos/twitter.png">
                         </a>
-                        <a target="_blank" ng-if="dojoViewer.dojo.facebook" href="{{dojoViewer.dojo.facebook}}">
+                        <a target="_blank" ng-if="dojo.facebook" href="{{dojo.facebook}}">
                             <img src="../img/dojos/facebook.png">
                         </a>
                     </p>
@@ -73,13 +75,16 @@
             <div class="col2-dojo-description">
                 <div class="container">
                     <label>Locație</label>
-                    <p class="location">{{dojoViewer.dojo.address}}</p>
-                    <a class="a-button" href="" ng-click="goToViewMembers()" ng-if="dojoViewer.dojo[keys.showMembers]">
-                        Membrii dojoului
+                    <p class="location">{{dojo.address}}</p>
+                    <a class="a-button" href="" ng-click="goToViewMembers()" ng-if="dojo[keys.showMembers]">
+                        Membrii dojo-ului
+                    </a>
+                    <a class="a-button" href="" ng-click="goToEditDojo()" ng-if="dojo[keys.canEditDojo]">
+                        Editează dojo-ul
                     </a>
                     <label>Copii ar trebui să vină cu:</label>
                     <ul class="requirements-list">
-                        <li ng-repeat=" requirement in dojoViewer.dojo.requirements">
+                        <li ng-repeat=" requirement in dojo.requirements">
                             {{requirement}}
                         </li>
                     </ul>
@@ -90,7 +95,7 @@
     <div class="dojo-events">
         <h3>Evenimente</h3>
         <hr>
-        <p ng-if="dojoViewer.dojo.dojoEvents.length === 0">Nu există momentan evenimente</p>
+        <p ng-if="dojo.dojoEvents.length === 0">Nu există momentan evenimente</p>
     </div>
     <div class="dojo-map-holder">
        <div id="dojo-map-single-dojo"></div>

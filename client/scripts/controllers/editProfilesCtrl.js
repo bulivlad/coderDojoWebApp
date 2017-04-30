@@ -10,7 +10,7 @@ angular.module("coderDojoTimisoara")
 
 
         //This method gets the user from the server and sets the view to "viewUserProfile"
-        $scope.goToViewRootUserProfile = function(callback){
+        $scope.initializeEditProfilesController = function(callback){
             $scope.getUserFromServer(function(err){
                 if (err){
                     if(err.status === 401){
@@ -34,7 +34,10 @@ angular.module("coderDojoTimisoara")
                         //getting users notifications
                         getNotificationsForUser(true);
 
-                        $scope.setView(keys.viewUserProfile);
+                        //getting users dojos
+                        getUsersDojosFromServer();
+
+                        $scope.setView(keys.viewUserProfile, [keys.showDojoInUserProfile]);
                         if(callback){
                             callback();
                         }
@@ -43,16 +46,20 @@ angular.module("coderDojoTimisoara")
             });
         };
 
-        //The same as the method above, only we get the local user, we do not go to the server
-        $scope.goToViewRootUserProfileLocal = function(){
-            var user = helperSvc.cloneUser($rootScope.user);
-            //Setting the current user as the root user
-            $scope.myProfile.user = user;
-            $scope.setView(keys.viewUserProfile);
-        };
-
         //Getting the user and setting viewUserProfile view
-        $scope.goToViewRootUserProfile();
+        $scope.initializeEditProfilesController();
+
+        ////The same as the method above, only we get the local user, we do not go to the server
+        //$scope.goToViewRootUserProfileLocal = function(){
+        //    //Setting the current user as the root user
+        //    $scope.myProfile.user = helperSvc.cloneUser($rootScope.user);
+        //    $scope.setView(keys.viewUserProfile, [keys.showDojoInUserProfile]);
+        //    //getting users dojos
+        //    getUsersDojosFromServer();
+        //
+        //};
+
+
 
         //Method that get the user's children from the server and sets then to the current user
         $scope.getUsersChildrenFromServer = function(saveToRoot){
@@ -98,7 +105,7 @@ angular.module("coderDojoTimisoara")
                 .catch(function(err){
                     if(err.status === 401){
                         //If not authorized, we try to get the user again (if that fails, we go to login screen)
-                        $scope.goToViewRootUserProfile();
+                        $scope.initializeEditProfilesController();
                     } else {
                         console.error(err);
                     }
@@ -115,7 +122,7 @@ angular.module("coderDojoTimisoara")
                     if(notificationObject.ownerOfNotifications == $scope.myProfile.user._id){
                         $scope.myProfile.user.notifications = notificationObject.notifications;
                     }
-                    if(setToRoot && notificationObject.ownerOfNotifications == $rootScope.user._id){
+                    if(setToRoot && (notificationObject.ownerOfNotifications == $rootScope.user._id)){
                         $rootScope.user.notifications = notificationObject.notifications;
                     }
                 }
@@ -128,7 +135,7 @@ angular.module("coderDojoTimisoara")
                     if(response.data.notificationObject){
                         callback(null, response.data.notificationObject)
                     } else {
-                        callback(new Error('Problem receiving notifications'));
+                        callback({msg:'Notification object not received'});
                     }
                 })
                 .catch (function(err){
@@ -155,13 +162,13 @@ angular.module("coderDojoTimisoara")
 
         //Method that takes appropriate action based on the user selected
         $scope.saveAction = function(){
-            if (isCurrentView(keys.editUserProfile)){
+            if ($scope.isCurrentView(keys.editUserProfile)){
                 $scope.editUser();
-            } else if (isCurrentView(keys.addChildUnder14Profile)){
+            } else if ($scope.isCurrentView(keys.addChildUnder14Profile)){
                 $scope.createUserUnder14ByParent();
-            } else if (isCurrentView(keys.addChildOver14Profile)){
+            } else if ($scope.isCurrentView(keys.addChildOver14Profile)){
                 $scope.createUserOver14ByParent();
-            } else if(isCurrentView(keys.editChildUnder14Profile) || isCurrentView(keys.editChildOver14Profile)){
+            } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
                 $scope.editUsersChild(keys.editChildUnder14Profile);
             }
         };
@@ -169,26 +176,23 @@ angular.module("coderDojoTimisoara")
 
         $scope.editAction = function(){
             //Old view is viewUserProfile
-            if(isCurrentView(keys.viewUserProfile)){
+            if($scope.isCurrentView(keys.viewUserProfile)){
                 $scope.setView(keys.editUserProfile);
                 //A child has to be able to invite parents
                 if($scope.isChild($scope.myProfile.user.birthDate)){
-                    $scope.myProfile.views.showInviteParent = true;
+                    $scope.addView(keys.showInviteParent);
                 } else {
-                    $scope.myProfile.views.showAddChildren = true;
+                    $scope.addView(keys.showAddChildren);
                 }
             }
             //Old view is viewChildProfile
-            else if (isCurrentView(keys.viewUsersChildProfile)){
+            else if ($scope.isCurrentView(keys.viewUsersChildProfile)){
                 //The user is now the child, and we check it's age
                 if(helperSvc.isAgeLessThen14($scope.myProfile.user.birthDate)){
-                    $scope.setView(keys.editChildUnder14Profile);
+                    $scope.setView(keys.editChildUnder14Profile, [keys.showInviteParent, keys.showAlias]);
                 } else {
-                    $scope.setView(keys.editChildOver14Profile);
-                    $scope.myProfile.views.passwords = true;
+                    $scope.setView(keys.editChildOver14Profile, [keys.showInviteParent, keys.showAlias, keys.showPasswords]);
                 }
-                $scope.myProfile.views.showInviteParent = true;
-                $scope.myProfile.views.showAlias = true;
             }
         };
 
@@ -196,11 +200,11 @@ angular.module("coderDojoTimisoara")
             //We reset errors that may remain
             $scope.resetErrors();
 
-            if(isCurrentView(keys.addChildUnder14Profile) || isCurrentView(keys.addChildOver14Profile) ||
-                        isCurrentView(keys.editUserProfile)){
-                $scope.goToViewRootUserProfileLocal();
+            if($scope.isCurrentView(keys.addChildUnder14Profile) || $scope.isCurrentView(keys.addChildOver14Profile) ||
+                        $scope.isCurrentView(keys.editUserProfile)){
+                $scope.initializeEditProfilesController();
 
-            } else if(isCurrentView(keys.editChildUnder14Profile) || isCurrentView(keys.editChildOver14Profile)){
+            } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
                 $scope.setView(keys.viewUsersChildProfile);
             }
 
@@ -221,14 +225,14 @@ angular.module("coderDojoTimisoara")
                         }else {
                             if(response.data.success){
                                 //If the child was saved, get the user from the server and go to view the parents profiles
-                                $scope.goToViewRootUserProfile();
+                                $scope.initializeEditProfilesController();
                             } else {
                                 console.log(JSON.stringify(response.data));
                             }
                         }
                     })
                     .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err);
+                        helperSvc.handlerCommunicationErrors(err, 'createUserUnder14ByParent - editProfileCtrl', $scope);
                     })
             }
         };
@@ -247,24 +251,24 @@ angular.module("coderDojoTimisoara")
                         }else {
                             if(response.data.success){
                                 //If the child was saved, get the user from the server and go to view the parents profiles
-                                $scope.goToViewRootUserProfile();
+                                $scope.initializeEditProfilesController();
                             } else {
                                 console.log(JSON.stringify(response.data));
                             }
                         }
                     })
                     .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err);
+                        helperSvc.handlerCommunicationErrors(err, 'createUserOver14ByParent - editProfilesCtrl', $scope);
                     })
             }
         };
 
         $scope.viewParentAction = function(parent){
             //If the old profile is viewChildProfile
-            if($scope.myProfile.views[keys.viewUsersChildProfile]){
+            if($scope.isCurrentView(keys.viewUsersChildProfile)){
                 //If the parent is the root user
                 if(isSameUser($rootScope.user, parent)){
-                    $scope.goToViewRootUserProfileLocal();
+                    $scope.initializeEditProfilesController();
                 }
                 //If the parent is not the root user
                 else {
@@ -272,10 +276,18 @@ angular.module("coderDojoTimisoara")
                     // children of the selected parent
                     parent.children = [];
                     parent.children.push($scope.myProfile.user);
+                    //We clone the child to avoid json circular exceptions when converting for saving
+                    parent = angular.copy(parent);
                     $scope.myProfile.user = parent;
-                    $scope.setView(keys.viewOtherParentProfile);
-                    $scope.myProfile.views.hideEditButton = true;
+                    $scope.setView(keys.viewOtherParentProfile, [keys.hideEditButton]);
                 }
+            }
+            else if($scope.isCurrentView(keys.viewUserProfile)){
+                //TODO go to parent's child profile
+                parent.children = [];
+                parent.children.push($scope.myProfile.user);
+                $scope.myProfile.user = parent;
+                $scope.setView(keys.viewOtherParentProfile, [keys.hideEditButton]);
             }
         };
 
@@ -285,7 +297,7 @@ angular.module("coderDojoTimisoara")
             if($scope.myProfile.views[keys.viewUserProfile]){
                 //Setting the child as the current user
                 $scope.myProfile.user = child;
-                $scope.setView(keys.viewUsersChildProfile);
+                $scope.setView(keys.viewUsersChildProfile, [keys.showDojoInUserProfile]);
                 var childsParents = JSON.parse(JSON.stringify(child.parents));
                 //If the child has parents, get the parents from the server
                 if(childsParents && childsParents.length > 0){
@@ -298,15 +310,23 @@ angular.module("coderDojoTimisoara")
                 //Getting the notifications for this child
                 getNotificationsForUsersChild(child);
 
+                //Getting dojos for child
+                getUsersChildsDojosFromServer(child._id);
+
+                //First we empty the dojos (that belong to the parent)
+                $scope.myProfile.user
+
             }
             //If the old profile is viewOtherParentProfile
             else if ($scope.myProfile.views[keys.viewOtherParentProfile]){
                 //If the child is the root user
                 if(isSameUser(child, $rootScope.user)){
-                    $scope.goToViewRootUserProfileLocal();
+                    $scope.initializeEditProfilesController();
                 }
                 else {
                     //Setting the child as the current user
+                    //We clone the child to avoid json circular exceptions when converting for saving
+                    child = angular.copy(child);
                     $scope.myProfile.user = child;
                     $scope.setView(keys.viewUsersChildProfile);
                     $scope.getUsersParentsFromServer(false);
@@ -316,7 +336,8 @@ angular.module("coderDojoTimisoara")
             }
         };
 
-        $scope.setView = function(view){
+        //Methor that resets the current views, and sets a new view
+        $scope.setView = function(view, extraShowFlags){
             //resetting all views
             $scope.myProfile.views = {};
             //resetting all errors
@@ -325,10 +346,22 @@ angular.module("coderDojoTimisoara")
 
             //setting the new view
             $scope.myProfile.views[view] = true;
+
+            //If we need to add extra show flags beside the original
+            if(extraShowFlags){
+                extraShowFlags.forEach(function(flag){
+                    $scope.myProfile.views[flag] = true;
+                })
+            }
+        };
+
+        //Method for adding view without resetting previous views.
+        $scope.addView = function(view){
+            $scope.myProfile.views[view] = true;
         };
 
         // Method to determine if the current view is thisView
-        var isCurrentView = function(thisView){
+        $scope.isCurrentView = function(thisView){
             return $scope.myProfile.views[thisView];
         };
 
@@ -351,13 +384,14 @@ angular.module("coderDojoTimisoara")
             //We determine what type of child we are editing
             if(helperSvc.isAgeLessThen14($scope.myProfile.user.birthDate)){
                 typeOfChild = keys.editChildUnder14Profile;
-            };
+            }
             var errors = helperSvc.validateFields($scope.myProfile.user, typeOfChild);
             if(errors){
                 $scope.myProfile.errors = errors;
             } else {
-                $scope.myProfile.user.userType = typeOfChild;
-                dataService.editUsersChild($scope.myProfile.user)
+                var editedChild = prepareEditedChild($scope.myProfile.user);
+                editedChild.userType = typeOfChild;
+                dataService.editUsersChild(editedChild)
                     .then(function(response){
                         if(response.data.errors){
                             if(response.data.errors === keys.wrongUserError){
@@ -367,18 +401,36 @@ angular.module("coderDojoTimisoara")
                                 $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
                             }
                         } else if (response.data.success){
-                            $scope.goToViewRootUserProfile(function(){
+                            $scope.initializeEditProfilesController(function(){
                                 $scope.setAlert(keys.infoAlert, 'Modificări salvate cu succes.');
-
                             });
                         }
                     })
                     .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err);
+                        helperSvc.handlerCommunicationErrors(err, 'editUsersChild - editProfilesCtrl', $scope);
                     });
             }
 
-        }
+        };
+
+        //Method that selects what fields are send to the server when editing a child/user
+        var prepareEditedChild = function(user){
+            var retUser = {};
+            retUser.firstName = user.firstName;
+            retUser.lastName = user.lastName;
+            retUser.birthDate = user.birthDate;
+            retUser.address = user.address;
+            retUser.phone = user.phone;
+            retUser.facebook = user.facebook;
+            retUser.linkedin = user.linkedin;
+            retUser.languagesSpoken = user.languagesSpoken;
+            retUser.programmingLanguages = user.programmingLanguages;
+            retUser.biography = user.biography;
+            retUser.gender = user.gender;
+            retUser._id = user._id;
+            retUser.alias = user.alias;
+            return retUser;
+        };
 
         //Method that modifies the account for a user that is not a child
         $scope.editUser = function(){
@@ -396,7 +448,7 @@ angular.module("coderDojoTimisoara")
                                 $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
                             }
                         } else if (response.data.success){
-                            $scope.goToViewRootUserProfile(function(){
+                            $scope.initializeEditProfilesController(function(){
                                 $scope.setAlert(keys.infoAlert, 'Utilizatorul a fost modificat cu success');
 
                             });
@@ -406,7 +458,7 @@ angular.module("coderDojoTimisoara")
                         }
                     })
                     .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err);
+                        helperSvc.handlerCommunicationErrors(err, 'editUser - editProfilesCtrl', $scope);
                     });
             }
         };
@@ -426,9 +478,7 @@ angular.module("coderDojoTimisoara")
             //Set an empty user
             $scope.myProfile.user = {};
             //set the correct view
-            $scope.setView(keys.addChildUnder14Profile);
-            //Add the alias field
-            $scope.myProfile.views.showAlias = true;
+            $scope.setView(keys.addChildUnder14Profile, [keys.showAlias]);
             helperSvc.scrollToTop();
         };
 
@@ -437,11 +487,7 @@ angular.module("coderDojoTimisoara")
             //Set an empty user
             $scope.myProfile.user = {};
             //set the correct view
-            $scope.setView(keys.addChildOver14Profile);
-            //Show passwords in the addChildOver14Panel
-            $scope.myProfile.views.password = true;
-            //Add the alias field
-            $scope.myProfile.views.showAlias = true;
+            $scope.setView(keys.addChildOver14Profile, [keys.showPasswords, keys.showAlias]);
             helperSvc.scrollToTop();
         };
 
@@ -452,7 +498,7 @@ angular.module("coderDojoTimisoara")
         //Is child returns true if the age is under 18
         $scope.isChild = function(){
             return !helperSvc.isAgeGreaterThen18($scope.myProfile.user.birthDate);
-        }
+        };
 
         $scope.inviteParent = function(){
             var errors = helperSvc.validateEmailForInvite($scope.myProfile.emailParent);
@@ -477,7 +523,7 @@ angular.module("coderDojoTimisoara")
                         }
                     })
                     .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err);
+                        helperSvc.handlerCommunicationErrors(err , 'editUser - editProfilesCtrl', $scope);
                     });
             }
         };
@@ -486,13 +532,13 @@ angular.module("coderDojoTimisoara")
             dataService.acceptChildInvite({notifId:notification._id})
                 .then(function(response){
                     if(response.data.error){
-                        helperSvc.handlerCommunicationErrors(err);
+                       console.log(err);//TODO better handler this time of error
                     } else if(response.data.success){
                         getNotificationsForUser();
                     }
                 })
                 .catch(function(err){
-                    helperSvc.handlerCommunicationErrors(err);
+                    helperSvc.handlerCommunicationErrors(err , 'acceptChildInvite - editProfilesCtrl', $scope);
                 })
         };
 
@@ -504,23 +550,69 @@ angular.module("coderDojoTimisoara")
             dataService.deleteNotificationForUser({notifId:notification._id})
                 .then(function(response){
                     if(response.data.error){
-                        helperSvc.handlerCommunicationErrors(err);
+                        console.log(err);//TODO to check reasons for this error checking
                     } else if(response.data.success){
                         getNotificationsForUser();
                     }
                 })
                 .catch(function(err){
-                    helperSvc.handlerCommunicationErrors(err);
+                    helperSvc.handlerCommunicationErrors(err, 'deleteNotificationForUser - editProfilesCtrl', $scope);
                 })
-        }
+        };
 
         $scope.dismissNotification = function(notification){
-            if(isCurrentView(keys.viewUserProfile)){
+            if($scope.isCurrentView(keys.viewUserProfile)){
                 deleteNotificationForUser(notification);
-            } else if (isCurrentView(keys.viewUsersChildProfile)){
+            } else if ($scope.isCurrentView(keys.viewUsersChildProfile)){
                 deleteUsersChildNotification(notification);
             }
-        }
+        };
+
+        //Method for informing controllers that are children of this controller where they are
+        $scope.whereAmI = function(){
+            return 'editProfilesCtrl';
+        };
+
+        //Method that retrieves a user's dojos from the server
+        var getUsersDojosFromServer = function(){
+            var curUserId = $scope.myProfile.user._id;
+            dataService.getMyDojos()
+                .then(function(response){
+                    if(response.data.dojos){
+                        //Check that the user making the request is the current user
+                        if(response.data.userId === curUserId){
+                            $scope.myProfile.user.dojos = response.data.dojos;
+                        }
+                    } else {
+                        console.log('No dojos in answer error');
+                    }
+                })
+                .catch(function(err){
+                    helperSvc.handlerCommunicationErrors(err, 'getUsersDojos - editProfilesCtrl', $scope);
+                })
+        };
+
+        //Method that retrieves a user's dojos from the server
+        var getUsersChildsDojosFromServer = function(childId){
+            var curUserId = $scope.myProfile.user._id;
+            dataService.getMyChildsDojos({childId: childId})
+                .then(function(response){
+                    if(response.data.errors === keys.wrongUserError){
+                        console.log('User is not parent of child error!');
+                    }
+                    else if(response.data.dojos){
+                        //Check that the user making the request is the current user
+                        if(response.data.childId === curUserId){
+                            $scope.myProfile.user.dojos = response.data.dojos;
+                        }
+                    } else {
+                        console.log('No dojos in answer error');
+                    }
+                })
+                .catch(function(err){
+                    helperSvc.handlerCommunicationErrors(err, 'getUsersDojos - editProfilesCtrl', $scope);
+                })
+        };
 
         var deleteUsersChildNotification = function(notification){
             var childId = $scope.myProfile.user._id;
@@ -534,9 +626,9 @@ angular.module("coderDojoTimisoara")
                     }
                 })
                 .catch(function(err){
-                    helperSvc.handleParentsOrChildren(err);
+                    helperSvc.handlerCommunicationErrors(err, 'deleteUsersChildNotification - editProfilesCtrl', $scope);
                 })
-        }
+        };
 
         var isSameUser = function(user1, user2){
             if(user1 && user2){

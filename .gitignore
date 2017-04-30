@@ -7,3 +7,4 @@ node_modules
 # scss map files
 /client/styles/*.map
 /client/styles/main.css
+/client/styles/.sass-cache

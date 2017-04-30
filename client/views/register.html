@@ -1,54 +1,55 @@
 <div id="register" ng-controller="registerController">
     <h3>Inregistrare cont</h3>
-    <form name="registerForm">
+    <form>
         <div class="register">
             <div class="input_and_error">
-                <input type="text" placeholder="Nume" title="Nume" name="lastNameForm" ng-model="register.lastName" ng-click="register.errors.lastName = undefined"><br>
-                <p class="error" ng-show="register.errors && register.errors.lastName">{{register.errors.lastName}}</p>
+                <input type="text" placeholder="Nume" title="Nume" name="lastName" ng-model="register.user.lastName" ng-focus="register.errors.lastName = undefined"><br>
+                <p class="error" ng-if="register.errors.lastName">{{register.errors.lastName}}</p>
             </div>
 
             <div class="input_and_error">
-                <input type="text" placeholder="Prenume" title="Prenume" name="firstNameForm" ng-model="register.firstName"
-                       ng-click="register.errors.firstName = undefined">
-                <p class="error" ng-show="register.errors && register.errors.firstName">{{register.errors.firstName}}</p>
+                <input type="text" placeholder="Prenume" title="Prenume" name="firstName" ng-model="register.user.firstName"
+                       ng-focus="register.errors.firstName = undefined">
+                <p class="error" ng-if="register.errors.firstName">{{register.errors.firstName}}</p>
             </div>
 
             <div class="input_and_error input_and_error_date_container">
                 <input type="text" id="datepicker" title="Data nasterii" placeholder="Data nașterii" name="birthDateForm"
-                       ng-model="register.birthDate" ng-click="register.errors.birthDate = undefined"><br>
-                <p class="error" ng-show="register.errors && register.errors.birthDate">{{register.errors.birthDate}}</p>
+                       ng-model="register.user.birthDate" ng-focus="register.errors.birthDate = undefined"><br>
+                <p class="error" ng-if="register.errors.birthDate">{{register.errors.birthDate}}</p>
             </div>
 
             <div class="input_and_error">
-                <textarea type="text" placeholder="Adresa" title="Adresa" name="addressForm" ng-model="register.address"
-                       ng-click="register.errors.address = undefined"></textarea>
-                <p class="error" ng-show="register.errors && register.errors.address">{{register.errors.address}}</p>
+                <textarea type="text" placeholder="Adresa" title="Adresa" name="address" ng-model="register.user.address"
+                       ng-focus="register.errors.address = undefined"></textarea>
+                <p class="error" ng-if="register.errors.address">{{register.errors.address}}</p>
             </div>
 
             <div class="input_and_error input_and_error_date_container datepicker">
-                <input type="text" placeholder="Telefon" title="Telefon" name="phoneForm" ng-model="register.phone"
-                       ng-click="register.errors.phone = undefined"><br>
-                <p class="error" ng-show="register.errors && register.errors.phone">{{register.errors.phone}}</p>
+                <input type="text" placeholder="Telefon" title="Telefon" name="phone" ng-model="register.user.phone"
+                       ng-focus="register.errors.phone = undefined"><br>
+                <p class="error" ng-show="register.errors.phone">{{register.errors.phone}}</p>
             </div>
 
             <div class="input_and_error">
-                <input type="text" placeholder="Adresa de email" title="Email" name="emailForm" ng-model="register.email"
-                       ng-click="register.errors.email = undefined"><br>
-                <p class="error" ng-show="register.errors && register.errors.email">{{register.errors.email}}</p>
+                <input type="text" placeholder="Adresa de email" title="Email" name="email" ng-model="register.user.email"
+                       ng-focus="register.errors.email = undefined" autocomplete="off"><br>
+                <p class="error" ng-if="register.errors.email">{{register.errors.email}}</p>
             </div>
 
             <div class="input_and_error">
-                <input type="password" placeholder="parola" title="Parola" name="passwordForm" ng-model="register.password"
-                       ng-click="register.errors.password = undefined">
-                <p class="error" ng-show="register.errors && register.errors.password">{{register.errors.password}}</p>
+                <input type="password" placeholder="parola" title="Parola" name="password" ng-model="register.user.password"
+                       ng-focus="register.errors.password = undefined">
+                <p class="error" ng-if="register.errors.password">{{register.errors.password}}</p>
             </div>
             <div class="input_and_error">
-                <input type="password" placeholder="reintrodu parola" title="Reintrodu parola" name="password2Form" ng-model="register.password2"
-                       ng-click="register.errors.password2 = undefined"><br>
-                <p class="error" ng-show="register.errors && register.errors.password2">{{register.errors.password2}}</p>
+                <input type="password" placeholder="reintrodu parola" title="Reintrodu parola" name="password2" ng-model="register.user.password2"
+                       ng-focus="register.errors.password2 = undefined" autocomplete="off"><br>
+                <p class="error" ng-if="register.errors.password2">{{register.errors.password2}}</p>
             </div>
             <div class="input_and_error">
                 <input type="button" title="Inregistrare" value="Înregistrare" ng-click="registerUser()"><br>
+                <p class="error" ng-if="register.errors.connectionError">{{register.errors.connectionError}}</p>
             </div>
         </div>
     </form>

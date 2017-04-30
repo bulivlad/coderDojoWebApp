@@ -1,19 +1,19 @@
 <div class="member-container" ng-controller="memberCtrl">
     <div class="pages-banner dojo-banner">
-        <h2>{{dojoViewer.dojo.name}} - Membrii dojo</h2>
+        <h2>{{dojo.name}} - Membrii dojo</h2>
     </div>
-    <button class="back-button" ng-click="goBackAction()" ng-if="dojoViewer.views[localKeys.showBackButton]">Inapoi</button>
+    <button class="back-button" ng-click="goBackAction()" ng-if="views[keys.showBackButton]">Inapoi</button>
     <div class="container">
         <label>Selecteaza utilizatorul:</label>
         <select ng-model="typeOfUser" ng-change="selectUserAction()">
             <option>Parinti</option>
             <option>Copii</option>
             <option>Mentori</option>
-            <option ng-if="dojoViewer.dojo[keys.canAcceptMembers]">Mentori in asteptare</option>
+            <option ng-if="dojo[keys.canAcceptMembers]">Mentori in asteptare</option>
             <option>Voluntari</option>
-            <option ng-if="dojoViewer.dojo[keys.canAcceptMembers]">Voluntari  in asteptare</option>
+            <option ng-if="dojo[keys.canAcceptMembers]">Voluntari  in asteptare</option>
             <option>Campioni</option>
-            <option ng-if="dojoViewer.dojo[keys.canAcceptMembers]">Campioni in asteptare</option>
+            <option ng-if="dojo[keys.canAcceptMembers]">Campioni in asteptare</option>
         </select>
         <hr>
         <div ng-if="users && users.length > 0">

@@ -1,6 +1,6 @@
-<div ng-controller="searchForDojosCtrl">
+<div ng-controller="dojosCtrl">
     <!--Search for dojo part-->
-    <div class="map-or-list-buttons-holder" ng-if="dojoViewer.views[localKeys.showMapAndList]">
+    <div class="map-or-list-buttons-holder">
         <button ng-class="{'selected': dojoViewer.views[keys.viewMap]}" ng-click="goToMap()">Hartă dojouri</button>
         <button ng-class="{'selected': dojoViewer.views[keys.viewList]}" ng-click="goToList()">Listă dojouri</button>
     </div>
@@ -13,11 +13,6 @@
 
 
 
-    <!--View Dojo Part-->
 
-    <dojo-directive ng-if="dojoViewer.views[keys.viewDojo]"></dojo-directive>
-    <member-directive ng-if="dojoViewer.views[keys.viewMembers]"></member-directive>
-
-    <!--View Dojo Part-->
 
 </div>

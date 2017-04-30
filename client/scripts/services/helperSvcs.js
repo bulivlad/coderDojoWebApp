@@ -9,11 +9,11 @@ angular.module('coderDojoTimisoara')
         this.determineAlertPosition = function(){
             var scrollPosition = $(window).scrollTop();
             $('#alert .inner').css('top', scrollPosition);
-        }
+        };
 
         this.scrollToTop = function(){
             $('body').scrollTop(0);
-        }
+        };
 
         this.prettyDate = function(date, hourAndMinutes){
             if(angular.isString(date)){
@@ -32,7 +32,7 @@ angular.module('coderDojoTimisoara')
                     (minutes < 10 ? '0' + minutes : '' + minutes);
             }
             return ret;
-        }
+        };
 
 
         //Method for cloning a user
@@ -46,7 +46,7 @@ angular.module('coderDojoTimisoara')
 
                 return clone;
             }
-        }
+        };
 
         //Method that clones an array of users, converting the dates from string to Date
         this.cloneArrayOfUsers = function(users){
@@ -59,7 +59,7 @@ angular.module('coderDojoTimisoara')
                     return childOrParent;
                 })
             }
-        }
+        };
 
 
         //Method used to validate input fileds for registering (returns an error object)
@@ -152,7 +152,7 @@ angular.module('coderDojoTimisoara')
 
                 //If a password was filled, we check it is valid
                 if(user.password || user.password2){
-                    this.checkPasswords(user, errors);
+                   hasErrors =  this.checkPasswords(user, errors);
                 }
             }
 
@@ -213,11 +213,11 @@ angular.module('coderDojoTimisoara')
             } else {
                 return null;
             }
-        }
+        };
 
         this.isAliasValid = function(alias){
             var containsAcceptedCharacters = alias.match(/[A-Za-z0-9]+/g);
-            var doesNotContainUnacceptedCharacters =  !alias.match(/[^A-Za-z0-9]+/g)
+            var doesNotContainUnacceptedCharacters =  !alias.match(/[^A-Za-z0-9]+/g);
             return containsAcceptedCharacters && doesNotContainUnacceptedCharacters;
         };
 
@@ -275,7 +275,7 @@ angular.module('coderDojoTimisoara')
 
         this.isAgeLessThen14 = function(birthDateRaw){
             return this.compareAge(birthDateRaw, 14, 'younger');
-        }
+        };
 
         this.isAgeBetween14and18 = function(birthDateRaw){
             return this.compareAge(birthDateRaw, 14, 'older') && //Older than 14
@@ -302,14 +302,14 @@ angular.module('coderDojoTimisoara')
                 ret = /^[0-9]*$/.test(phone);
             }
             return ret;
-        }
+        };
 
         //Method for scrolling to the top of the windows
         this.scrollToTop = function(){
             $(function(){
                 $('body').scrollTop(0);
             });
-        }
+        };
 
         //Method that receives errors from the server, formatted a different way than the client ones, and coverts
         //them to client errors.
@@ -339,42 +339,35 @@ angular.module('coderDojoTimisoara')
                 }
             });
             return clientErrors;
-        }
+        };
 
-        this.handlerCommunicationErrors = function(err, methodInfo){
+        this.handlerCommunicationErrors = function(err, methodInfo, scope){
             if (err.status === 401){
-                console.log('Not authorized:' + err);
+                console.log('Not authorized:' + err.msg);
                 $rootScope.deleteUser(methodInfo);
                 $location.path('/' + keys.login);
             } else if (err.status === 500){
                 //Display an alert notifying the user that the operation did not succeed
-                $scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
-                console.log('Problems with the database:' + err);
-            } else {
-                console.log('Unexpected error:' + err);
+                if(scope){
+                    scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
+                }
+                console.log('Problems with the database for method (' + methodInfo + '):' + err.msg);
+                $location.path('/' + keys.despre);
+            }  else {
+                console.log('Unexpected error for method (' + methodInfo + '):' + err.msg);
+                $location.path('/' + keys.despre);
             }
-        }
+        };
 
-
+        //Method for getting a dojo from a list of dojos
+        this.getDojoFromDojos = function(dojoId, dojos){
+            for(var i = 0; i < dojos.length; i++){
+                var curDojo = dojos[i];
+                if(curDojo._id === dojoId){
+                    return curDojo;
+                }
+            }
+        };
     })
     .service('dojosService', function(){
-        //Method used to multiply dojos if more than one child is registered for the same user (email)
-        this.prepareMyDojosForDisplay = function(dojos){
-            var ret = [];
-            dojos.forEach(function(dojo){
-                // If user has more than one child
-                if (dojo.registered && dojo.registered.length > 1){
-                    dojo.registered.forEach(function(child){
-                        //cloning dojo
-                        var newDojo = JSON.parse(JSON.stringify(dojo));
-                        newDojo.registered = [child];
-                        ret.push(newDojo);
-                    });
-                } else {
-                    ret.push(dojo);
-                }
-            });
-            return ret;
-        }
-
     });

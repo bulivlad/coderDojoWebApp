@@ -3,212 +3,40 @@
  */
 
 angular.module("coderDojoTimisoara")
-    .controller("dojosCtrl", function($scope, $rootScope, $location, dataService, helperSvc, dojosService){
-        $scope.getDojos = function(){
-            if ($rootScope.user){
-                //If the user is authenticated
-                dataService.getAuthDojos()
-                    .then(function(response){
-                        if(response.errors){
-                            //TODO same thing on the server
-                        } else {
-                            var dojos = response.data;
-                            dojos.forEach(function (dojo) {
-                                dojo.date = new Date(dojo.date);
-                                dojo.date = helperSvc.prettyDate(dojo.date);
-                            });
-                            $scope.dojos = dojosService.prepareMyDojosForDisplay(dojos);
-                        }
-                    })
-                    .catch(function(err){
-                        console.log(err);
-                    });
-            } else {
-                //If the user is not authenticated
-                dataService.getDojos()
-                    .then(function(response){
-                        if(response.errors){
-                            //TODO same thing on the server
-                        } else {
-                            var dojos = response.data;
-                            dojos.forEach(function (dojo) {
-                                dojo.date = new Date(dojo.date);
-                                dojo.date = helperSvc.prettyDate(dojo.date);
-                            });
-                            $scope.dojos = dojos;
-                        }
-                    })
-                    .catch(function(err){
-                        console.log(err);
-                    });
-            }
 
-        }
-
-        $scope.registerChildForDojo = function(dojo, whichChild){
-            if (!$rootScope.user){
-                $rootScope.alert = keys.childRegisterAlert;
-                helperSvc.determineAlertPosition();
-            } else {
-                console.log(JSON.stringify(dojo));
-                //We verify if the current user has children
-                var data = {dojoId: dojo._id};
-                if ($rootScope.user.children){
-
-                } else {
-                    data.childName = $rootScope.user.firstName + ' ' + $rootScope.user.lastName;
-                }
-
-                dataService.registerChildForDojo(data, null)
-                    .then(function(response){
-                        if (response.data.error){
-                            if (response.data.error === keys.childAlreadyRegisteredError){
-                                alert('Copilul este deja inregistrat');
-                            } else if (response.data.error === keys.noMoreRoomInDojoError){
-                                alert('Nu mai este loc in dojo momentan');
-                            }
-                        } else if(response.data.dojo){
-                            $scope.getDojos();
-                        }
-                    })
-                    .catch(function(err){
-                        if(err.status === 401){
-                            $location.path('/' + keys.login);
-                        } else if (err.status === 500){
-                            alert('There was a problem, try again later');
-                        } else {
-                            console.log("Error registering user for dojo: " + err);
-                        }
-                    });
-            }
-        }
-
-        //Method that determines if a child is registered in the current dojo
-        $scope.isAnyChildRegistered = function(dojo){
-            if (dojo.registered){
-                for(var i = 0; i  < dojo.registered.length; i++){
-                    if (dojo.registered[i]){
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        //Getting the dojos when the page loads
-        $scope.getDojos();
-    })
-    .controller('addDojoCtrl', function($scope, $rootScope, $location, dataService, helperSvc){
-        $scope.errors = {};
-        $scope.dojo = {};
-        $scope.addDojo = function(){
-            var errors = validateDojoFields($scope.dojo);
-            if(errors){
-                $scope.errors = errors;
-            } else {
-                dataService.addDojo($scope.dojo)
-                    .then(function(response){
-                        if(response.data.errors === keys.notAuthorizedError){
-                            $location.path('/' + keys.despre);
-                            $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
-                        } else if (response.data.success){
-                            $location.path('/' + keys.cautaUnDojo);
-                            $scope.setAlert(keys.infoAlert, 'Dojo creeat cu succes!');
-                        }
-                    })
-                    .catch(function(err){
-                        //TODO handler errros
-                        console.log(err);
-                    })
-            }
-        }
-
-        var validateDojoFields = function(dojo){
-            var errors = {};
-            var hasErrors = false;
-
-            if(!dojo.name || dojo.name === ''){
-                hasErrors = true;
-                errors.name = 'Dojo-ul trebuie sa aibe nume';
-            }
-
-            if(!dojo.address || dojo.address === ''){
-                hasErrors = true;
-                errors.address = 'Dojo-ul trebuie sa aibe adresa';
-            }
-
-            if(!dojo.latitude || dojo.latitude === ''){
-                hasErrors = true;
-                errors.latitude = 'Dojo-ul trebuie sa aibe latitudine';
-            }
-
-            if(!dojo.longitude || dojo.longitude === ''){
-                hasErrors = true;
-                errors.longitude = 'Dojo-ul trebuie sa aibe longitudine';
-            }
-
-            if(!dojo.email || dojo.email === ''){
-                hasErrors = true;
-                errors.email = 'Dojo-ul trebuie sa aibe email';
-            }
-
-            if(!dojo.orar){
-                hasErrors = true;
-                errors.orar = 'Dojo-ul trebuie sa aibe orar';
-            }
-
-            if(!dojo.requirements || dojo.requirements === ''){
-                hasErrors = true;
-                errors.requirements = 'Dojo-ul trebuie sa aibe cerinte scrise cu enter';
-            }
-
-
-            if (hasErrors){
-                return errors;
-            } else {
-                return null;
-            }
-        }
-    })
-    .controller('searchForDojosCtrl', function($scope, $rootScope, $location, $compile, dataService, helperSvc){
-        $scope.dojos = [];
+    .controller('dojosCtrl', function($scope, $rootScope, $location, $compile, dataService, helperSvc, dojosService){
         var markers = [];
         $scope.dojoViewer = {views:{}, dojos:[]};
-        $scope.localKeys = {
-            showBackButton: 'showBackButton',
-            showMapAndList: 'showMapAndList'
-        }
 
-
-       var getNotLoggedInDojosFromServer = function(){
+       var getDojosFromServerAndCreateMap = function(){
            dataService.getDojos()
                .then(function(response){
                    if(response.data.dojos){
                        $scope.dojoViewer.dojos = response.data.dojos;
-                       createMapWithDojos($scope.dojoViewer.dojos, 'dojo-map', false);
+                       createMapWithAllDojos();
                    }
                })
                .catch(function(err){
-                   console.log(err);
+                   helperSvc.handlerCommunicationErrors(err, 'getDojosFromServerAndCreateMap- dojosCtrl', $scope);
                })
        };
 
-        var getLoggedInDojosFromServerAndCreateDojoMap = function(){
-            dataService.getAuthDojos()
+        var getMyDojosFromServer = function(){
+            dataService.getMyDojos()
                 .then(function(response){
                     if(response.data.dojos){
                         $scope.dojoViewer.dojos = response.data.dojos;
-                        createMapWithDojos($scope.dojoViewer.dojos, 'dojo-map', false);
                     }
                 })
                 .catch(function(err){
-                    console.log(err);
+                    helperSvc.handlerCommunicationErrors(err, 'getMyDojosFromServer- dojosCtrl', $scope);
                 })
         };
 
+
         //Method for injecting a google maps plugin for displaying dojos. Element name is the element where we are
         //going to inject the map (it's id). The flag forIndividualDojo is for making unclickable markers for single dojos
-        var createMapWithDojos = function(dojos, elementName, forIndividualDojo){
+        var createMapWithDojos = function(dojos, elementName){
             var latLongTimisoara = new google.maps.LatLng(45.756818, 21.228600);
 
             $scope.mapProp = {
@@ -229,84 +57,43 @@ angular.module("coderDojoTimisoara")
                     position: markerLatLng,
                     map: mapObj,
                     name:dojo.name
-                })
-                if (!forIndividualDojo){
-                    var content = '<a class="info-window" ng-click="goToDojoAction(\'' + dojo.name + '\')">' + dojo.name + '</a>';
-                    var compiledContent = $compile(content)($scope);
+                });
+                var content = '<a class="info-window" ng-click="goToDojoAction(\'' + dojo.name + '\')">' + dojo.name + '</a>';
+                var compiledContent = $compile(content)($scope);
 
-                    //for closing infoWindows
-                    markers.push(marker);
+                //for closing infoWindows
+                markers.push(marker);
 
-                    var infoWindow = new google.maps.InfoWindow({
-                        content:compiledContent[0]
-                    });
-                    marker.infoWindow = infoWindow;
+                var infoWindow = new google.maps.InfoWindow({
+                    content:compiledContent[0]
+                });
+                marker.infoWindow = infoWindow;
 
-                    google.maps.event.addListener(marker,'click', (function(){
-                        closeInfoWindows();
-                        infoWindow.open(mapObj, marker);
+                google.maps.event.addListener(marker,'click', (function(){
+                    closeInfoWindows();
+                    infoWindow.open(mapObj, marker);
                     })  );
-                }
 
             }); //end of for
         };
 
-        //method for joining dojo
-        $scope.joinDojoAction = function(){
-            if($scope.isUserLoggedIn()){
-                $('body').css('overflow', 'hidden');
-                $scope.dojoViewer.views.showJoin = true;
-                if(helperSvc.isAgeGreaterThen18($scope.user.birthDate)){
-                    $scope.dojoViewer.views.isAdult = true;
-                }
-            } else {
-                $scope.goToLogin();
-            }
+        //method that closes all info windows on map
+        var closeInfoWindows = function(){
+            markers.forEach(function(marker){
+                marker.infoWindow.close();
+            })
         };
 
-        $scope.leaveDojoAction = function(){
-            var currentDojoId = $scope.dojoViewer.dojo._id;
-            dataService.leaveDojo({dojoId: currentDojoId})
-                .then(function(response){
-                    if(response.data.success){
-                        //If the leaving of the dojo has been successful, we reload the dojos and set the current
-                        // dojo as the loaded dojo
-                        dataService.getAuthDojos()
-                            .then(function(response){
-                                if(response.data.dojos){
-                                    $scope.dojoViewer.dojos = response.data.dojos;
-                                    $scope.dojoViewer.dojo = getDojoFromDojos(currentDojoId, $scope.dojoViewer.dojos);
-                                }
-                            })
-                            .catch(function(err){
-                                $scope.initialize();
-                                console.log(err);
-                            })
-                    }
-                })
-        };
 
-        $scope.closeJoinModal = function(){
-            $scope.dojoViewer.views.showJoin = false;
-            $('body').css('overflow', 'auto');
-        }
 
-        $scope.goToDojo = function(dojo){
-            console.log('dojo', dojo);
-        };
-
-        $scope.goToList = function(){
-            $scope.setView(keys.viewList, [$scope.localKeys.showMapAndList]);
+       $scope.goToList = function(){
+            $scope.setView(keys.viewList, [keys.showMapAndList]);
         };
 
         $scope.goToMap = function(){
-            $scope.setView(keys.viewMap, [$scope.localKeys.showMapAndList]);
-            // we need the delay because otherwise the element would not be drawn on time and an exception raised
-            // because the map did not have an element to inject itself onto
-            setTimeout(function(){
-                createMapWithDojos($scope.dojoViewer.dojos, 'dojo-map', false);
+            $scope.setView(keys.viewMap, [keys.showMapAndList]);
+            createMapWithAllDojos();
 
-            }, 200);
         };
 
         $scope.setView = function(view, extraShowFlags){
@@ -321,11 +108,16 @@ angular.module("coderDojoTimisoara")
 
         //This sets a dojo in the viewDojo panel
         $scope.selectDojoAction = function(dojo){
-            $scope.setView(keys.viewDojo, [$scope.localKeys.showBackButton]);
-            $scope.dojoViewer.dojo = dojo;
-            setTimeout(function(){
-                createMapWithDojos([$scope.dojoViewer.dojo], 'dojo-map-single-dojo', true);
+            $scope.setToBeViewedDojoId(dojo._id);
+            $location.path('/' + keys.getDojoRoute);
+        };
 
+
+        // we need the delay because otherwise the element would not be drawn on time and an exception raised
+        // because the map did not have an element to inject itself onto
+        var createMapWithAllDojos = function(){
+            setTimeout(function(){
+                createMapWithDojos($scope.dojoViewer.dojos, 'dojo-map');
             }, 200);
         };
 
@@ -340,126 +132,78 @@ angular.module("coderDojoTimisoara")
             }
         };
 
-        //Method for navigating back in the dojo view
-        $scope.goBackAction = function(){
-            if(isCurrentView(keys.viewDojo)){
-                $scope.initialize();
-            } else if(isCurrentView(keys.viewMembers)){
-                $scope.setView(keys.viewDojo, [$scope.localKeys.showBackButton]);
-            }
+        //Method for informing controllers that are children of this controller where they are
+        $scope.whereAmI = function(){
+            return 'dojosCtrl';
         };
 
-        // Method to determine if the current view is thisView
-        var isCurrentView = function(thisView){
-            return $scope.dojoViewer.views[thisView];
-        };
-
-        //method that closes all info windows on map
-        var closeInfoWindows = function(){
-            markers.forEach(function(marker){
-                marker.infoWindow.close();
-            })
-        };
-
-        $scope.createSchedule = function(rawSchedules){
-            var ret = '';
-
-            if(rawSchedules){
-                rawSchedules.forEach(function(rawSchedule){
-                    var startHour = rawSchedule.startHour + '';
-                    startHour = startHour.length == 1 ? '0' + startHour : startHour;
-
-                    var endHour = rawSchedule.endHour + '';
-                    endHour = endHour.length == 1 ? '0' + endHour : endHour;
-
-                    var startMinute = rawSchedule.startMinute + '';
-                    startMinute = startMinute.length == 1 ? '0' + startMinute : startMinute;
-
-                    var endMinute = rawSchedule.endMinute + '';
-                    endMinute = endMinute.length == 1 ? '0' + endMinute : endMinute;
-
-                    var schedule = 'In fiecare ' +  rawSchedule.day + ' de la ' + startHour + ':' + startMinute +
-                        ' la ' + endHour + ':' + endMinute;
-
-                    ret += schedule;
-                    ret += '\n';
-                });
-            }
-
-            return ret;
-        };
-
-        //Method for sernding request to server to become a member of a dojo
-       $scope.becomeMemberOfDojo = function($event, whatMember){
-            $event.stopPropagation();
-           var currentDojoId = $scope.dojoViewer.dojo._id;
-            dataService.becomeMemberOfDojo({dojoId: currentDojoId, whatMember: whatMember})
-                .then(function(response){
-                    if(response.data.success){
-                        //If the request for membership has been sent successfully, we refresh the dojos
-                        // from the server (with the current user joined or pending)
-
-                        dataService.getAuthDojos()
-                            .then(function(response){
-                                if(response.data.dojos){
-                                    $scope.dojoViewer.dojos = response.data.dojos;
-                                    $scope.dojoViewer.dojo = getDojoFromDojos(currentDojoId, $scope.dojoViewer.dojos);
-                                }
-                                $scope.closeJoinModal();
-                            })
-                            .catch(function(err){
-                                $scope.closeJoinModal();
-                                $scope.initialize();
-                                console.log(err);
-                            })
-                    } else {
-                        $scope.closeJoinModal();
-                        if(response.data.errors === keys.userAlreadyJoinedDojoError){
-                            $scope.setAlert(keys.infoAlert, 'Utilizatorul deja face parte din dojo.');
-                        } else {
-                            $scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
-                        }
-
-                    }
-
-                })
-                .catch(function(err){
-                    if(err.status === 500){
-                        $scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
-                    } else if (err.status === 401){
-                        $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
-                    }
-
-                    $scope.closeJoinModal();
-
-                })
-
-        };
-
-        //Method for getting a dojo from a list of dojos
-        var getDojoFromDojos = function(dojoId, dojos){
-            for(var i = 0; i < dojos.length; i++){
-                var curDojo = dojos[i];
-                if(curDojo._id === dojoId){
-                    return curDojo;
+        $scope.initializeDojosCtrl = function(){
+            //If we are showing only the users's dojos
+            if(isMyDojosView()){
+                if($scope.isUserLoggedIn()){
+                    $scope.setView(keys.viewList);
+                    getMyDojosFromServer();
+                }
+                //If the user is not logged in and has somehow received the option to view my dojos, go the the default page
+                else {
+                    $location.path('/' + keys.despre);
                 }
             }
-        };
-
-        $scope.goToViewMembers = function(){
-            $scope.setView(keys.viewMembers, [$scope.localKeys.showBackButton]);
-        };
-
-        $scope.initialize = function(){
-            //The default view is view map
-            $scope.setView(keys.viewMap, [$scope.localKeys.showMapAndList]);
-            if($scope.isUserLoggedIn()){
-                getLoggedInDojosFromServerAndCreateDojoMap();
-            } else {
-                getNotLoggedInDojosFromServer();
+            //If we are in the search for dojo route
+            else if (isSearchForDojoView()){
+                //The default view is view map
+                $scope.setView(keys.viewMap, [keys.showMapAndList]);
+                getDojosFromServerAndCreateMap();
             }
         };
 
-        $scope.initialize();
+        var isSearchForDojoView = function(){
+            return $location.path() === ('/' +  keys.cautaUnDojo);
+        };
 
-    });//End searchForDojosCtrl
+        var isMyDojosView = function(){
+            return $location.path() === ('/' +  keys.getMyDojos);
+        };
+
+
+
+
+        $scope.initializeDojosCtrl();
+
+    })//End dojosCtrl
+    .controller('dojoBubbleCtrl', function($scope, $location, dataService, helperSvc){
+        $scope.bubbleDojos = [];
+
+        //Method that retrieves a user's dojos from the server
+        var getUsersDojosFromServer = function(){
+            dataService.getMyDojos()
+                .then(function(response){
+                    if(response.data.dojos){
+                        $scope.bubbleDojos = response.data.dojos;
+                    } else {
+                        console.log('No dojos in answer error');
+                    }
+                })
+                .catch(function(err){
+                    helperSvc.handlerCommunicationErrors(err, 'getUsersDojos - editProfilesCtrl', $scope);
+                })
+        };
+
+        var initializeDojoBubbleCtrl = function(userId){
+           getUsersDojosFromServer();
+        };
+
+        initializeDojoBubbleCtrl();
+
+        //This event listener is used when a user is changed, to get the dojos
+        $scope.$on('userChange', function(event, userId){
+            initializeDojoBubbleCtrl(userId);
+        });
+
+
+        //This sets a dojo in the viewDojo panel
+        $scope.selectDojoAction = function(dojo){
+            $scope.setToBeViewedDojoId(dojo._id);
+            $location.path('/' + keys.getDojoRoute);
+        };
+    });

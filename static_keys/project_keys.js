@@ -14,9 +14,11 @@ let keyMap = {
     editUsersChild: 'editUsersChild',
     myProfile: 'myProfile',
     editProfiles: 'editProfiles',
-    getDojos: 'getDojos',
-    getAuthDojos: 'getAuthDojos',
-    getMyDojos: 'getMyDojos',
+    getDojosRoute: 'getDojos',
+    getMyDojosRoute: 'getMyDojos',
+    getMyChildsDojosRoute: 'getMyChildsDojos',
+    getDojoRoute: 'getDojo',
+    getAuthDojoRoute: 'getAuthDojo',
     registerChildForDojo: 'registerChildForDojo',
     cancelChildRegistryForDojo: 'cancelChildRegistryForDojo',
     amIAuthenticatedUserRoute: 'amIAuthenticatedUserRoute',
@@ -31,6 +33,7 @@ let keyMap = {
     deleteNotificationForUsersChildRoute: 'deleteNotificationForUsersChild',
     acceptChildInviteRoute: 'acceptChildInvite',
     addDojoRoute: 'addDojo',
+    editDojoRoute: 'editDojo',
     cautaUnDojo: 'cautaUnDojo',
     becomeMemberOfDojoRoute: 'becomeMemberOfDojo',
     leaveDojoRoute: 'leaveDojo',
@@ -66,11 +69,13 @@ let keyMap = {
     user: 'user',
     admin: 'admin',
     mentor: 'mentor',
+    pendingMentor: 'pendingMentor',
     volunteer: 'volunteer',
+    pendingVolunteer: 'pendingVolunteer',
     champion: 'champion',
+    pendingChampion: 'pendingChampion',
     parent: 'parent',
     attendee: 'attendee',
-
 
     //Profile type
     editUserOver14Profile: 'editUserOver14Profile',     //Editing by the user himself/herself
@@ -87,6 +92,12 @@ let keyMap = {
     viewUsersChildProfile: 'viewUsersChildProfile',
     addChildUnder14Profile: 'addChildUnder14Profile',
     addChildOver14Profile: 'addChildOver14Profile',
+    showDojoInUserProfile: 'showDojoInUserProfile',
+    showPasswords: 'showPasswords',
+    showAlias: 'showAlias',
+    showAddChildren: 'showAddChildren',
+    showInviteParent: 'showInviteParent',
+    hideEditButton: 'hideEditButton',
 
     //View for dojos
     viewMap: 'viewMap',
@@ -96,6 +107,10 @@ let keyMap = {
     editDojo: 'editDojo',
     editEvent: 'editEvent',
     viewMembers: 'viewMembers',
+
+    //View keys for various views
+    showBackButton: 'showBackButton',
+    showMapAndList: 'showMapAndList',
 
     //PermissionsForDojo
     canEditDojo: 'canEditDojo',

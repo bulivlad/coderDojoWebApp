@@ -13,11 +13,23 @@ const authentification = require('../passport/authentification');
 //Route for adding a new dojo (only the admin can do that)
 router.post('/' + keys.addDojoRoute, authentification.ensureAuthenticated, dojosController.addDojo);
 
-//Route for getting the existing dojos
-router.get('/' + keys.getDojos, dojosController.getDojos);
+//Route for editing an existing dojo (only the admin and champion can do that)
+router.post('/' + keys.editDojoRoute, authentification.ensureAuthenticated, dojosController.editDojo);
 
-//Method that returns the upcoming dojos for unauthorized users
-router.get('/' + keys.getAuthDojos, authentification.ensureAuthenticated, dojosController.getAuthenticatedDojos);
+//Route for getting the existing dojos
+router.get('/' + keys.getDojosRoute, dojosController.getDojos);
+
+//Method that returns a user's dojos
+router.get('/' + keys.getMyDojosRoute, authentification.ensureAuthenticated, dojosController.getMyDojos);
+
+//Method that returns a user's child's dojos
+router.post('/' + keys.getMyChildsDojosRoute, authentification.ensureAuthenticated, dojosController.getMyChildsDojos);
+
+//Method that returns a dojo for an unauthenticated user
+router.post('/' + keys.getDojoRoute, dojosController.getDojo);
+
+//Method that returns a user's dojo
+router.post('/' + keys.getAuthDojoRoute, authentification.ensureAuthenticated, dojosController.getAuthDojo);
 
 //Method that returns the a user's dojos
 router.get('/' + keys.getMyDojos, authentification.ensureAuthenticated, dojosController.getMyDojos);

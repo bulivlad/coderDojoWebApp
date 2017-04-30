@@ -39,36 +39,47 @@ angular.module('coderDojoTimisoara')
             });
         };
 
-        //Service that returns the upcoming dojos
-        this.getDojos = function(){
+        //Service that returns all dojos
+        this.getDojos = function(data){
             return $http({
                 method: 'get',
-                url:'dojos/' + keys.getDojos
+                url:'dojos/' + keys.getDojosRoute,
+                data: data
             });
         };
 
-        //Service that returns the upcoming dojos for authenticated users
-        this.getAuthDojos = function(){
-            return $http({
-                method: 'get',
-                url:'dojos/' + keys.getAuthDojos
-            });
-        };
-
-        //Service that returns the upcoming dojos in which users have registered to attend
-        this.getAuthDojos = function(){
-            return $http({
-                method: 'get',
-                url:'dojos/' + keys.getAuthDojos
-            });
-        };
-
-        //Service that returns the users upcoming dojos
+        //Service that returns the user's dojos
         this.getMyDojos = function(){
-            console.log('dataServ gettingMyDojos')
             return $http({
                 method: 'get',
-                url:'dojos/' + keys.getMyDojos
+                url:'dojos/' + keys.getMyDojosRoute
+            });
+        };
+
+        //Service that returns the user's child's dojos
+        this.getMyChildsDojos = function(data){
+            return $http({
+                method: 'post',
+                url:'dojos/' + keys.getMyChildsDojosRoute,
+                data: data
+            });
+        };
+
+        //Service that returns a dojo for an unauthenticated user
+        this.getDojo = function(data){
+            return $http({
+                method: 'post',
+                url:'dojos/' + keys.getDojoRoute,
+                data: data
+            });
+        };
+
+        //Service that returns a dojo for an Authenticated user
+        this.getAuthDojo = function(data){
+            return $http({
+                method: 'post',
+                url:'dojos/' + keys.getAuthDojoRoute,
+                data: data
             });
         };
 
@@ -202,12 +213,20 @@ angular.module('coderDojoTimisoara')
                 url: '/user/' + keys.acceptChildInviteRoute,
                 data: notification
             });
-        }
+        };
 
         this.addDojo = function(dojo){
             return $http({
                 method: 'POST',
                 url: '/dojos/' + keys.addDojoRoute,
+                data: {dojo: dojo}
+            });
+        };
+
+        this.editDojo = function(dojo){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.editDojoRoute,
                 data: {dojo: dojo}
             });
         };

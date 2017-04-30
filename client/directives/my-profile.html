@@ -1,5 +1,5 @@
 <div>
-    <button class="edit-profile-button" ng-click="editAction()" ng-hide="myProfile.views.hideEditButton">Editare profil</button>
+    <button class="edit-profile-button" ng-click="editAction()" ng-if="!(myProfile.views[keys.hideEditButton])">Editare profil</button>
     <div class="page-content">
         <div class="col1-my-profile">
             <div class=".block-div">
@@ -30,6 +30,12 @@
                 <div >
                     <h3>Membru al dojo</h3>
                     <hr>
+                    <div class="dojo-bubble-container" ng-controller="dojoBubbleCtrl">
+                        <div class="dojo-bubble" ng-repeat="dojo in myProfile.user.dojos" ng-click="selectDojoAction(dojo)">
+                            <img src="../img/dojos/default-dojo-picture.png">
+                            <p>{{dojo.name}}</p>
+                        </div>
+                    </div>
                 </div>
                 <div ng-show="myProfile.user.parents.length > 0">
                     <h3>Părinți</h3>
@@ -42,7 +48,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="my-profile-notifications" ng-show="myProfile.user.notifications.length > 0">
+                <div class="my-profile-notifications">
                     <h3>Notificări</h3>
                     <hr>
                     <div class="my-profile-notification-container" ng-repeat="notification in myProfile.user.notifications">
@@ -50,8 +56,10 @@
                             <button ng-click="cancelChildInvite(notification)"><img src="../img/reject.png"></button>
                             <button ng-click="acceptChildInvite(notification)"><img src="../img/approve.png"></button>
                             <span><strong>{{notification.data.firstName + " " + notification.data.lastName}}</strong>
-                                      alias <strong>{{notification.data.alias}}</strong>, ți-a trimis o invitație să îi fi
-                                    părinte pe <code>Coder Dojo Timișoara</code>
+                                      <span ng-if="notification.data.alias">
+                                          alias <strong>{{notification.data.alias}}, </strong>
+                                      </span>
+                                ți-a trimis o invitație să îi fi părinte pe <code>Coder Dojo Timișoara</code>
                             </span>
 
                         </div>

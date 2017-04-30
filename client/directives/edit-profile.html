@@ -103,13 +103,13 @@
                 </label>
             </div>
         </div>
-        <div class="label-and-value" ng-show="myProfile.views.password">
+        <div class="label-and-value" ng-show="myProfile.views[keys.showPasswords]">
             <label for="personal-data-password">Parola</label>
             <input type="password" placeholder="parola" id="personal-data-password" ng-model="myProfile.user.password"
                    ng-click="myProfile.errors.password = undefined"><br>
             <p ng-show="myProfile.errors && myProfile.errors.password">{{myProfile.errors.password}}</p>
         </div>
-        <div class="label-and-value" ng-show="myProfile.views.password">
+        <div class="label-and-value" ng-show="myProfile.views[keys.showPasswords]">
             <label for="personal-data-password2">Confirmare parola</label>
             <input type="password" id="personal-data-password2" placeholder="confirmare parolă"  ng-model="myProfile.user.password2"
                    ng-click="myProfile.errors.password2 = undefined"><br>
@@ -123,7 +123,7 @@
             <h3>Copii</h3>
             <div></div>
         </div>
-        <div class="add-kids-panel" ng-show="myProfile.views.showAddChildren">
+        <div class="add-kids-panel" ng-show="myProfile.views[keys.showAddChildren]">
             <button ng-click="addChildUnder14Action()">Adaugă copil <br>sub 14 ani</button>
             <button ng-click="addChildOver14Action()">Adaugă copil <br>peste 14 ani</button>
             <button>Invită copil <br>peste 14 ani</button>
@@ -131,7 +131,7 @@
 
 
     </div>
-    <div class="personal-data" ng-show="myProfile.views.showInviteParent">
+    <div class="personal-data" ng-if="myProfile.views[keys.showInviteParent]">
         <h3>Parinți</h3>
         <div class="label-and-value">
             <label for="personal-data-invite-parent">Invită</label>

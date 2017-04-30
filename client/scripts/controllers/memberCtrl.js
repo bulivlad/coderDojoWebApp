@@ -6,7 +6,7 @@ angular.module("coderDojoTimisoara")
     .controller("memberCtrl", function($scope, $rootScope, $location, dataService, helperSvc){
         $scope.typeOfUser = 'Parinti';
         var getUsersForMember = function(typeOfUsers){
-            dataService.getUsersForMember({typeOfUsers: typeOfUsers, dojoId: $scope.dojoViewer.dojo._id})
+            dataService.getUsersForMember({typeOfUsers: typeOfUsers, dojoId: $scope.dojo._id})
                 .then(function(response){
                     if(response.data.errors === keys.notAuthorizedError){
                         $location.path('/' + keys.despre);
@@ -16,7 +16,7 @@ angular.module("coderDojoTimisoara")
                     }
                 })
                 .catch(function(err){
-                    helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl');
+                    helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl', $scope);
                 })
         };
 
@@ -55,7 +55,7 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.getUserInfoForExpandedLook = function(user){
-            dataService.getDetailedUserForMember({userId: user._id, dojoId: $scope.dojoViewer.dojo._id})
+            dataService.getDetailedUserForMember({userId: user._id, dojoId: $scope.dojo._id})
                 .then(function(response){
                     if(response.data.errors === keys.notAuthorizedError){
                         $location.path('/' + keys.despre);
@@ -87,13 +87,13 @@ angular.module("coderDojoTimisoara")
                     }
                 })
                 .catch(function(err){
-                    helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl');
+                    helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl', $scope);
                 })
         };
 
         //Method for accepting a pending member in a dojo (for mentor, volunteer, champion)
         $scope.acceptPendingMemberForDojo = function(user){
-            dataService.acceptPendingMemberForDojo({userId: user._id, dojoId: $scope.dojoViewer.dojo._id})
+            dataService.acceptPendingMemberForDojo({userId: user._id, dojoId: $scope.dojo._id})
                 .then(function(response){
                     if(response.data.errors === keys.notAuthorizedError){
                         $location.path('/' + keys.despre);
@@ -103,7 +103,7 @@ angular.module("coderDojoTimisoara")
                     }
                 })
                 .catch(function(err){
-                    helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl');
+                    helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl', $scope);
                 })
         };
 
@@ -111,7 +111,7 @@ angular.module("coderDojoTimisoara")
         $scope.rejectPendingMemberForDojo = function(user){
             var confirmed  = confirm('Sigur vrei sa stergi aplicatia lui ' + user.firstName + ' ' + user.lastName + '?');
             if (confirmed){
-                dataService.rejectPendingMemberForDojo({userId: user._id, dojoId: $scope.dojoViewer.dojo._id})
+                dataService.rejectPendingMemberForDojo({userId: user._id, dojoId: $scope.dojo._id})
                     .then(function(response){
                         if(response.data.errors === keys.notAuthorizedError){
                             $location.path('/' + keys.despre);
@@ -121,7 +121,7 @@ angular.module("coderDojoTimisoara")
                         }
                     })
                     .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl');
+                        helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl', $scope);
                     })
             }
 

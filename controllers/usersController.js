@@ -130,7 +130,7 @@ module.exports.getUsersChildren = function(req, res){
 //Method for getting user's parents
 module.exports.getUsersParents = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.getUsersParentsRoute} for ${getUser(req)}`);
-    if(req.user && req.user.parents && req.user.parents.length > 0){
+    if(req.user && req.user.parents && req.user.parents.length > 0){//TODO this always returns noParentsError (test why)
         User.find({_id: {$in: req.user.parents}}, {password: false, creationDate: false},function(err, expandedParents){
             if (err){
                 logger.error('Could not get parents: ' + err);
@@ -148,6 +148,7 @@ module.exports.getUsersParents = function(req, res){
 module.exports.getChildsParents = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.getChildsParentsRoute} for ${getUser(req)}`);
     let parents = req.body.parents;
+    //TODO add check that the current user is the parent of the child asking for parents
     logger.silly(`Parents to search for ${parents}`);
     User.find({_id: {$in: parents}},
         {password: false, creationDate: false, children:false, parents:false, badges:false, notifications: false},//TODO add proper levels of information
@@ -273,7 +274,7 @@ module.exports.getUsersChildsNotifications = function(req, res){
     } else {
         logger.debug(`User (email=${getUser()}) doesn't have a child (_id=${childId})`);
         let errors = [];
-        errors.push(createServerError(keys.getUsersChildNotificationsRoute, 'child is not parents\''));
+        errors.push(createServerError(keys.error, 'child is not parents\''));
         res.json({errors:errors});
     }
 };
@@ -416,7 +417,7 @@ module.exports.acceptChildInvite = function(req, res){
                     let childNotification = {};
                     childNotification.typeOfNot = keys.infoNotification;
                     childNotification.data = {
-                        msg: `${user.firstName} + ${user.lastName} ți-a acceptat invitația de a îți fii părinte pe
+                        msg: `${user.firstName} ${user.lastName} ți-a acceptat invitația de a îți fii părinte pe
                                 Coder Dojo Timișoara`
                     };
 
@@ -626,7 +627,7 @@ function validateFields(req, validationForWhat){
         }
     }
     let errors = req.validationErrors();
-    logger.silly('validateErrors(errors=' + JSON.stringify(errors, undefined, 2) + ')');
+    logger.silly('validateErrors(errors=' + JSON.stringify(errors) + ')');
 
     return req.validationErrors();
 }
@@ -640,14 +641,14 @@ function createServerError(errorType, errorMessage){
 }
 
 //Function that determine if a child is a users child
-function isUsersChild(user, child){
-    logger.silly('Entering isUsersChild');
+module.exports.isUsersChild = isUsersChild = function (user, child){
+    //logger.silly('Entering isUsersChild');
     logger.silly(`child_id=${child._id}`);
     if(user.children){
-        logger.silly(`user.children=${user.children}`);
+        //logger.silly(`user.children=${user.children}`);
         for(let i = 0; i < user.children.length; i++){
             let tmpChild = user.children[i];
-            logger.silly(`tmpChild=${tmpChild}`);
+            //logger.silly(`tmpChild=${tmpChild}`);
             if(tmpChild == child._id){//We need weak comparison because the two values are not of the same type
                 return true;
             }

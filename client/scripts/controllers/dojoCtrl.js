@@ -3,7 +3,7 @@
  */
 
 angular.module("coderDojoTimisoara")
-    .controller('dojoCtrl', function($scope, $rootScope, $location, $compile, dataService, helperSvc, dojosService){
+    .controller('dojoCtrl', function($scope, $rootScope, $location, $compile, dataService, helperSvc){
         $scope.dojo = {};
         $scope.views = {};
 

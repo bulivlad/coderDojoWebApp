@@ -21,7 +21,7 @@ router.post('/' + keys.register, userController.registerUser);
 //Route for registering childUsers by parent
 router.post('/' + keys.registerChildRoute, authentification.ensureAuthenticated, userController.registerUsersChild);
 
-//Route for logging in users
+//Route for logging in users. Here we user passport.authenticate local strategy to authenticate the user
 router.post('/' + keys.login, passport.authenticate('local'), userController.loginUser);
 
 //Route for user to know it is logged in (authenticated)
@@ -75,6 +75,7 @@ passport.use(new passportLocal.Strategy(
     },
     function(email, password, done){
         logger.debug('Entering LocalAuthentificationStrategy');
+        //First we search the database for a user with the given email (or alias)
         User.findUserByEmailOrAlias(email, function (err, user) {
             if (err) {
                 //TODO check what done does when mongo server is not running
@@ -82,18 +83,23 @@ passport.use(new passportLocal.Strategy(
                 done(err);
             } else {
                 if (!user) {
+                    //If no user is found, we call done with false
                     logger.debug('User: ' + email + 'does not exist');
                     done(null, false);
                 } else {
+                    //If the user was found we compare the password given by the user to the hash stored in the database
+                    //for this we need to has the passport given, and then compare the hashes
                     bcrypt.compare(password, user.password, function (err, isMatch) {
                         if (err) {
                             logger.error('Error comparing passwords with bcrypt: ' + err);
                             done(err);
                         } else {
+                            //If the passwords match we report success
                             if (isMatch) {
                                 user.password = undefined;
                                 done(null, user);
                             } else {
+                                //If the passwords do not match, we call done with false
                                 logger.debug('Password does not match user password');
                                 done(null, false);
                             }

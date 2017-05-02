@@ -125,8 +125,8 @@ ALERTS
   .inner {
     background-color: #e9ebee;
     border: 1px solid $my_profile_color;
-    margin: 43% auto 0 auto;
-    position: relative;
+    margin: 23% 25% 0 25%;
+    position: fixed;
     width: 50%;
   }
 
@@ -225,6 +225,16 @@ header {
     .header-banner-col3{
       margin: 5px 5px 3px auto;
     }
+
+    .header-banner-col4{
+      margin: 5px 5px 3px 3px;
+    }
+
+    .cizma {
+      border: $test_border;
+      margin-right: 5px;
+      width: 200px;
+    }
   }
 
   //Font for Logo
@@ -319,8 +329,6 @@ header {
 
     }
   }
-
-
 
   .user-logout { // Display the user and the user menu
     border-bottom: 1px solid grey;
@@ -477,6 +485,102 @@ header {
 }
 
 #login-register-wide {
+  margin-right: 0;
+  position: relative;
+
+  a {
+    color: $my_profile_color;
+    &:hover {
+      top: 2px;
+      text-decoration: none;
+    }
+    &:focus {
+      outline: none;
+    }
+    :visited {
+      color: $my_profile_color;
+    }
+  }
+
+  a.login-register-buttons {
+
+    display: inline-block;
+    font-weight: bold;
+    position: relative;
+  }
+
+  div.user-menu {
+    #user-menu-header {
+      border-left: 3px solid #ededed;
+      cursor: pointer;
+      text-align: center;
+      width: 200px;
+
+      img {
+        padding: 6px 0 0 5px;
+        width: 25px;
+      }
+
+      span, i {
+        font-size: 0.8em;
+        position: relative;
+        padding-left: 4px;
+        top: 10px;
+        vertical-align: top;
+      }
+
+      span {
+        display: inline-block;
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: clip;
+        white-space: nowrap;
+      }
+
+      i {
+        display: inline-block;
+        float: right;
+        font-size: 12px;
+        margin-right: 5px;
+      }
+      &:hover {
+        //background-color: #ededed;
+      }
+
+    }
+    ul.user-menu-dropdown {
+      background-color: white;
+      border-left: 3px solid #e3e3e3;
+      display: none;
+      position: fixed;
+      margin: 0;
+      list-style: none;
+      padding: 10px 0 0 0;
+      width: 200px;
+      z-index: 100;
+
+      li {
+        border-bottom: 1px solid #e3e3e3;
+        padding: 10px;
+        a {
+          display: inline-block;
+
+          font-size: 0.8em;
+
+          width: 100%;
+        }
+        &:hover {
+          background-color: #ededed;
+        }
+      }
+
+    }
+  }
+
+
+
+  //Hide it when the display is not narrow
+  color: grey;
   @media screen and (max-width: $transition_resolution){
     display:none;
   }

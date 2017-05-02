@@ -93,10 +93,11 @@ let UserSchema = mongoose.Schema({
 // Here we export the DataBase interface to our other modules
 let User = module.exports = mongoose.model("User", UserSchema);
 
+//Method for saving a new user to the database
 module.exports.createUser = function(newUser, callback){
     logger.debug('Creating user ' + JSON.stringify(newUser, undefined, 2));
     if(newUser.password){
-        //If the user is saved with a password, we need to hash it
+        //If the user is saved with a password, we need to hash it, and save the user with the hash
         bcrypt.genSalt(10, function(err, salt){
             if (err){
                 logger.error('Error obtaining salt: ' + err);

@@ -4,8 +4,8 @@
         <img src="../img/poza_profil.png">
         <p>{{myProfile.user.firstName}}</p>
     </div>
-    <my-profile ng-show="myProfile.views.viewProfile"></my-profile>
-    <edit-profile ng-show="myProfile.views.editProfile"></edit-profile>
+    <my-profile ng-if="myProfile.views.viewProfile"></my-profile>
+    <edit-profile ng-if="myProfile.views.editProfile"></edit-profile>
 
 
 

@@ -41,7 +41,7 @@ angular.module("coderDojoTimisoara")
                 $('#navigation-narrow').hide();
                 $('#navigation-narrow-full-user').hide();
             }, 400);
-        }
+        };
 
         //Method for showing the user menu in narrow views (mobile)
         $scope.showUserMenuNarrow = function(){

@@ -13,10 +13,8 @@ angular.module("coderDojoTimisoara")
         $scope.initializeEditProfilesController = function(callback){
             $scope.getUserFromServer(function(err){
                 if (err){
-                    if(err.status === 401){
-                        $location.path('/' + keys.login);
-                    }
-                    console.log(err);
+                   helperSvc.handlerCommunicationErrors(err, 'coderDojoTimisoara - initializeEditProfilesController',
+                                                        $scope);
                 } else {
                     if($rootScope.user){
                         var user = helperSvc.cloneUser($rootScope.user);
@@ -32,7 +30,7 @@ angular.module("coderDojoTimisoara")
                         }
 
                         //getting users notifications
-                        getNotificationsForUser(true);
+                        getNotificationsForUser(true);//TODO move this to the main controller
 
                         //getting users dojos
                         getUsersDojosFromServer();
@@ -169,7 +167,7 @@ angular.module("coderDojoTimisoara")
             } else if ($scope.isCurrentView(keys.addChildOver14Profile)){
                 $scope.createUserOver14ByParent();
             } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
-                $scope.editUsersChild(keys.editChildUnder14Profile);
+                $scope.editUsersChild();
             }
         };
 
@@ -199,16 +197,13 @@ angular.module("coderDojoTimisoara")
         $scope.goBackAction = function(){
             //We reset errors that may remain
             $scope.resetErrors();
-
             if($scope.isCurrentView(keys.addChildUnder14Profile) || $scope.isCurrentView(keys.addChildOver14Profile) ||
                         $scope.isCurrentView(keys.editUserProfile)){
                 $scope.initializeEditProfilesController();
 
             } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
-                $scope.setView(keys.viewUsersChildProfile);
+                $scope.setView(keys.viewUsersChildProfile);//TODO need to ad refresh for this user as it could have been modified
             }
-
-
         };
 
         //Method that adds a user under 14 for the current parent user
@@ -286,6 +281,8 @@ angular.module("coderDojoTimisoara")
                 //TODO go to parent's child profile
                 parent.children = [];
                 parent.children.push($scope.myProfile.user);
+                //We clone the child to avoid json circular exceptions when converting for saving
+                parent = angular.copy(parent);
                 $scope.myProfile.user = parent;
                 $scope.setView(keys.viewOtherParentProfile, [keys.hideEditButton]);
             }
@@ -313,9 +310,6 @@ angular.module("coderDojoTimisoara")
                 //Getting dojos for child
                 getUsersChildsDojosFromServer(child._id);
 
-                //First we empty the dojos (that belong to the parent)
-                $scope.myProfile.user
-
             }
             //If the old profile is viewOtherParentProfile
             else if ($scope.myProfile.views[keys.viewOtherParentProfile]){
@@ -328,10 +322,14 @@ angular.module("coderDojoTimisoara")
                     //We clone the child to avoid json circular exceptions when converting for saving
                     child = angular.copy(child);
                     $scope.myProfile.user = child;
-                    $scope.setView(keys.viewUsersChildProfile);
+                    $scope.setView(keys.viewUsersChildProfile, [keys.showDojoInUserProfile]);
                     $scope.getUsersParentsFromServer(false);
+
                     //Getting the notifications for this child
                     getNotificationsForUsersChild(child);
+
+                    //Getting dojos for child
+                    getUsersChildsDojosFromServer(child._id);
                 }
             }
         };
@@ -389,13 +387,14 @@ angular.module("coderDojoTimisoara")
             if(errors){
                 $scope.myProfile.errors = errors;
             } else {
-                var editedChild = prepareEditedChild($scope.myProfile.user);
+                var editedChild = prepareEditedUser($scope.myProfile.user);
                 editedChild.userType = typeOfChild;
                 dataService.editUsersChild(editedChild)
                     .then(function(response){
                         if(response.data.errors){
                             if(response.data.errors === keys.wrongUserError){
                                 //Display an alert notifying the user that the operation did not succeed
+                                //TODO message displayed
                                 $scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
                             } else {
                                 $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
@@ -414,7 +413,7 @@ angular.module("coderDojoTimisoara")
         };
 
         //Method that selects what fields are send to the server when editing a child/user
-        var prepareEditedChild = function(user){
+        var prepareEditedUser = function(user){
             var retUser = {};
             retUser.firstName = user.firstName;
             retUser.lastName = user.lastName;
@@ -439,9 +438,11 @@ angular.module("coderDojoTimisoara")
                 $scope.myProfile.errors = errors;
             } else {
                 $scope.myProfile.user.userType = keys.editUserOver14Profile;
-                dataService.editUser($scope.myProfile.user)
+                var preparedUser = prepareEditedUser($scope.myProfile.user);
+                dataService.editUser(preparedUser)
                     .then(function(response){
                         if(response.data.errors){
+                            //TODO check if this is a valid action
                             if(response.data.errors === keys.wrongUserError){
                                 $scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
                             } else {
@@ -450,7 +451,6 @@ angular.module("coderDojoTimisoara")
                         } else if (response.data.success){
                             $scope.initializeEditProfilesController(function(){
                                 $scope.setAlert(keys.infoAlert, 'Utilizatorul a fost modificat cu success');
-
                             });
 
                         } else {
@@ -531,11 +531,7 @@ angular.module("coderDojoTimisoara")
         $scope.acceptChildInvite = function(notification){
             dataService.acceptChildInvite({notifId:notification._id})
                 .then(function(response){
-                    if(response.data.error){
-                       console.log(err);//TODO better handler this time of error
-                    } else if(response.data.success){
-                        getNotificationsForUser();
-                    }
+                    $scope.initializeEditProfilesController();
                 })
                 .catch(function(err){
                     helperSvc.handlerCommunicationErrors(err , 'acceptChildInvite - editProfilesCtrl', $scope);
@@ -549,11 +545,7 @@ angular.module("coderDojoTimisoara")
         var deleteNotificationForUser = function(notification){
             dataService.deleteNotificationForUser({notifId:notification._id})
                 .then(function(response){
-                    if(response.data.error){
-                        console.log(err);//TODO to check reasons for this error checking
-                    } else if(response.data.success){
-                        getNotificationsForUser();
-                    }
+                    getNotificationsForUser();
                 })
                 .catch(function(err){
                     helperSvc.handlerCommunicationErrors(err, 'deleteNotificationForUser - editProfilesCtrl', $scope);

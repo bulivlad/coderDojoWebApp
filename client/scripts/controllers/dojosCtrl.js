@@ -4,7 +4,7 @@
 
 angular.module("coderDojoTimisoara")
 
-    .controller('dojosCtrl', function($scope, $rootScope, $location, $compile, dataService, helperSvc, dojosService){
+    .controller('dojosCtrl', function($scope, $rootScope, $location, $compile, dataService, helperSvc){
         var markers = [];
         $scope.dojoViewer = {views:{}, dojos:[]};
 
@@ -48,7 +48,7 @@ angular.module("coderDojoTimisoara")
             mapObj = new google.maps.Map(document.getElementById(elementName), $scope.mapProp);
             google.maps.event.addListener(mapObj, 'click', function(){
                 closeInfoWindows();
-            })
+            });
 
             //Creating markers
             dojos.forEach(function(dojo){

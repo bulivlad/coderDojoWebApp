@@ -10,35 +10,35 @@
             <label for="dojo-name">Nume</label>
             <input type="text" id="dojo-name" ng-model="localDojo.name"
                    ng-click="errors.name = undefined"> <br>
-            <p ng-show="errors.name">{{errors.name}}</p>
+            <p ng-if="errors.name">{{errors.name}}</p>
         </div>
 
         <div class="label-and-value">
             <label for="dojo-address">Adresa</label>
             <input type="text" id="dojo-address" ng-model="localDojo.address"
                    ng-click="errors.address = undefined"> <br>
-            <p ng-show="errors.address">{{errors.address}}</p>
+            <p ng-if="errors.address">{{errors.address}}</p>
         </div>
 
         <div class="label-and-value">
             <label for="dojo-latitude">Latitudine</label>
             <input type="number" id="dojo-latitude" ng-model="localDojo.latitude"
                    ng-click="errors.latitude = undefined"> <br>
-            <p ng-show="errors.latitude">{{errors.latitude}}</p>
+            <p ng-if="errors.latitude">{{errors.latitude}}</p>
         </div>
 
         <div class="label-and-value">
             <label for="dojo-longitude">Longitudine</label>
             <input type="number" id="dojo-longitude" ng-model="localDojo.longitude"
                    ng-click="errors.longitude = undefined"> <br>
-            <p ng-show="errors.longitude">{{errors.longitude}}</p>
+            <p ng-if="errors.longitude">{{errors.longitude}}</p>
         </div>
 
         <div class="label-and-value">
             <label for="dojo-email">Email</label>
             <input type="email" id="dojo-email" ng-model="localDojo.email"
                    ng-click="errors.email = undefined"> <br>
-            <p ng-show="errors.email">{{errors.email}}</p>
+            <p ng-if="errors.email">{{errors.email}}</p>
         </div>
 
         <div class="label-and-value">
@@ -94,7 +94,7 @@
                             Adauga eveniment
                         </button>
                     </div>
-                    <hr style="clear:both" ng-if="!(localDojo.schedules.length - 1 == $index)">
+                    <hr ng-if="!(localDojo.schedules.length - 1 == $index)">
                 </div>
 
 
@@ -105,14 +105,12 @@
 
         <div class="label-and-value">
             <label for="dojo-facebook">Facebook</label>
-            <input type="text" id="dojo-facebook" ng-model="localDojo.facebook"
-                   ng-click="errors.facebook = undefined"> <br>
+            <input type="text" id="dojo-facebook" ng-model="localDojo.facebook"> <br>
         </div>
 
         <div class="label-and-value">
             <label for="dojo-twitter">Twitter</label>
-            <input type="text" id="dojo-twitter" ng-model="localDojo.twitter"
-                   ng-click="errors.twitter = undefined"> <br>
+            <input type="text" id="dojo-twitter" ng-model="localDojo.twitter"> <br>
         </div>
 
         <div class="label-and-value">

@@ -12,35 +12,40 @@ const validator = require('../validator/validator');
 module.exports.registerUser = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.register} for user (email=${req.body.user.email},
                    alias=${req.body.user.email})`);
+    //First we validate and sanitize the user fields received from the client
+    //TODO we need to sanitize the data received from the client
     let errors = validateFields(req, keys.regUserOver14Profile);
     if (errors){
+        //If there are errors, we sent them back to the client
         res.json({errors: errors})
     } else {
         let user = req.body.user;
         //No validation errors at this point
+        //Fist we check if the the email is already in use
         User.findOne({email: user.email}, function(err, result){
             if (err){
-                res.status(500).json({errors:keys.dbsUserCreationError})
+                return res.sendStatus(500);
             }
-            else if(result){
-                //If we already find an entry with this email
+            if(result){
+                //If we already find an entry with this email we send an error to the client that the email is already in use
                 errors = [];
                 errors.push(createServerError('email', 'Cont existent'));
                 res.json({errors:errors});
                 logger.info("An account with this email already exists: " + (req.body.user.email));
             } else {
-                //If there are no errors we, save the new user
+                //If there are no errors
+                //We remove password2, as this was only check for the user to make sure they typed the password correctly
                 user.password2 = undefined;
                 let newUser = new User(user);
-
+                //We save the user
                 User.createUser(newUser, function(err, user){
                     if(err){
                         logger.error('Error saving user in the database:' + err);
                         return res.sendStatus(500);
-                    } else {
-                        logger.debug('User created:', user.email);
-                        res.json({success:true});
                     }
+                    //If there was no error, the user was created
+                    logger.debug('User created:', user.email);
+                    res.json({success:true});
                 });
             }
         });
@@ -50,7 +55,7 @@ module.exports.registerUser = function(req, res){
 module.exports.registerUsersChild = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.registerChildRoute} for ${getUser(req)}`);
     let childUser = req.body.user;
-    logger.silly('user:' + JSON.stringify(childUser , undefined, 2));
+    logger.silly('user:' + JSON.stringify(childUser));
     let childUserType = childUser.userType;
     let errors = validateFields(req, childUserType);
     if (errors){
@@ -61,14 +66,14 @@ module.exports.registerUsersChild = function(req, res){
         User.findOne({alias: childUser.alias}, function(err, aliasFound){
             if (err){
                 logger.error('Error seaching database for alias (' + childUser.alias + ') : ' + err);
-                return res.status(500).json({errors:keys.dbsUserCreationError});
+                return res.sendStatus(500);
             }
             else if(aliasFound){
                 //If we already find an entry with this alias
                 errors = [];
                 errors.push(createServerError('alias', 'Alias existent'));
                 res.json({errors:errors});
-                logger.info("An account with this alias already exists: " + (childUser.alias));
+                logger.debug("An account with this alias already exists: " + (childUser.alias));
             } else {
                 //We must make sure the email is unique as well
                 if(childUser.email){
@@ -96,9 +101,10 @@ module.exports.registerUsersChild = function(req, res){
     }
 };
 
-//Method for loging in user
+//Method for login in user
 module.exports.loginUser = function(req, res){
     logger.debug(`Entering UsersRoute:${keys.login}`);
+    //IF the user passed login
     res.json({success:true});
 };
 
@@ -122,7 +128,7 @@ module.exports.getUsersChildren = function(req, res){
                 res.json({children:expandedChildren});
             });
     } else {
-        logger.error(`User (email=${req.user.email}/alias=${req.user.alias} has no children but issued requset for children`);
+        logger.error(`${getUser(req)} has no children but issued request for children`);
         res.json({errors: keys.noChildrenError});
     }
 };
@@ -140,6 +146,7 @@ module.exports.getUsersParents = function(req, res){
             res.json({parents:expandedParents});
         });
     } else {
+        logger.error(`${getUser(req)} has no parents but issued request for parents`);
         res.json({errors: keys.noParentsError});
     }
 };
@@ -189,7 +196,6 @@ module.exports.editUser = function(req, res){
             logger.silly('newUser', JSON.stringify(newUser , undefined, 2));
             User.findOneAndUpdate({'_id':req.user._id}, //The user to update (the currently authenticated user)
                 {$set: selectUserFieldsForSaving(newUser)}, // what to modify the current user to
-                {new: true}, //Return the new, modified user
                 function(err){
                     if (err){
                         logger.error(`Error modifying user (${req.user.email}) in the database: ` + err);
@@ -279,7 +285,7 @@ module.exports.getUsersChildsNotifications = function(req, res){
     }
 };
 
-//Method for inving a user to be parent
+//Method for inviting a user to be parent
 module.exports.inviteUserToBeParent = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.inviteUserToBeParentRoute} for user (email=${req.user.email},
                    alias=${req.user.alias})`);
@@ -386,7 +392,6 @@ module.exports.deleteNotificationForUsersChild = function(req, res){
 module.exports.acceptChildInvite = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.acceptChildInviteRoute} for ${getUser(req)}`);
     let notificationId = req.body.notifId;
-
     User.findById(req.user._id, {notifications: true}, function(err, user){
         if (err){
             logger.error(`Error finding ${getUser(req)}:` + err);
@@ -420,7 +425,6 @@ module.exports.acceptChildInvite = function(req, res){
                         msg: `${user.firstName} ${user.lastName} ți-a acceptat invitația de a îți fii părinte pe
                                 Coder Dojo Timișoara`
                     };
-
                     //If we have been successful so far, we add the parent to the child, and a notification for the child
                     // that the parent has added it
                     User.findOneAndUpdate({_id: childId},
@@ -447,7 +451,6 @@ function saveChildToDbsAndRegisterWithParent(req, res, child){
     child.parents = [parent._id];
     logger.silly(`saveChildToDbsAndRegisterWithParent(child=${JSON.stringify(child)})`);
     logger.silly(`saveChildToDbsAndRegisterWithParent(parent=${JSON.stringify(parent)})`);
-    child.parents.push();
     let newUser = new User(child);
 
     User.createUser(newUser, function(err, savedChild){
@@ -529,8 +532,7 @@ function validateFields(req, validationForWhat){
     }
 
     //Registering or editing a user by himself/herself
-    if(validationForWhat === keys.editUserOver14Profile ||
-        validationForWhat === keys.regUserOver14Profile){
+    if(validationForWhat === keys.regUserOver14Profile){
         logger.silly('validateFields(Reg/Edit user over 14 by himself/herself)');
         req.checkBody("user.email", "Email-ul este necesar").notEmpty();
         if(email){

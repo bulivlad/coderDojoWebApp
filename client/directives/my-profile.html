@@ -16,7 +16,7 @@
         </div>
         <div class="col2-my-profile">
             <div class=".block-div" id="col2-my-profile-block-div">
-                <div ng-show="myProfile.user.children.length > 0">
+                <div ng-if="myProfile.user.children.length > 0">
                     <h3>Copii</h3>
                     <hr>
                     <div class="my-profile-children">
@@ -37,7 +37,7 @@
                         </div>
                     </div>
                 </div>
-                <div ng-show="myProfile.user.parents.length > 0">
+                <div ng-if="myProfile.user.parents.length > 0">
                     <h3>Părinți</h3>
                     <hr>
                     <div class="my-profile-children">

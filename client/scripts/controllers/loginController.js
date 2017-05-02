@@ -9,29 +9,34 @@ angular.module("coderDojoTimisoara")
         $scope.login.password = undefined;
 
         $scope.loginUser = function(){
-            $rootScope.needLogin = undefined;
+            //We reset the justRegistered flag
             $rootScope.justRegistered = undefined;
+            //We validate the fields
             var errors = validateLoginFields($scope.login);
             if (errors){
+                //IF there are errors we set them in the scope for the html
                 $scope.login.errors = errors;
             } else {
                 var user = {
                     email:$scope.login.email,
                     password: $scope.login.password
                 };
-
+                //If there are no errors we send the user to the server for logging in
                 dataService.loginUser(user)
                     .then(function(response){
                         if(response.data.errors){
+                            //if there are errors we set them to the scope
                             $scope.login.errors = response.data.errors;
                         }else if (response.data.success){
-                            resetValues($scope.login);
+                            // If we receive a success message from the server we go the the default page and get the
+                            // user from the server.
                             $location.path('/' + keys.despre);
-                            $scope.getUserFromServer();//We get the use from the server
+                            //We get the user from the server
+                            $scope.getUserFromServer();
                         }
                     })
                     .catch(function(err){
-                        if(err.status === 401){
+                        if(err.status === 401 || err.status === 400){
                             $scope.login.errors = {email:'Email-ul sau parola nu sunt corecte'};
                         } else if (err.status === -1){
                             $scope.login.errors = {email:'Verificati conexiunea la internet'};
@@ -44,15 +49,15 @@ angular.module("coderDojoTimisoara")
 
         };
 
-        var validateLoginFields = function(login){
+        var validateLoginFields = function(user){
             var errors = {};
             var hasErrors = false;
 
-            if (!login.email || login.email === ''){
+            if (!user.email || user.email === ''){
                 errors.email = 'Email-ul este necesar';
                 hasErrors = true;
             }
-            if (!login.password || login.password === ''){
+            if (!user.password || user.password === ''){
                 errors.password = 'Parola este necesara';
                 hasErrors = true;
             }

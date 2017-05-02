@@ -115,8 +115,6 @@ module.exports.getMyChildsDojos = function(req, res){
         logger.error(`${getUser(req)} is not parent of child(id=${childId}`);
         res.json({errors:keys.wrongUserError});
     }
-
-
 };
 
 //Method that returns a dojo for an user that is not authenticated

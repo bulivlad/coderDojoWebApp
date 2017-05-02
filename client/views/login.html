@@ -1,15 +1,14 @@
 <div id="login" ng-controller="loginController">
     <form name="login">
-        <div>
+        <div class="login">
             <p class="just_registered" ng-show="justRegistered">Cont creat</p>
-            <p class="just_registered" ng-show="needLogin">Trebuie sa fi inregistrat pentru a accesa {{needLogin}}</p>
             <div class="input_and_error">
-                <input type="text" placeholder="adresa de email" name="emailForm" ng-model="login.email" ng-click="login.errors.email = undefined"><br>
-                <p class="error" ng-show="login.errors && login.errors.email">{{login.errors.email}}</p>
+                <input type="text" placeholder="adresa de email" name="emailForm" ng-model="login.email" ng-focus="login.errors.email = undefined"><br>
+                <p class="error" ng-if="login.errors && login.errors.email">{{login.errors.email}}</p>
             </div>
             <div class="input_and_error">
-                <input type="password" placeholder="parola"  name='passwordForm' ng-model="login.password" ng-click="login.errors.password = undefined"><br>
-                <p class="error" ng-show="login.errors && login.errors.password">{{login.errors.password}}</p>
+                <input type="password" placeholder="parola"  name='passwordForm' ng-model="login.password" ng-focus="login.errors.password = undefined"><br>
+                <p class="error" ng-if="login.errors && login.errors.password">{{login.errors.password}}</p>
             </div>
             <div class="input_and_error">
                 <input type="button" ng-click="loginUser()" value="Autentificare"><br>

@@ -26,14 +26,10 @@ angular.module("coderDojoTimisoara")
                     if (err.status === 401){
                         //If not authorized, we must delete the current user
                         $rootScope.user = undefined;
-                        console.log('You are not authenticated')
-                    } else {
-                        console.log('Problems communicating')
                     }
                     if(callback){
                         callback(err);
                     }
-
                 });
         };
 
@@ -99,8 +95,34 @@ angular.module("coderDojoTimisoara")
         //Method for getting the current dojo to be viewed
         $scope.getToBeViewedDojoId = function(){
             return $scope.toBeViewedDojoId;
-        }
+        };
 
+        $scope.showUserMenuDropDown = function(event){
+            event.stopPropagation();
+            $('.user-menu-dropdown').show();
+            $('#user-menu-header').css('background-color', 'white').css('border-left', '3px solid #e3e3e3');
+        };
+
+        $scope.initiateMainController = function(){
+            hideMenusWhenPageClicked();
+        };
+
+        //Method for hiding menus that should be hidden when the page is clicked (the event propagation is stopped to cancel
+        //hiding the menu inadvertently
+        var hideMenusWhenPageClicked = function(){
+            $(document).click(function(){
+                hideUserMenu();
+            });
+        };
+
+        var hideUserMenu = function(){
+            if (!($(".user-menu-dropdown").css('display') === 'none')){
+                $(".user-menu-dropdown").hide().css('background-color:white');
+                $('#user-menu-header').css('background-color', '#ededed').css('border-left', '3px solid #ededed');
+            }
+        };
+
+        $scope.initiateMainController();
     });
 
 

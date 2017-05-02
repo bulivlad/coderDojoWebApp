@@ -8,7 +8,6 @@ angular.module("coderDojoTimisoara")
             dataService.getDespre(function(err, response){
                 if (err){
                     if (err.status === 401){
-                        $rootScope.needLogin = '„Cum pot ajuta”'
                         $location.path('/' + keys.login);
                     } else {
                         console.log('err: ', err)

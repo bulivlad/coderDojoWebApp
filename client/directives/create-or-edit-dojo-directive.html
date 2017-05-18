@@ -7,42 +7,42 @@
         <h3>Info dojo</h3>
 
         <div class="label-and-value">
-            <label for="dojo-name">Nume</label>
-            <input type="text" id="dojo-name" ng-model="localDojo.name"
-                   ng-click="errors.name = undefined"> <br>
+            <label class="left-label" for="dojo-name">Nume</label>
+            <input class="dojo-simple-fields-input" type="text" id="dojo-name" ng-model="localDojo.name"
+                   ng-focus="errors.name = undefined"> <br>
             <p ng-if="errors.name">{{errors.name}}</p>
         </div>
 
         <div class="label-and-value">
-            <label for="dojo-address">Adresa</label>
-            <input type="text" id="dojo-address" ng-model="localDojo.address"
-                   ng-click="errors.address = undefined"> <br>
+            <label class="left-label" for="dojo-address">Adresa</label>
+            <input class="dojo-simple-fields-input" type="text" id="dojo-address" ng-model="localDojo.address"
+                   ng-focus="errors.address = undefined"> <br>
             <p ng-if="errors.address">{{errors.address}}</p>
         </div>
 
         <div class="label-and-value">
-            <label for="dojo-latitude">Latitudine</label>
-            <input type="number" id="dojo-latitude" ng-model="localDojo.latitude"
-                   ng-click="errors.latitude = undefined"> <br>
+            <label class="left-label" for="dojo-latitude">Latitudine</label>
+            <input class="dojo-simple-fields-input" type="number" id="dojo-latitude" ng-model="localDojo.latitude"
+                   ng-focus="errors.latitude = undefined"> <br>
             <p ng-if="errors.latitude">{{errors.latitude}}</p>
         </div>
 
         <div class="label-and-value">
-            <label for="dojo-longitude">Longitudine</label>
-            <input type="number" id="dojo-longitude" ng-model="localDojo.longitude"
-                   ng-click="errors.longitude = undefined"> <br>
+            <label class="left-label" for="dojo-longitude">Longitudine</label>
+            <input class="dojo-simple-fields-input" type="number" id="dojo-longitude" ng-model="localDojo.longitude"
+                   ng-focus="errors.longitude = undefined"> <br>
             <p ng-if="errors.longitude">{{errors.longitude}}</p>
         </div>
 
         <div class="label-and-value">
-            <label for="dojo-email">Email</label>
-            <input type="email" id="dojo-email" ng-model="localDojo.email"
-                   ng-click="errors.email = undefined"> <br>
+            <label class="left-label" for="dojo-email">Email</label>
+            <input class="dojo-simple-fields-input" type="email" id="dojo-email" ng-model="localDojo.email"
+                   ng-focus="errors.email = undefined"> <br>
             <p ng-if="errors.email">{{errors.email}}</p>
         </div>
 
         <div class="label-and-value">
-            <label>Status</label>
+            <label class="left-label">Status</label>
             <div id="status-body">
                 <div ng-repeat="status in localDojo.statuses">
                     <h5>Status {{$index + 1}}</h5>
@@ -58,63 +58,20 @@
             </div>
         </div>
 
-        <div class="label-and-value weekly-schedule">
-            <label>Orar</label>
-            <div class="weekly-schedule-body">
-                <div ng-repeat="schedule in localDojo.schedules">
-                    <h5>Eveniment {{$index + 1}}</h5>
-                    <label  class="schedule-label">
-                        Start <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                    </label>
-                    <input type="number" min="0" max="24" placeholder="ora" class="hour-schedule" ng-model="schedule.startHour">:
-                    <input type="number" min="0" max="60" placeholder="min" class="min-schedule" ng-model="schedule.startMinute">
-
-                    <label  class="schedule-label" >Sfarsit <i class="fa fa-arrow-right" aria-hidden="true"></i></label>
-                    <input type="number" min="0" max="24" placeholder="ora" class="hour-schedule" ng-model="schedule.endHour">:
-                    <input type="number" min="0" max="60" placeholder="min" class="min-schedule" ng-model="schedule.endMinute">
-
-                    <div>
-                        <label  class="schedule-label">
-                            Ziua <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                        </label>
-                        <input type="text" placeholder="ziua" class="day-schedule" ng-model="schedule.day">
-
-                        <br>
-                        <label  class="schedule-label">
-                            Atelier <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                        </label>
-
-                        <input type="text" placeholder="Atelierele (eg Scratch, Java, Python (separate cu virgulă)"
-                               class="workshops-schedule" ng-model="schedule.workshops">
-                    </div>
-
-                    <div class="buttons-div">
-                        <button ng-click="deleteEvent($index)">Sterge eveniment</button>
-                        <button ng-if="localDojo.schedules.length - 1 == $index" ng-click="localDojo.schedules.push({})">
-                            Adauga eveniment
-                        </button>
-                    </div>
-                    <hr ng-if="!(localDojo.schedules.length - 1 == $index)">
-                </div>
 
 
-            </div>
-            <br>
-            <p ng-show="errors.schedules">{{errors.schedules}}</p>
+        <div class="label-and-value">
+            <label class="left-label" for="dojo-facebook">Facebook</label>
+            <input class="dojo-simple-fields-input" type="text" id="dojo-facebook" ng-model="localDojo.facebook"> <br>
         </div>
 
         <div class="label-and-value">
-            <label for="dojo-facebook">Facebook</label>
-            <input type="text" id="dojo-facebook" ng-model="localDojo.facebook"> <br>
+            <label class="left-label" for="dojo-twitter">Twitter</label>
+            <input class="dojo-simple-fields-input" type="text" id="dojo-twitter" ng-model="localDojo.twitter"> <br>
         </div>
 
         <div class="label-and-value">
-            <label for="dojo-twitter">Twitter</label>
-            <input type="text" id="dojo-twitter" ng-model="localDojo.twitter"> <br>
-        </div>
-
-        <div class="label-and-value">
-            <label>Cerinte</label>
+            <label class="left-label">Cerinte</label>
             <div id="requirements-body">
                 <div ng-repeat="requirement in localDojo.requirements">
                     <h5>Cerință {{$index + 1}}</h5>
@@ -129,6 +86,27 @@
 
             </div>
         </div>
+        <div class="clear-fix"></div>
+        <div class="label-and-value weekly-event">
+            <label class="weekly-event-label">Evenimente săptămânale</label>
+            <div class="weekly-event-body">
+                <div ng-repeat="event in localDojo.recurrentEvents">
+                    <h5>Eveniment {{$index + 1}}</h5>
+                    <event-directive></event-directive>
+                    <div class="buttons-div">
+                        <button class="add-bttn" ng-if="isLastItemInArray(localDojo.recurrentEvents, $index)" ng-click="addEmptyEvent(localDojo.recurrentEvents)">
+                            Adauga eveniment
+                        </button>
+                        <button class="rem-bttn" ng-click="deleteEvent($index)">Sterge eveniment</button>
+                    </div>
+                    <hr class="event-delimiter" ng-if="!isLastItemInArray(localDojo.recurrentEvents, $index)">
+                </div>
+
+
+            </div>
+            <br>
+            <p ng-show="errors.events">{{errors.events}}</p>
+        </div> <!--weekly-event-->
         <button class="save-profile" ng-click="addOrEditDojo()">Salveaza</button>
         <div class="clear-fix"></div>
     </div>

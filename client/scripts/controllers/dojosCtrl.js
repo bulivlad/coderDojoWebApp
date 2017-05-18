@@ -108,6 +108,8 @@ angular.module("coderDojoTimisoara")
 
         //This sets a dojo in the viewDojo panel
         $scope.selectDojoAction = function(dojo){
+            //For the use of the back button
+            $scope.setDojoSelector(keys.cautaUnDojo);
             $scope.setToBeViewedDojoId(dojo._id);
             $location.path('/' + keys.getDojoRoute);
         };
@@ -126,6 +128,8 @@ angular.module("coderDojoTimisoara")
             for(var i = 0; i < $scope.dojoViewer.dojos.length; i++){
                 var dojo = $scope.dojoViewer.dojos[i];
                 if(dojo.name === dojoName){
+                    //For the use of the back button
+                    $scope.setDojoSelector(keys.cautaUnDojo);
                     $scope.selectDojoAction(dojo);
                     return;
                 }
@@ -204,6 +208,7 @@ angular.module("coderDojoTimisoara")
         //This sets a dojo in the viewDojo panel
         $scope.selectDojoAction = function(dojo){
             $scope.setToBeViewedDojoId(dojo._id);
+            $scope.setDojoSelector(keys.getMyDojosRoute);
             $location.path('/' + keys.getDojoRoute);
         };
     });

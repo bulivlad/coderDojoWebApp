@@ -25,8 +25,8 @@ angular.module('coderDojoTimisoara')
             var hour = date.getHours();
             var minutes = date.getMinutes();
             var ret = (day < 10 ? '0' + day: '' + day) + '.' +
-                      (month < 10 ? '0' + month: '' + month) + '.' +
-                      year + ' ';
+                (month < 10 ? '0' + month: '' + month) + '.' +
+                year + ' ';
             if(hourAndMinutes){
                 ret +=  hour + ':' +
                     (minutes < 10 ? '0' + minutes : '' + minutes);
@@ -90,7 +90,7 @@ angular.module('coderDojoTimisoara')
 
             //Registering or editing a user by himself/herself
             if(validationForWhat === keys.editUserOver14Profile ||
-               validationForWhat === keys.regUserOver14Profile){
+                validationForWhat === keys.regUserOver14Profile){
                 if (!user.email || user.email === ''){
                     errors.email = 'Email-ul este necesar';
                     hasErrors = true;
@@ -120,7 +120,7 @@ angular.module('coderDojoTimisoara')
 
             //Register or Edit child younger than 14 by parent
             if(validationForWhat === keys.editChildUnder14Profile ||
-               validationForWhat === keys.regChildUnder14Profile){
+                validationForWhat === keys.regChildUnder14Profile){
                 if (user.birthDate && !this.isAgeLessThen14(user.birthDate)){
                     errors.birthDate = 'Ne pare rau, copilul nu are vârsta potrivită';
                     hasErrors = true;
@@ -152,7 +152,7 @@ angular.module('coderDojoTimisoara')
 
                 //If a password was filled, we check it is valid
                 if(user.password || user.password2){
-                   hasErrors =  this.checkPasswords(user, errors);
+                    hasErrors =  this.checkPasswords(user, errors);
                 }
             }
 
@@ -266,7 +266,7 @@ angular.module('coderDojoTimisoara')
         };
 
         this.isAgeGreaterThen14 = function(birthDateRaw){
-           return this.compareAge(birthDateRaw, 14, 'older');
+            return this.compareAge(birthDateRaw, 14, 'older');
         };
 
         this.isAgeGreaterThen18 = function(birthDateRaw){
@@ -279,16 +279,16 @@ angular.module('coderDojoTimisoara')
 
         this.isAgeBetween14and18 = function(birthDateRaw){
             return this.compareAge(birthDateRaw, 14, 'older') && //Older than 14
-                   this.compareAge(birthDateRaw, 18, 'younger'); //Younger than 18
+                this.compareAge(birthDateRaw, 18, 'younger'); //Younger than 18
         };
 
 
         this.isPasswordValid = function(password){
             var ret = false;
             if ((password.length >= 8) && //Pasword contains at least 8 characters
-                 password.match(/[a-z]+/g) && //Password contains at least one small letter
-                 password.match(/[A-Z]+/g) && //Password contains at least one capital letter
-                 password.match(/[0-9]+/g)){ //Password contains at least one number
+                password.match(/[a-z]+/g) && //Password contains at least one small letter
+                password.match(/[A-Z]+/g) && //Password contains at least one capital letter
+                password.match(/[0-9]+/g)){ //Password contains at least one number
 
                 ret = true;
             }
@@ -368,6 +368,106 @@ angular.module('coderDojoTimisoara')
                 }
             }
         };
+
+        //Method for validating events
+        this.validateEventFields = function(events){
+            var hasErrors = false;
+            for(var i = 0; i < events.length; i++){
+                var curEvent = events[i];
+                //Only check if the event is not empty
+                if(!this.eventIsEmpty(curEvent)){
+                    curEvent.error = {};
+                    if(!curEvent.name || curEvent.name === ""){
+                        hasErrors = true;
+                        curEvent.error.name = 'Evenimentul trebuie sa aibă nume';
+                    }
+
+                    if((this.numberValueIsNullOrUndefined(curEvent.startHour) || this.numberValueIsNullOrUndefined(curEvent.startMinute))){
+                        hasErrors = true;
+                        curEvent.error.startTime = 'Evenimentul trebuie sa aibă oră si minut de start';
+                    }
+
+                    if((this.numberValueIsNullOrUndefined(curEvent.endHour) || this.numberValueIsNullOrUndefined(curEvent.endMinute))){
+                        hasErrors = true;
+                        curEvent.error.endTime = 'Evenimentul trebuie sa aibă oră si minut de sfârșit';
+                    }
+
+                    if((curEvent.startHour || curEvent.startHour === 0) && (curEvent.startMinute || curEvent.startMinute === 0) &&
+                        (curEvent.endHour || curEvent.endHour === 0)  && (curEvent.endMinute || curEvent.endMinute === 0)){
+                        if (curEvent.startHour > curEvent.endHour){
+                            hasErrors = true;
+                            curEvent.error.startTime = 'Ora de start trebuie sa fie înainte de ora de sfârșit';
+                        }
+                    }
+
+                    if(!curEvent.description || curEvent.description === ""){
+                        hasErrors = true;
+                        curEvent.error.description = 'Evenimentul trebuie sa aibă descriere';
+                    }
+
+                    for(var j = 0; j < curEvent.sessions.length; j++){
+                        var curSession = curEvent.sessions[j];
+                        curSession.error = {};
+                        if(!curSession.workshop || curSession.workshop === ""){
+                            hasErrors = true;
+                            curSession.error.workshop = 'Sesiunea trebuie sa aibă atelier';
+                        }
+
+                        for(var k = 0; k < curSession.tickets.length; k++){
+                            var curTicket = curSession.tickets[k];
+                            if(!curTicket.nameOfTicket || curTicket.nameOfTicket === ""){
+                                hasErrors = true;
+                                curSession.error.ticketsError = 'Unul dintre tickete nu are nume';
+                                break;
+                            }
+
+                            if(!curTicket.numOfTickets){
+                                hasErrors = true;
+                                curSession.error.ticketsError = 'Unul dintre tickete nu are număr';
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return hasErrors;
+        };
+
+        this.eventIsEmpty = function(curEvent){
+            //If any field has a value in it, then the event is not empty
+            if(!(!curEvent.name || curEvent.name === "")){
+                return false;
+            } else if(!(this.numberValueIsNullOrUndefined(curEvent.startHour) && this.numberValueIsNullOrUndefined(curEvent.startMinute))){
+                return false;
+            } else if(!(this.numberValueIsNullOrUndefined(curEvent.endHour) && this.numberValueIsNullOrUndefined(curEvent.endMinute))){
+                return false;
+            } else if (!(!curEvent.description || curEvent.description === "")){
+                return false;
+            } else {
+                curEvent.sessions.forEach(function(curSession){
+                    if (!(!curSession.workshop || curSession.workshop === "")){
+                        return false;
+                    }
+                    curSession.tickets.forEach(function(curTicket){
+                        if(!(!curTicket.nameOfTicket || curTicket.nameOfTicket === "")){
+                            return false;
+                        } else if (!(!curTicket.numOfTickets)){
+                            return false;
+                        }
+                    });
+                })
+            }
+            return true;
+        }
+
+        this.numberValueIsNullOrUndefined  = function(number){
+            if(number === undefined || number === null){
+                return true;
+            } else {
+                return false;
+            }
+        }
     })
     .service('dojosService', function(){
     });

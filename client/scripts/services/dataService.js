@@ -223,6 +223,14 @@ angular.module('coderDojoTimisoara')
             });
         };
 
+        this.deleteDojo = function(data){
+            return $http({
+                method: 'POST',
+                url: '/dojos/' + keys.deleteDojoRoute,
+                data: data
+            });
+        };
+
         this.editDojo = function(dojo){
             return $http({
                 method: 'POST',
@@ -278,5 +286,14 @@ angular.module('coderDojoTimisoara')
                 data: data
             });
         };
+
+        this.uploadUserPhoto = function(data){
+            return $http({
+                url: '/user/' + keys.uploadUserPictureRoute,
+                method: "POST",
+                data: data,
+                headers: {'Content-Type': undefined}
+            });
+        }
 
     });

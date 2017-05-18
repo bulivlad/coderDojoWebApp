@@ -9,8 +9,7 @@ angular.module("coderDojoTimisoara")
             dataService.getUsersForMember({typeOfUsers: typeOfUsers, dojoId: $scope.dojo._id})
                 .then(function(response){
                     if(response.data.errors === keys.notAuthorizedError){
-                        $location.path('/' + keys.despre);
-                        $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
+                        $scope.showNotAuthorizedError();
                     } else {
                         $scope.users = addNumbersToUser(response.data.users);
                     }
@@ -46,7 +45,7 @@ angular.module("coderDojoTimisoara")
                 $scope.showAcceptReject = true;
                 typeOfUser = 'pendingVolunteers';
             }else if($scope.typeOfUser === 'Campioni'){
-                typeOfUser = 'champion';
+                typeOfUser = 'champions';
             }else if($scope.typeOfUser === 'Campioni in asteptare'){
                 $scope.showAcceptReject = true;
                 typeOfUser = 'pendingChampions';
@@ -58,8 +57,7 @@ angular.module("coderDojoTimisoara")
             dataService.getDetailedUserForMember({userId: user._id, dojoId: $scope.dojo._id})
                 .then(function(response){
                     if(response.data.errors === keys.notAuthorizedError){
-                        $location.path('/' + keys.despre);
-                        $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
+                        $scope.showNotAuthorizedError();
                     } else if (response.data.errors === keys.userNoLongerPartOfDojo){
                         //If the user is no longer part of the dojo, we get a warning and refresh the users list
                         $scope.selectUserAction();
@@ -96,8 +94,7 @@ angular.module("coderDojoTimisoara")
             dataService.acceptPendingMemberForDojo({userId: user._id, dojoId: $scope.dojo._id})
                 .then(function(response){
                     if(response.data.errors === keys.notAuthorizedError){
-                        $location.path('/' + keys.despre);
-                        $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
+                        $scope.showNotAuthorizedError();
                     } else if (response.data.success){
                         $scope.selectUserAction();
                     }
@@ -114,8 +111,7 @@ angular.module("coderDojoTimisoara")
                 dataService.rejectPendingMemberForDojo({userId: user._id, dojoId: $scope.dojo._id})
                     .then(function(response){
                         if(response.data.errors === keys.notAuthorizedError){
-                            $location.path('/' + keys.despre);
-                            $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
+                            $scope.showNotAuthorizedError();
                         } else if (response.data.success){
                             $scope.selectUserAction();
                         }

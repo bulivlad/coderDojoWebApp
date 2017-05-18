@@ -20,6 +20,10 @@ GENERAL
   clear: both;
 }
 
+.always-hide {
+  display: none;
+}
+
 body {
   background-color: #ededed;
   color: black;
@@ -56,6 +60,24 @@ button, a.a-button {
     color: white;
   }
 
+}
+
+button.add-bttn {
+  border: 1px solid #55aa25;
+  //font-weight: bold;
+  margin-bottom: 2px;
+  padding: 5px 5px;
+  &:hover {
+    background-color: #158018;
+  }
+}
+
+button.rem-bttn {
+  border: 1px solid #ff9383;
+  //font-weight: bold;
+  &:hover {
+    background-color: red;
+  }
 }
 
 .back-button {
@@ -230,10 +252,36 @@ header {
       margin: 5px 5px 3px 3px;
     }
 
-    .cizma {
-      border: $test_border;
+    .search-for-dojos-wide {
       margin-right: 5px;
+      vertical-align: middle;
       width: 200px;
+
+      a {
+        background-color: #f4f4f4;
+        border-radius: 15px;
+        border: 1px solid lightgray;
+        color: grey;
+        margin:auto;
+        padding: 6px;
+        display: block;
+        font-size: 0.9em;
+
+        i {
+          color: $my_profile_color;
+        }
+
+        &:hover {
+          color: $my_profile_color;
+          //border-color: $my_profile_color;
+          text-decoration: none;
+          vertical-align: middle;
+        }
+      }
+
+      @media screen and (max-width: $transition_resolution){
+        display: none;
+      }
     }
   }
 
@@ -561,12 +609,11 @@ header {
 
       li {
         border-bottom: 1px solid #e3e3e3;
-        padding: 10px;
+
         a {
           display: inline-block;
-
           font-size: 0.8em;
-
+          padding: 10px;
           width: 100%;
         }
         &:hover {
@@ -783,11 +830,43 @@ My PROFILE
     height: $profile_banner_height;
   }
 
-  img {
+  //style="background-image:url('../img/poza_profil.png')"
+  img { //Regular uneditable image
+    border-radius: 50px;
     height:80px;
     left: 50px;
     position: absolute;
     top: 15px;
+  }
+
+  div.user-profile-img {
+    background-image: url("../img/poza_profil.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 50px;
+    display: inline;
+    height:80px;
+    width: 80px;
+    left: 50px;
+    position: absolute;
+    top: 15px;
+  }
+
+  img.edit-user-image { //editable image in edit profiles menu
+    cursor: pointer;
+  }
+
+  label.edit-user-image {
+    cursor: pointer;
+    position: absolute;
+    left:79px;
+    top: 65px;
+
+    i {
+      color: #bf40f0;
+      font-size: 1.3em;
+    }
   }
 
   p {
@@ -823,7 +902,7 @@ My PROFILE
       position: relative;
       height: 40px;
 
-      label {
+      label.left-label {
         display: inline-block;
         font-size: .8em;
         margin-right: 2%;
@@ -831,7 +910,7 @@ My PROFILE
         width: 28%;
       }
 
-      input, textarea {
+      input.dojo-simple-fields-input, textarea {
         border: 1px solid gray;
         border-radius: 3px;
         float: right;
@@ -935,24 +1014,38 @@ My PROFILE
 
   .my-profile-children { //The children of the current user
     .my-profile-child {
+      border-top: 1px solid white;
       cursor: pointer;
       display: inline-block;
       vertical-align: top;
-      img {
+
+      div.child-profile-img, div.parent-profile-img {
+        //background-image: url("../img/poza_profil.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
         border: 3px solid white;
-        border-radius: 100%;
-
+        border-radius: 80px;
+        display: inline-block;
+        height: 70px;
+        padding: 5px;
         width: 70px;
-
-        &:hover {
-          border: 3px solid $my_profile_color;
-        }
       }
 
       p { //child name
         text-align: center;
         font-size: 0.7em;
-        &:hover {
+        //&:hover {
+        //  text-decoration: underline;
+        //}
+      }
+
+      &:hover {//The div containing the child image and child name
+        div.child-profile-img, div.parent-profile-img {
+          border: 3px solid $my_dojo_color;
+
+        }
+        p { //child name
           text-decoration: underline;
         }
       }
@@ -1357,7 +1450,7 @@ div.dojos-view-container {
               }
 
               button {
-                  border: 3px solid yellow;
+                border: 3px solid yellow;
                 &:hover {
                   background-color: yellow;
                   color: $my_profile_color;
@@ -1603,7 +1696,13 @@ Add or create dojos
     color: $my_profile_color;
   }
 
-  .weekly-schedule-body, #requirements-body, #status-body {
+  div.buttons-div {
+    display: block;
+    margin: 8px auto 6px auto;
+    text-align: center;
+  }
+
+  #requirements-body, #status-body {
     border: 1px solid gray;
     border-radius: 3px;
     background-color: #f2f2f2;
@@ -1620,48 +1719,13 @@ Add or create dojos
       text-align: center;
     }
 
-    label.schedule-label {
+    label.event-label {
       display: inline-block;
       text-align: left;
       max-width: 20%;
       width: 20%;
       width: auto;
 
-    }
-
-    input.hour-schedule, input.min-schedule, input.day-schedule, input.workshops-schedule {
-      border: 1px solid $my_dojo_color;
-      color: $my_dojo_color;
-
-      i {
-       font-weight: 400;
-      }
-    }
-
-    input.hour-schedule, input.min-schedule, input.day-schedule {
-
-      float: none;
-      display: inline-block;
-      margin-right: 2px;
-      min-width: 10px;
-      width: 10%;
-    }
-
-    input.day-schedule {
-      width: 20%;
-    }
-    input.workshops-schedule {
-      float: none;
-      display: inline-block;
-      margin: 0 auto;
-      width: 77%;
-      max-width: none;
-    }
-
-    div.buttons-div {
-      display: block;
-      margin: 8px auto 2px auto;
-      text-align: center;
     }
 
     textarea.requirement {
@@ -1675,9 +1739,304 @@ Add or create dojos
       max-width: none;
       width: 98%;
     }
+
+    div.buttons-div {
+      display: block;
+      margin: 8px auto 6px auto;
+      text-align: center;
+    }
+  } //#requirements-body, #status-body
+
+  .personal-data div.weekly-event {
+    height: auto;
+    width: 100%;
   }
 
+  .label-and-value label.weekly-event-label { //Label weekly event mobile view
+    display: block;
+    margin: 10px 0;
+    width: auto;
+    text-align: center;
+  }
+
+  div.weekly-event-body { //Event body weekly event mobile view
+    float: none;
+    max-width: none;
+    width: 100%;
+  }
+
+  @media screen and (min-width: $transition_resolution) {
+    .label-and-value label.weekly-event-label {
+      display: inline-block;
+      text-align: right;
+      margin-right: 2%;
+      width: 28%;
+    }
+
+    div.weekly-event-body {
+      float: right;
+      padding: 1%;
+      max-width: 66%;
+      margin-bottom: 10px;
+      width: 65%;
+      min-width: 30%;
+    }
+
+    .personal-data div.weekly-event {
+      height: 40px;
+      width: auto;
+    }
+  }
+
+
 }
+
+
+/*****************
+Event directive
+******************/
+
+.weekly-event-body {
+  border: 1px solid gray;
+  border-radius: 3px;
+  background-color: #f2f2f2;
+  float: right;
+  padding: 1%;
+  max-width: 66%;
+  margin-bottom: 10px;
+  width: 65%;
+  min-width: 30%;
+
+  h5 {
+    color: $my_profile_color;
+    margin: 0 auto 0.4em auto;
+    text-align: center;
+  }
+}
+
+div.create-or-edit-event {
+
+
+
+  label.event-label {
+    display: inline-block;
+    font-size: 0.8em;
+    text-align: left;
+    margin-bottom: 10px;
+    margin-left:5px;
+    max-width: 40%;
+    width: 40%;
+
+  }
+
+  hr.event-delimiter {
+    border-top: 2px solid $my_profile_color;
+  }
+
+  input.event-input {
+    border: 1px solid $my_dojo_color;
+    border-radius: 3px;
+    font-size: 0.8em;
+    padding: 2px;
+  }
+
+  div.event-name {
+    padding: 10px 0;
+
+    input.event-name-input {
+
+      float: none;
+      width: 50%;
+    }
+  }
+
+  select.event-select {
+    border: 1px solid $my_dojo_color;
+    border-radius: 3px;
+    font-size: 0.85em;
+    padding: 3px;
+    margin-bottom: 5px;
+  }
+
+  p.event-error {
+    display: block !important;
+    font-size: .6em !important;
+    left: auto !important;
+    position: relative !important;
+    margin: 5px 0 !important;
+    top: auto !important;
+    text-align: center !important;
+  }
+
+
+  input.hour-event, input.min-event, input.day-event, input.workshop-event {
+    border: 1px solid $my_dojo_color;
+    color: $my_dojo_color;
+
+    i {
+      font-weight: 400;
+    }
+  }
+
+  input.hour-event, input.min-event {
+    border-radius: 3px;
+    float: none;
+    display: inline-block;
+    margin-right: 2px;
+    min-width: 10px;
+    text-align: center;
+    width: 15%;
+  }
+
+  div.event-description {
+    textarea.event-textarea {
+      float: none !important;
+      height: 150px !important;
+      width: 50% !important;
+
+    }
+  }
+
+  div.event-session { //For the sessions editor
+    margin: 0 auto;
+    width: 95%;
+
+    .individual-session {
+      background-color: #f8f8f8;
+      border: 1px solid lightgray;
+      padding: 10px 0;
+      margin-bottom: 15px;
+    }
+
+    label.event-name-label {
+      width: 25%;
+    }
+
+
+    input.workshop-event {
+      float: none;
+      display: inline-block;
+      margin: 0 auto;
+      width: 65%;
+      max-width: none;
+    }
+
+    div.buttons-div {
+      display: block;
+      margin: 8px auto 6px auto;
+      text-align: center;
+    }
+
+    div.tickets-container {
+      background-color: white;
+      margin: 15px auto;
+      width: 95%;
+
+      div.tickets-display-wide{
+        display: none;
+      }
+
+      div.individual-ticket-narrow {
+        padding: 5px;
+      }
+
+      input.event-ticket-narrow-input {
+        box-sizing: border-box;
+        width: 55%;
+      }
+
+
+    } //div.tickets-container
+
+  }
+
+  @media screen and (min-width: $transition_resolution) {
+    div.event-session {
+      div.tickets-container {
+
+        padding: 5px 0;
+
+        div.tickets-display-narrow {
+          display: none;
+        }
+
+        div.tickets-display-wide {
+          display: block;
+
+          width: 100%;
+
+          table {
+            margin: 0 auto;
+            tr {
+              border: 1px solid lightgray;
+            }
+
+            th.col1 {
+              width: 20%;
+            }
+
+            th.col2 {
+              width: 40%;
+            }
+
+            th.col3 {
+              width: 18%;
+            }
+
+            th.col4 {
+              width: 18%;
+            }
+
+            th.error-col {
+              width: 0;
+            }
+
+            td, th {
+              color: $my_profile_color;
+              text-align: center;
+              padding: 5px 0 5px 0;
+            }
+
+            th {
+              padding: 5px 0 0 0;
+            }
+          }
+
+
+        }//div.tickets-display-wide
+
+        select.ticket-type-wide {
+          border-radius: 3px;
+          font-size: 0.8em;
+          padding: 3px;
+        }
+
+        input.ticket-name, input.ticket-number {
+          display: block;
+          margin: auto;
+          padding: 3px;
+          float: none;
+        }
+
+        input.ticket-name {
+          width: 80%;
+        }
+
+        input.ticket-number {
+          text-align: center;
+          width: 60%;
+        }
+
+        button.rem-ticket-bttn {
+          width: 90%;
+        }
+
+      }//div.tickets-container
+    }
+
+  }
+
+}//div.create-or-edit-event
 
 /******************
 Dojo bubble viewer

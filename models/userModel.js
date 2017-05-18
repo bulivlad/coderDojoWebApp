@@ -87,7 +87,10 @@ let UserSchema = mongoose.Schema({
             typeOfNot: String,
             data: mongoose.Schema.Types.Mixed //TODO make notifications not selectable by default
         }
-    ]
+    ],
+    userPhoto: {
+        type: String
+    }
 });
 
 // Here we export the DataBase interface to our other modules
@@ -121,10 +124,30 @@ module.exports.findUserByEmailOrAlias = function(emailOrAlias, callback){
     User.findOne(query, {password: true},  callback);
 };
 
-module.exports.findUserByIdForDeserialization = function(id, fieldsToGet, callback){
-    User.findById(id, fieldsToGet, callback);
+module.exports.findUserByIdForDeserialization = function(id, callback){
+    User.findById(id, deserializedFields, callback);
 };
 
+//These are the fields we get from the database when we deserialieze the user on communication
+let deserializedFields = {
+    address: true,
+    biography: true,
+    birthDate: true,
+    children: true,
+    email: true,
+    facebook: true,
+    firstName: true,
+    gender: true,
+    languagesSpoken: true,
+    lastName: true,
+    linkedin: true,
+    parents: true,
+    phone: true,
+    programmingLanguages: true,
+    alias: true,
+    authorizationLevel:true,
+    userPhoto: true
+};
 
 module.exports.getUsersForMember = function(userIds, callback){
     User.find({_id: {$in: userIds}}, fieldsToGetForUsersForMember, callback);
@@ -162,6 +185,12 @@ let fieldsToGetUserForMember = {
     programmingLanguages: true,
     biography: true,
     gender: true,
-    birthDate: true
+    birthDate: true,
+    userPhoto: true
+};
+
+//Method for updating a users photo
+module.exports.updatePhotoForUser = function(userId, userPhotoName, callback){
+    User.findOneAndUpdate({_id: userId}, {$set :{userPhoto: userPhotoName}}, callback);
 };
 

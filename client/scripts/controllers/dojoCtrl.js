@@ -49,13 +49,22 @@ angular.module("coderDojoTimisoara")
         //Method for navigating back in the dojo view
         $scope.goBackAction = function(){
             if($scope.isCurrentView(keys.viewDojo)){
-                $scope.initializeDojosCtrl();
+                goToDojoSelector();
             } else if($scope.isCurrentView(keys.viewMembers) || // if Viewing members
                 $scope.isCurrentView(keys.editDojo)){     // or editing dojos
                 $scope.setView(keys.viewDojo, [keys.showBackButton]);
                 createMapWithSingleDojo();
             }
 
+        };
+
+        var goToDojoSelector = function(){
+            var dojoSelector = $scope.getDojoSelector();
+            if(dojoSelector === keys.getMyDojosRoute){
+                $location.path('/' + keys.getMyDojosRoute);
+            } else {
+                $location.path('/' + keys.cautaUnDojo);
+            }
         };
 
         //Method for determining the users role in the dojo
@@ -80,6 +89,25 @@ angular.module("coderDojoTimisoara")
                 return 'Administator';
             } else {
                 return '-';
+            }
+        };
+
+        //Method for deleting a dojo
+        $scope.deleteDojo = function(){
+            var confirmed  = confirm('Sigur vrei sa stergi dojo-ul ' + $scope.dojo.name + '?');
+            if(confirmed){
+                dataService.deleteDojo({dojoId: $scope.dojo._id})
+                    .then(function(response){
+                        if(response.data.success){
+                            goToDojoSelector();
+                        } else if(response.data.errors === keys.notAuthorizedError){
+                            $scope.showNotAuthorizedError();
+                        }
+
+                    })
+                    .catch(function(err){
+                        helperSvc.handlerCommunicationErrors(err, 'deleteDojo', $scope);
+                    });
             }
         };
 
@@ -139,7 +167,7 @@ angular.module("coderDojoTimisoara")
                             })
                             .catch(function(err){
                                 $scope.closeJoinModal();
-                                $scope.initializeDojosCtrl();
+                                goToDojoSelector();
                                 console.log(err);
                             })
                     } else {
@@ -198,7 +226,7 @@ angular.module("coderDojoTimisoara")
                                 }
                             })
                             .catch(function(err){
-                                $scope.initializeDojosCtrl();
+                                goToDojoSelector();
                                 console.log(err);
                             })
                     }
@@ -221,10 +249,10 @@ angular.module("coderDojoTimisoara")
         //Method for injecting a google maps plugin for displaying a dojo. Element name is the element where we are
         //going to inject the map (it's id).
         var drawMap = function(dojo, elementName){
-            var latLongTimisoara = new google.maps.LatLng(45.756818, 21.228600);
+            var latLongDojo = new google.maps.LatLng(dojo.latitude, dojo.longitude);
 
             $scope.mapProp = {
-                center: latLongTimisoara,
+                center: latLongDojo,
                 zoom: 12,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
@@ -232,7 +260,7 @@ angular.module("coderDojoTimisoara")
             mapObj = new google.maps.Map(document.getElementById(elementName), $scope.mapProp);
 
             //Creating markers
-            var markerLatLng =  new google.maps.LatLng(dojo.latitude, dojo.longitude);
+            var markerLatLng =  latLongDojo;
             var marker = new google.maps.Marker({
                 position: markerLatLng,
                 map: mapObj,
@@ -253,9 +281,9 @@ angular.module("coderDojoTimisoara")
             //We check the a dojo to be viewed has been set in another view (it should have been, otherwise an error
             // has occurred, and we go to the search dojos page
             if(toBeViewedDojoId){
-                $scope.setView(keys.viewDojo);
+                $scope.setView(keys.viewDojo, [keys.showBackButton]);
                 if($scope.isUserLoggedIn()){
-                     $scope.getAuthDojoFromServerAndMakeMap(toBeViewedDojoId);
+                    $scope.getAuthDojoFromServerAndMakeMap(toBeViewedDojoId);
                 } else {
                     $scope.getDojoFromServerAndMakeMap(toBeViewedDojoId);
                 }

@@ -7,6 +7,9 @@ const User = require('../models/userModel');
 //const bcrypt = require('bcryptjs');
 const logger = require('winston');
 const validator = require('../validator/validator');
+const multer = require('multer');
+const mime = require('mime');
+let upload;
 
 //Method for registering user
 module.exports.registerUser = function(req, res){
@@ -441,6 +444,51 @@ module.exports.acceptChildInvite = function(req, res){
         }
     })
 };
+
+
+
+
+//Module for uploading user photos
+module.exports.uploadUserPicture = function(req, res){
+    logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${getUser(req)}`);
+    upload(req, res, function(err){
+        let userToUpdatePhoto = req.body.userId;
+        let fileName = req.file.filename;
+        let user = req.user;
+        if (err){
+            logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${getUser(req)}:` + err);
+            return res.sendStatus(500);
+        }
+
+        //If the user changing the photo is the logged in user or if the user changing photo is the
+        //logged in user's child
+        if(user._id == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
+            User.updatePhotoForUser(userToUpdatePhoto, fileName, function(err){
+                if(err){
+                    logger.error(`Error updating user photo for for ${userToUpdatePhoto} by ${getUser(req)}:` + err);
+                    return res.sendStatus(500);
+                }
+                res.json({userPhoto:fileName, userId: userToUpdatePhoto});
+            })
+        } else {
+            logger.error(` ${getUser(req)} (children=${user.children}) tried to change photo for user _id=${userToUpdatePhoto} while not being the user or the users child`)
+            res.json({errors:keys.wrongUserError});
+        }
+    })
+};
+
+let storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, __dirname + '/../client/img/user_photos');
+    },
+    filename: function (req, file, callback) {
+        callback(null, `${req.body.userId}_${Date.now()}.${mime.extension(file.mimetype)}`);
+    }
+});
+
+upload =  multer({storage:storage}).single('user-photo');
+
+
 
 
 function saveChildToDbsAndRegisterWithParent(req, res, child){

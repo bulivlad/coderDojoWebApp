@@ -67,6 +67,9 @@ router.post('/' + keys.deleteNotificationForUsersChildRoute, authentification.en
 //Method for accepting and invitation from a child to be his/her parent
 router.post('/' + keys.acceptChildInviteRoute, authentification.ensureAuthenticated, userController.acceptChildInvite);
 
+//Method for uploading user pictures
+router.post('/' + keys.uploadUserPictureRoute, authentification.ensureAuthenticated, userController.uploadUserPicture);
+
 
 //This is the local strategy password uses to log in a user and save a session
 passport.use(new passportLocal.Strategy(
@@ -121,7 +124,7 @@ passport.serializeUser(function(user, done){
 });
 
 passport.deserializeUser(function(user, done){
-    User.findUserByIdForDeserialization(user._id, deserializedFields, function(err, user){
+    User.findUserByIdForDeserialization(user._id, function(err, user){
         if (err){
             //TODO check what done(err) propagates
             logger.error(`Error searching for user (${user.email}) in database: ` + err);
@@ -138,25 +141,6 @@ passport.deserializeUser(function(user, done){
     })
 });
 
-//These are the fields we get from the database when we deserialieze the user on communication
-let deserializedFields = {
-    address: true,
-    biography: true,
-    birthDate: true,
-    children: true,
-    email: true,
-    facebook: true,
-    firstName: true,
-    gender: true,
-    languagesSpoken: true,
-    lastName: true,
-    linkedin: true,
-    parents: true,
-    phone: true,
-    programmingLanguages: true,
-    alias: true,
-    authorizationLevel:true
 
-};
 
 module.exports = router;

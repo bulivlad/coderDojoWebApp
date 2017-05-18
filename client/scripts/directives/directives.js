@@ -63,4 +63,10 @@ angular.module("coderDojoTimisoara")
             templateUrl: "directives/create-or-edit-dojo-directive.html",
             replace: true
         }
+    })
+    .directive("eventDirective", function(){
+        return {
+            templateUrl: "directives/create-or-edit-dojo-event-directive.html",
+            replace: true
+        }
     });

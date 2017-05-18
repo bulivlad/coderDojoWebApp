@@ -34,12 +34,38 @@ module.exports.addDojo = function(req, res){
     }
 };
 
+//Method for deleting a dojo (only the admin can do that)
+module.exports.deleteDojo = function(req, res){
+    logger.debug(`Entering DojosRoute: ${keys.deleteDojoRoute} by ${getUser(req)}`);
+    //First we check that the user trying to add the dojo is an administrator
+    if(req.user.authorizationLevel === keys.admin){
+        let dojoId = req.body.dojoId;
+        logger.silly(`DojoId to delete: (${dojoId})`);
+        //We save the dojo to the database
+        Dojo.remove({_id: dojoId}, function(err){
+            if(err){
+                logger.error(`Error deleting dojo (_id=${dojoId}) by ${getUser(req)}:` + err);
+                return res.sendStatus(500);
+            }
+            //If the save was successful, we return a success message to the client.
+            res.json({success: true});
+        });
+    } else {
+        //If the user is not an administrator, we log this as an error, and respond with a not authorized error to the
+        //client.
+        logger.error(`${getUser(req)} tried to add a dojo while not authorized to do so`);
+        res.json({errors: keys.notAuthorizedError});
+    }
+};
+
+
 
 //Route for editing an existing dojo (only the admin and champion can do that)
 module.exports.editDojo = function(req, res){
     logger.debug(`Entering DojosRoute: ${keys.editDojoRoute} by ${getUser(req)}`);
     let user = req.user;
     let modifiedDojo = req.body.dojo;
+    logger.silly(`Modified dojo: ${JSON.stringify(modifiedDojo)}`);
     //We get the dojos from the database to check the user's credentials
     Dojo.getDojoForInternalAuthentication(modifiedDojo._id, function(err, dojo){
         if(err){
@@ -245,7 +271,7 @@ module.exports.getUsersForMember = function(req, res){
         let isUserAuthorized = isUserAdmin(user);
 
         if(typeOfUsers === 'parents' || typeOfUsers === 'attendees' || typeOfUsers === 'volunteers' ||
-            typeOfUsers === 'mentors' || typeOfUsers === 'champion'){
+            typeOfUsers === 'mentors' || typeOfUsers === 'champions'){
             if(isUserMemberOfDojo(dojo, user._id)){
                 isUserAuthorized = true;
             }
@@ -392,7 +418,7 @@ module.exports.acceptPendingMember = function(req, res){
             let dojoModifications = null;
             if(isUserPendingChampionInDojo(dojo, userToAcceptId)){
                 typeOfUser = 'campion';
-                dojoModifications = {$pull: {pendingChampions: userToAcceptId}, $addToSet: {champion: userToAcceptId}};
+                dojoModifications = {$pull: {pendingChampions: userToAcceptId}, $addToSet: {champions: userToAcceptId}};
             } else if (isUserPendingMentorInDojo(dojo, userToAcceptId)){
                 typeOfUser = 'mentor';
                 dojoModifications = {$pull: {pendingMentors: userToAcceptId},  $addToSet: {mentors: userToAcceptId}};
@@ -462,7 +488,7 @@ function filterDojosForMyDojos(user, dojos){
                 isUserAdmin(user)){
                 //These field are not required to the app after it is determined if the user is part of the dojo
                 //so are removed for performance and privacy reasons.
-                dojo.champion = undefined;
+                dojo.champions = undefined;
                 dojo.mentors = undefined;
                 dojo.parents = undefined;
                 dojo.attendees = undefined;
@@ -499,7 +525,7 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
                 //We have determined that the user is a mentor in this dojos
                 logger.silly(`User is a mentor in this dojo`);
                 //Adding fields the user does has access to
-                dojoRet.champion = dojo.champion;
+                dojoRet.champions = dojo.champions;
                 dojoRet.mentors = dojo.mentors;
                 dojoRet.volunteers = dojo.volunteers;
                 dojoRet.parents = dojo.parents;
@@ -513,7 +539,7 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             else if(isUserVolunteerInDojo(dojo, user._id)){
                 logger.silly(`User is a Volunteer or attendee or parent in this dojo`);
                 //We have determined that the user is a volunteer an attendee or a parent in this dojo
-                dojoRet.champion = dojo.champion;
+                dojoRet.champions = dojo.champions;
                 dojoRet.mentors = dojo.mentors;
                 dojoRet.volunteers = dojo.volunteers;
 
@@ -524,7 +550,7 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             else if(isUserAttendeeInDojo(dojo, user._id)){
                 logger.silly(`User is a Volunteer or attendee or parent in this dojo`);
                 //We have determined that the user is a volunteer an attendee or a parent in this dojo
-                dojoRet.champion = dojo.champion;
+                dojoRet.champions = dojo.champions;
                 dojoRet.mentors = dojo.mentors;
                 dojoRet.volunteers = dojo.volunteers;
 
@@ -535,7 +561,7 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             else if(isUserParentInDojo(dojo, user._id) ){
                 logger.silly(`User is a Volunteer or attendee or parent in this dojo`);
                 //We have determined that the user is a volunteer an attendee or a parent in this dojo
-                dojoRet.champion = dojo.champion;
+                dojoRet.champions = dojo.champions;
                 dojoRet.mentors = dojo.mentors;
                 dojoRet.volunteers = dojo.volunteers;
 
@@ -546,14 +572,16 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             else if (isUserChampionInDojo(dojo, user._id)){
                 logger.silly(`User is champion`);
                 //We have determined that the user is a champion in this dojo
-                dojoRet.champion = dojo.champion;
-                dojoRet.pendingChampions = dojo.pendingChampions;
-                dojoRet.mentors = dojo.mentors;
-                dojoRet.pendingMentors = dojo.pendingMentors;
-                dojoRet.volunteers = dojo.volunteers;
-                dojoRet.pendingVolunteers = dojo.pendingVolunteers;
-                dojoRet.parents = dojo.parents;
-                dojoRet.attendees = dojo.attendees;
+                //TODO remove if deemed unecessary (noticed this info was not used, but not sure now)
+                //dojoRet.champions = dojo.champions;
+                //dojoRet.pendingChampions = dojo.pendingChampions;
+                //dojoRet.mentors = dojo.mentors;
+                //dojoRet.pendingMentors = dojo.pendingMentors;
+                //dojoRet.volunteers = dojo.volunteers;
+                //dojoRet.pendingVolunteers = dojo.pendingVolunteers;
+                //dojoRet.parents = dojo.parents;
+                //dojoRet.attendees = dojo.attendees;
+                dojoRet.recurrentEvents = dojo.recurrentEvents;
 
                 dojoRet[keys.canEditDojo] = true;
                 dojoRet[keys.canAcceptMembers] = true;
@@ -564,16 +592,18 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             } else if(isUserAdmin(user)){
                 logger.silly(`User is admin`);
                 //We determine that the user is an admin in this dojo
-                dojoRet.champion = dojo.champion;
-                dojoRet.pendingChampions = dojo.pendingChampions;
-                dojoRet.mentors = dojo.mentors;
-                dojoRet.pendingMentors = dojo.pendingMentors;
-                dojoRet.volunteers = dojo.volunteers;
-                dojoRet.pendingVolunteers = dojo.pendingVolunteers;
-                dojoRet.parents = dojo.parents;
-                dojoRet.attendees = dojo.attendees;
+                //dojoRet.champions = dojo.champions;
+                //dojoRet.pendingChampions = dojo.pendingChampions;
+                //dojoRet.mentors = dojo.mentors;
+                //dojoRet.pendingMentors = dojo.pendingMentors;
+                //dojoRet.volunteers = dojo.volunteers;
+                //dojoRet.pendingVolunteers = dojo.pendingVolunteers;
+                //dojoRet.parents = dojo.parents;
+                //dojoRet.attendees = dojo.attendees;
+                dojoRet.recurrentEvents = dojo.recurrentEvents;
 
                 dojoRet[keys.canEditDojo] = true;
+                dojoRet[keys.canDeleteDojo] = true;
                 dojoRet[keys.canAcceptMembers] = true;
                 dojoRet[keys.canAddEvent] = true;
                 dojoRet[keys.hasJoined] = true;
@@ -666,8 +696,8 @@ function isUserPendingMentorInDojo(dojo, userId){
 }
 
 function isUserChampionInDojo(dojo, userId){
-    if(dojo.champion){
-        return (dojo.champion.indexOf(userId.toString()) > -1);
+    if(dojo.champions){
+        return (dojo.champions.indexOf(userId.toString()) > -1);
     } else {
         logger.debug(`dojo.champion is not defined, dojo ${JSON.stringify(dojo)}`);
     }
@@ -698,8 +728,7 @@ function isUserMemberOrPendingMemberOfDojo(dojo, userId){
 //Method for displaying user information for logging
 function getUser(req){
     if(req.user){
-        return `user=(email=${req.user.email}, alias=${req.user.alias}, _id=${req.user._id},
-                authorizationLevel=${req.user.authorizationLevel})`;
+        return `user=(email=${req.user.email}, alias=${req.user.alias}, _id=${req.user._id}, authorizationLevel=${req.user.authorizationLevel})`;
     }
 }
 

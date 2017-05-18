@@ -76,6 +76,11 @@ angular.module("coderDojoTimisoara")
             $rootScope.alert = undefined;
         };
 
+        $scope.goToV = function(){
+            $location.path('/' + keys.register);
+            $rootScope.alert = undefined;
+        };
+
         $scope.resetAlerts = function(){
                 $rootScope.alert = undefined;
                 $rootScope.alertMessage = undefined;
@@ -107,6 +112,11 @@ angular.module("coderDojoTimisoara")
             hideMenusWhenPageClicked();
         };
 
+        //Method for going to a page in the site
+        $scope.goToPage = function(page){
+            $location.path('/' + page);
+        };
+
         //Method for hiding menus that should be hidden when the page is clicked (the event propagation is stopped to cancel
         //hiding the menu inadvertently
         var hideMenusWhenPageClicked = function(){
@@ -120,6 +130,69 @@ angular.module("coderDojoTimisoara")
                 $(".user-menu-dropdown").hide().css('background-color:white');
                 $('#user-menu-header').css('background-color', '#ededed').css('border-left', '3px solid #ededed');
             }
+        };
+
+        $scope.addEmptyEvent = function(events){
+            events.push({
+                sessions:[{tickets:[{}]}]
+            });
+        };
+
+        $scope.addTicket = function(tickets){
+            tickets.push({});
+        };
+
+        $scope.addSession = function(sessions){
+            sessions.push({tickets:[{}]});
+        };
+
+        $scope.deleteSession = function(sessions, index){
+            if (sessions.length > 1){
+                sessions.splice(index, 1);
+            } else {
+                sessions.pop();
+                sessions.push({tickets:[{}]});
+            }
+        };
+
+        $scope.deleteTicket = function(tickets, index){
+            if (tickets.length > 1){
+                tickets.splice(index, 1);
+            } else {
+                tickets.pop();
+                tickets.push({});
+            }
+        };
+
+        $scope.isLastItemInArray = function(array, index){
+            return (array.length - 1) === index;
+        };
+
+        $scope.isCurrentView = function(view){
+          return false;
+        };
+
+        $scope.eventIsRecurrent = function(eventType){
+          return eventType === keys.eventTypes[0];
+        };
+
+        $scope.eventIsUnique = function(eventType){
+            return eventType === keys.eventTypes[1];
+        };
+
+        //Method for setting the view that selected a dojo (ex cauta un dojo view). This info is used when going back
+        //from a dojo, to know to which view to go
+        $scope.setDojoSelector = function(dojoSelector){
+          $scope.dojoSelector = dojoSelector;
+        };
+
+        $scope.getDojoSelector = function(){
+          return $scope.dojoSelector;
+        };
+
+        $scope.showNotAuthorizedError = function(){
+            $location.path('/' + keys.despre);
+            $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
         };
 
         $scope.initiateMainController();

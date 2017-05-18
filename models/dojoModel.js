@@ -3,49 +3,10 @@
  */
 
 'use strict';
-const mongoose = require('mongoose'),
-    keys = require('../static_keys/project_keys'),
-    logger = require('winston');
-
-let dojoEventSchema = new mongoose.Schema({
-    subject: {
-        type: String,
-        required: true
-    },
-    location: {
-        type: String,
-        required: true
-    },
-    date: {
-        type: Date,
-        required: true
-    },
-    maxNumberOfChildren: {
-        type: Number,
-        required: true
-    },
-    children: [
-        {
-            parentEmail: String,
-            childName: String,
-            childPhone: String,
-            parentPhone: String,
-            confirmed: {
-                type: Boolean,
-                default: false
-            }
-        }
-    ]
-});
-
-let scheduleSchema = mongoose.Schema({
-    startHour: {type: Number, max: 24, min: 0, required: true},
-    endHour: {type: Number, max: 24, min: 0, required: true},
-    startMinute: {type: Number, max: 60, min: 0, required: true},
-    endMinute: {type: Number, max: 60, min: 0, required: true},
-    day: {type: String, required: true},
-    workshops: [String]
-});
+const mongoose = require('mongoose');
+const keys = require('../static_keys/project_keys');
+const logger = require('winston');
+const event = require('./eventModel');
 
 let DojoSchema = mongoose.Schema({
     name: {
@@ -57,11 +18,10 @@ let DojoSchema = mongoose.Schema({
     longitude: Number,
     email: String,
     statuses: [String],
-    schedules: [scheduleSchema],
     facebook: String,
     twitter: String,
     requirements: [String],
-    champion:[String],//TODO correct to the plural
+    champions:[String],
     pendingChampions:[String],
     mentors: [String],
     pendingMentors:[String],
@@ -69,7 +29,7 @@ let DojoSchema = mongoose.Schema({
     pendingVolunteers:[String],
     attendees:[String],
     parents:[String],
-    dojoEvents: [dojoEventSchema],
+    recurrentEvents: [event.recurrentEventSchema],
     pictureUrl: String
 });
 
@@ -87,7 +47,7 @@ let myDojosFields = {
     name: true,
     latitude: true,
     longitude: true,
-    champion: true,
+    champions: true,
     mentors: true,
     parents: true,
     attendees: true,
@@ -148,7 +108,7 @@ let dojoAuthFields = {
     facebook: true,
     twitter: true,
     requirements: true,
-    champion:true,
+    champions:true,
     pendingChampions:true,
     mentors: true,
     pendingMentors:true,
@@ -157,7 +117,8 @@ let dojoAuthFields = {
     attendees:true,
     parents: true,
     dojoEvents: true,
-    pictureUrl: true
+    pictureUrl: true,
+    recurrentEvents: true
 };
 
 //This are dojos for users that ARE authenticated
@@ -174,7 +135,7 @@ module.exports.getAuthDojo = function(dojoId, callback){
 };
 
 let fieldsForInternalDojoAuthentication = {
-    champion:true,
+    champions:true,
     pendingChampions:true,
     mentors: true,
     pendingMentors:true,
@@ -202,7 +163,7 @@ module.exports.updateDojo = function(dojo, callback){
     Dojo.findOneAndUpdate({_id:dojo._id},
         {$set: {name: dojo.name, address: dojo.address, latitude: dojo.latitude, longitude: dojo.longitude, email: dojo.email,
             statuses: dojo.statuses, schedules: dojo.schedules, facebook: dojo.facebook, twitter: dojo.twitter,
-            requirements: dojo.requirements}},
+            requirements: dojo.requirements, recurrentEvents: dojo.recurrentEvents}},
         {new:true},
         function(err, dojo){
             logger.silly(`Updated dojo: ${JSON.stringify(dojo, null, 2)}`);

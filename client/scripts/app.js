@@ -56,6 +56,7 @@ const keys = {
     deleteNotificationForUsersChildRoute: 'deleteNotificationForUsersChild',
     acceptChildInviteRoute: 'acceptChildInvite',
     addDojoRoute: 'addDojo',
+    deleteDojoRoute: 'deleteDojo',
     editDojoRoute: 'editDojo',
     cautaUnDojo: 'cautaUnDojo',
     becomeMemberOfDojoRoute: 'becomeMemberOfDojo',
@@ -64,6 +65,7 @@ const keys = {
     getDetailedUserForMemberRoute: 'getDetailedUserForMember',
     acceptPendingMemberRoute: 'acceptPendingMember',
     rejectPendingMemberRoute: 'rejectPendingMember',
+    uploadUserPictureRoute: 'uploadUserPicture',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
@@ -121,6 +123,7 @@ const keys = {
     showAddChildren: 'showAddChildren',
     showInviteParent: 'showInviteParent',
     hideEditButton: 'hideEditButton',
+    uploadPhotoListenerInitiated: 'uploadPhotoListenerInitiated',
 
     //View for dojos
     viewMap: 'viewMap',
@@ -139,9 +142,19 @@ const keys = {
     canEditDojo: 'canEditDojo',
     canAcceptMembers: 'canAcceptMembers', //can add mentors, attendees, volunteers
     canAddEvent: 'canAddEvent',
+    canDeleteDojo: 'canDeleteDojo',
     hasJoined: 'hasJoined',
     isPendingJoining: 'isPendingJoining',
-    showMembers: 'showMembers'
+    showMembers: 'showMembers', //can view mentors, attendees, volunteers
+
+    //Views for events
+    showMultiEventTypes: 'showMultiEventTypes',
+
+    //Enums
+    daysOfWeek: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată', 'Duminică'],
+    typesOfTickets: ['voluntar', 'mentor', 'cursant'],
+    eventTypes: ['recurent', 'unic'],
+    eventStatus: ['Activ', 'Inactiv']
 
 };
 

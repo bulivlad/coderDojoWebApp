@@ -8,6 +8,7 @@ angular.module("coderDojoTimisoara")
         $scope.errors = {};
         $scope.localDojo = {};
         $scope.title = 'Creează dojo';
+        //$scope.daysOfWeek = keys.daysOfWeek;
 
         var isEditingMode = function(){
             //If we are part of the dojosCtrl, we have this method  in our parent scope, and we check for editing mode
@@ -23,8 +24,11 @@ angular.module("coderDojoTimisoara")
                 $scope.title = 'Editează dojo';
                 $scope.showBackButton = isEditingMode();
                 //We need to initialize the schedules array with at least one empty object
-                if(!$scope.localDojo.schedules || $scope.localDojo.schedules.length === 0){
-                    $scope.localDojo.schedules = [{}];
+                if(!$scope.localDojo.recurrentEvents){
+                    $scope.localDojo.recurrentEvents = [];
+                    $scope.addEmptyEvent($scope.localDojo.recurrentEvents);
+                } else if ($scope.localDojo.recurrentEvents.length === 0){
+                    $scope.addEmptyEvent($scope.localDojo.recurrentEvents);
                 }
                 //We need to initialize the requirements array with at least one empty requirement
                 if(!$scope.localDojo.requirements || $scope.localDojo.requirements.length === 0){
@@ -47,7 +51,8 @@ angular.module("coderDojoTimisoara")
                     }
                 }
             } else {
-                $scope.localDojo.schedules = [{}];
+                $scope.localDojo.recurrentEvents = [];
+                $scope.addEmptyEvent($scope.localDojo.recurrentEvents);
                 $scope.localDojo.requirements = [{data:''}];
                 $scope.localDojo.statuses = [{data:''}];
 
@@ -58,10 +63,10 @@ angular.module("coderDojoTimisoara")
 
         //Deletes an event in the que
         $scope.deleteEvent = function(index){
-            $scope.localDojo.schedules.splice(index, 1);
+            $scope.localDojo.recurrentEvents.splice(index, 1);
             //If the event array is empty, we add an empty event (which isn't saved, but we need to display something)
-            if($scope.localDojo.schedules.length === 0){
-                $scope.localDojo.schedules.push({});
+            if($scope.localDojo.recurrentEvents.length === 0){
+                $scope.addEmptyEvent($scope.localDojo.recurrentEvents);
             }
         };
 
@@ -104,11 +109,10 @@ angular.module("coderDojoTimisoara")
             if(errors){
                 $scope.errors = errors;
             } else {
-                dataService.addDojo({dojo: prepareDojoForSending($scope.localDojo)})
+                dataService.addDojo(prepareDojoForSending($scope.localDojo))
                     .then(function(response){
                         if(response.data.errors === keys.notAuthorizedError){
-                            $location.path('/' + keys.despre);
-                            $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
+                            $scope.showNotAuthorizedError();
                         } else if (response.data.success){
                             $location.path('/' + keys.cautaUnDojo);
                             $scope.setAlert(keys.infoAlert, 'Dojo creeat cu succes!');
@@ -128,10 +132,9 @@ angular.module("coderDojoTimisoara")
                 dataService.editDojo(prepareDojoForSending($scope.localDojo))
                     .then(function(response){
                         if(response.data.errors === keys.notAuthorizedError){
-                            $location.path('/' + keys.despre);
-                            $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
+                            $scope.showNotAuthorizedError();
                         } else if (response.data.success){
-                           //If the dojo was updated, we reload the dojo, running the initialize method from dojoCtrl
+                            //If the dojo was updated, we reload the dojo, running the initialize method from dojoCtrl
                             if($scope.initializeDojoCtrl){
                                 $scope.initializeDojoCtrl();
                             }
@@ -167,22 +170,20 @@ angular.module("coderDojoTimisoara")
             }
             dojo.statuses = preparedStatuses;
 
-            var preparedSchedules = [];
-            if(dojo.schedules){
-                dojo.schedules.forEach(function(schedule){
-                    //We verify that the all the required fields are filled, and we add the schedule
-                    if (!((!schedule.startHour && schedule.startHour != 0) || (!schedule.endHour && schedule.endHour != 0) ||
-                        (!schedule.startMinute && schedule.startMinute != 0) || (!schedule.endMinute && schedule.endMinute != 0) ||
-                        !schedule.day)){
-                        preparedSchedules.push(schedule);
-                    }
-                });
-            }
-            dojo.schedules = preparedSchedules;
+            removeEventErrors(dojo.recurrentEvents);
 
             return dojo;
         };
 
+        //Method that removes the extraneous fields from the recurrent events
+        var removeEventErrors = function(recurrentEvents){
+            recurrentEvents.forEach(function(event){
+                event.error = undefined;
+                event.sessions.forEach(function(session){
+                    session.error = undefined;
+                })
+            });
+        };
 
         var validateDojoFields = function(dojo){
             var errors = {};
@@ -213,22 +214,12 @@ angular.module("coderDojoTimisoara")
                 errors.email = 'Dojo-ul trebuie sa aibe email';
             }
 
-            if(dojo.schedules){
-                for(var i = 0; i <dojo.schedules.length; i++){
-                    var schedule = dojo.schedules[i];
-                    if ((!schedule.startHour && schedule.startHour != 0) || (!schedule.endHour && schedule.endHour != 0) ||
-                        (!schedule.startMinute && schedule.startMinute != 0) || (!schedule.endMinute && schedule.endMinute != 0) ||
-                        !schedule.day){
-                        hasErrors = true;
-                        errors.schedules = 'Toate orarele trebuie să aibe începutul, sfârșitul și ziua';
-                    } else if(schedule.startHour >= schedule.endHour) {
-                        hasErrors = true;
-                        errors.schedules = 'Evenenimentul trebuie sa inceapă inainte de a se termina';
-                    }
-                }
-            }
+            //we need to remove the previous errors if the dojo is resubmitted
+            removeEventErrors(dojo.recurrentEvents);
 
-            if (hasErrors){
+            var hasEventErrors = helperSvc.validateEventFields(dojo.recurrentEvents);
+
+            if (hasErrors || hasEventErrors){
                 return errors;
             } else {
                 return null;

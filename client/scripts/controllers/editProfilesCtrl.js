@@ -7,6 +7,8 @@ angular.module("coderDojoTimisoara")
         $scope.myProfile = {};
         $scope.myProfile.user = {};
         $scope.myProfile.views = {};
+        $scope.myProfile.initializations = {};//This is for stuff that needs to be run only once when the controller per
+        //controller load
 
 
         //This method gets the user from the server and sets the view to "viewUserProfile"
@@ -20,6 +22,7 @@ angular.module("coderDojoTimisoara")
                         var user = helperSvc.cloneUser($rootScope.user);
                         //Setting the current user as the root user
                         $scope.myProfile.user = user;
+
                         // Getting the users children
                         if(user.children && user.children.length > 0){
                             $scope.getUsersChildrenFromServer(true);
@@ -46,18 +49,6 @@ angular.module("coderDojoTimisoara")
 
         //Getting the user and setting viewUserProfile view
         $scope.initializeEditProfilesController();
-
-        ////The same as the method above, only we get the local user, we do not go to the server
-        //$scope.goToViewRootUserProfileLocal = function(){
-        //    //Setting the current user as the root user
-        //    $scope.myProfile.user = helperSvc.cloneUser($rootScope.user);
-        //    $scope.setView(keys.viewUserProfile, [keys.showDojoInUserProfile]);
-        //    //getting users dojos
-        //    getUsersDojosFromServer();
-        //
-        //};
-
-
 
         //Method that get the user's children from the server and sets then to the current user
         $scope.getUsersChildrenFromServer = function(saveToRoot){
@@ -206,6 +197,40 @@ angular.module("coderDojoTimisoara")
             }
         };
 
+        //Method for opening dialog for adding user picture
+        $scope.loadPicture = function(){
+            var $fileInput = $('#user-photo-input');
+            if(!($scope.myProfile.initializations[keys.uploadPhotoListenerInitiated])){
+                $fileInput.on('change', function(event){
+                    //$('#user-photo-upload-button').click();
+                    var $fileInput = $('#user-photo-input');
+                    var formData = new FormData();
+                    formData.append('userId', $scope.myProfile.user._id);
+                    formData.append('user-photo', $fileInput[0].files[0]);
+                    dataService.uploadUserPhoto(formData)
+                        .then(function(response){
+                            if(response.data.userPhoto){
+                                //THe same user that changed the photo is the current user
+                                if(response.data.userId === $scope.myProfile.user._id){
+                                    $scope.myProfile.user.userPhoto = response.data.userPhoto;
+                                }
+                            }
+                            console.log(response.data);
+                        })
+                        .catch(function(err){
+                            console.log(err);
+                        });
+                });
+                $scope.myProfile.initializations[keys.uploadPhotoListenerInitiated] = true;
+            }
+            $fileInput.click();
+        };
+
+        //Method for changing the user's picture
+        $scope.changePicture = function(){
+            console.log('dog');
+        };
+
         //Method that adds a user under 14 for the current parent user
         $scope.createUserUnder14ByParent = function(){
             var errors = helperSvc.validateFields($scope.myProfile.user, keys.regChildUnder14Profile);
@@ -309,7 +334,6 @@ angular.module("coderDojoTimisoara")
 
                 //Getting dojos for child
                 getUsersChildsDojosFromServer(child._id);
-
             }
             //If the old profile is viewOtherParentProfile
             else if ($scope.myProfile.views[keys.viewOtherParentProfile]){

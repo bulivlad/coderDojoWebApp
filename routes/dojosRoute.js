@@ -13,6 +13,9 @@ const authentification = require('../passport/authentification');
 //Route for adding a new dojo (only the admin can do that)
 router.post('/' + keys.addDojoRoute, authentification.ensureAuthenticated, dojosController.addDojo);
 
+//Route for deleting a dojo (only the admin can do that)
+router.post('/' + keys.deleteDojoRoute, authentification.ensureAuthenticated, dojosController.deleteDojo);
+
 //Route for editing an existing dojo (only the admin and champion can do that)
 router.post('/' + keys.editDojoRoute, authentification.ensureAuthenticated, dojosController.editDojo);
 

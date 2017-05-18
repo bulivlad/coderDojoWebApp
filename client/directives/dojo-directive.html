@@ -82,6 +82,9 @@
                     <a class="a-button" href="" ng-click="goToEditDojo()" ng-if="dojo[keys.canEditDojo]">
                         Editează dojo-ul
                     </a>
+                    <a class="a-button" href="" ng-click="deleteDojo()" ng-if="dojo[keys.canDeleteDojo]">
+                        Șterge dojo-ul
+                    </a>
                     <label>Copii ar trebui să vină cu:</label>
                     <ul class="requirements-list">
                         <li ng-repeat=" requirement in dojo.requirements">

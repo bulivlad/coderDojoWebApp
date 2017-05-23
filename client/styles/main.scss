@@ -1354,7 +1354,7 @@ div.dojos-view-container {
       }
 
       p {
-        font-size: 0.8em;
+        font-size: 0.875em;
         margin: 3px 0 10px 0;
         text-align: center;
 
@@ -1514,7 +1514,7 @@ div.dojos-view-container {
 
         li {
           color: black;
-          font-size: 0.8em;
+          font-size: 0.875em;
           margin-bottom: 7px;
         }
       }
@@ -1563,9 +1563,51 @@ div.dojos-view-container {
 
   }
 
-  .dojo-events {
+  div.dojo-events {
+    div.dojo-events-container {
+      div.dojo-event {
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        margin: 15px 0;
+        padding: 10px;
+        transition: 0.3s;
+
+        &:hover {
+          box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
 
 
+        div.col1-dojo-events {
+          font-size: 0.875em;
+        }
+        div.col2-dojo-events {
+          h4.event-date {
+            color: $my_profile_color;
+            font-style: italic;
+            font-weight: normal;
+            text-align: center;
+
+          }
+
+          button.go-to-event-button {
+            background-color: #50922a;
+            border-color: #50922a;
+            color: white;
+            display: block;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 0 auto 10px auto;
+            letter-spacing: 1.5px;
+            padding: 14px 14px;
+
+            &:hover {
+              background-color: white;
+              color: #50922a;
+            }
+
+          }
+        }
+      }
+    }
   }
 
   .dojo-map-holder {
@@ -1573,6 +1615,8 @@ div.dojos-view-container {
   }
 
 }
+
+
 
 /***************
 Dojo members

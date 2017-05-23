@@ -160,6 +160,7 @@ angular.module("coderDojoTimisoara")
             }
             dojo.requirements = preparedRequirements;
 
+            //Disregard empty statuses
             var preparedStatuses = [];
             if(dojo.statuses){
                 dojo.statuses.forEach(function(status){
@@ -169,6 +170,16 @@ angular.module("coderDojoTimisoara")
                 });
             }
             dojo.statuses = preparedStatuses;
+
+            // We only add the recurrent events that are completed by the user (there is a default event that is empty,
+            // and we should not add this event (or any other empty events).
+            var preparedRecurrentEvents = [];
+            dojo.recurrentEvents.forEach(function(reccurentEvent){
+                if(!helperSvc.eventIsEmpty(reccurentEvent)){
+                    preparedRecurrentEvents.push(reccurentEvent);
+                }
+            });
+            dojo.recurrentEvents = preparedRecurrentEvents;
 
             removeEventErrors(dojo.recurrentEvents);
 

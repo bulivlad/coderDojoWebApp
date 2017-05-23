@@ -7,9 +7,8 @@
         <p class="event-error" ng-if="event.error.name">{{event.error.name}}</p>
         <label class="event-label">Tip eveniment <i class="fa fa-arrow-right" aria-hidden="true"></i></label>
         <select class="event-select day-event" ng-model="event.type" ng-options="eventType for eventType in keys.eventTypes"
-                ng-init="event.type = keys.eventTypes[0]" ng-disabled="!isCurrentView(keys.showMultiEventTypes)">
+                ng-init="event.type = event.type ? event.type : keys.eventTypes[0]" ng-disabled="!isCurrentView(keys.showMultiEventTypes)">
         </select>
-
     </div>
     <div class="event-date-recurrent" ng-if="eventIsRecurrent(event.type)">
 
@@ -18,7 +17,7 @@
                 Status eveniment <i class="fa fa-arrow-right" aria-hidden="true"></i>
             </label>
             <select class="event-select day-event" ng-model="event.activeStatus" ng-options="eventStatus for eventStatus in keys.eventStatus"
-                    ng-init="event.activeStatus = keys.eventStatus[0]" >
+                    ng-init="event.activeStatus = event.activeStatus ? event.activeStatus : keys.eventStatus[0]" >
             </select>
         </div>
 
@@ -43,7 +42,7 @@
                 Ziua <i class="fa fa-arrow-right" aria-hidden="true"></i>
             </label>
             <select class="event-select day-event" ng-model="event.day" ng-options="day for day in keys.daysOfWeek"
-                    ng-init="event.day = keys.daysOfWeek[5]">
+                    ng-init="event.day = keys.daysOfWeek[6]">
             </select>
         </div>
     </div> <!--date recurrent-->
@@ -74,7 +73,7 @@
                     Status sesiune <i class="fa fa-arrow-right" aria-hidden="true"></i>
                 </label>
                 <select class="event-select day-event" ng-model="session.activeStatus" ng-options="eventStatus for eventStatus in keys.eventStatus"
-                        ng-init="session.activeStatus = keys.eventStatus[0]" >
+                        ng-init="session.activeStatus = session.activeStatus ? session.activeStatus : keys.eventStatus[0]" >
                 </select>
             </div>
 
@@ -87,12 +86,12 @@
                         <br>
 
                         <label class="event-label">Nume tichet</label>
-                        <input class="event-input event-ticket-narrow-input" ng-model="ticket.nameOfTicket"
-                               ng-init="ticket.nameOfTicket = ticket.typeOfTicket" ng-focus="session.ticketsError= undefined">
+                        <input class="event-input event-ticket-narrow-input" ng-model="ticket.nameOfTicket" ng-focus="session.ticketsError= undefined"
+                               ng-init="ticket.nameOfTicket = ticket.nameOfTicket ? ticket.nameOfTicket : ticket.typeOfTicket" >
                         <br>
 
                         <label class="event-label">Număr tichete</label>
-                        <input class="event-input event-ticket-narrow-input" type="number" class="ticket-number"
+                        <input class="event-input event-ticket-narrow-input" type="number" class="ticket-number" min="1"
                                ng-model="ticket.numOfTickets" ng-focus="session.ticketsError = undefined">
 
 
@@ -118,7 +117,6 @@
                             <th class="col2">Nume tichet</th>
                             <th class="col3">Nr tichete</th>
                             <th class="col4"></th>
-                            <th class="error-col"></th>
                         </tr>
                         <tr ng-repeat="ticket in session.tickets">
                             <td>
@@ -126,12 +124,12 @@
                                         ng-change="ticket.nameOfTicket = ticket.typeOfTicket" ng-options="ticketType for ticketType in keys.typesOfTickets"></select>
                             </td>
                             <td>
-                                <input class="event-input ticket-name" ng-model="ticket.nameOfTicket" ng-init="ticket.nameOfTicket = ticket.typeOfTicket"
-                                       ng-focus="session.ticketsError = undefined">
+                                <input class="event-input ticket-name" ng-model="ticket.nameOfTicket" ng-focus="session.ticketsError = undefined"
+                                       ng-init="ticket.nameOfTicket = ticket.nameOfTicket ? ticket.nameOfTicket : ticket.typeOfTicket">
                             </td>
                             <td>
-                                <input class="event-input ticket-number" type="number" class="ticket-number" ng-model="ticket.numOfTickets"
-                                       ng-focus="session.ticketsError= undefined">
+                                <input class="event-input ticket-number" type="number" class="ticket-number" ng-model="ticket.numOfTickets" min="1"
+                                       ng-focus="session.error.ticketsError= undefined">
                             </td>
                             <td>
 
@@ -139,11 +137,9 @@
                                     Sterge
                                 </button>
                             </td>
-                            <td class="error-col">
-                                <p class="event-error" ng-if="ticket.error">{{ticket.error}}</p>
-                            </td>
                         </tr>
                     </table>
+                    <p class="event-error" ng-if="session.error.ticketsError">{{session.error.ticketsError}}</p>
                     <div class="buttons-div">
                         <button class="add-bttn" ng-click="addTicket(session.tickets)"
                                 title="Adaugă un nou ticket pentru sesiune">

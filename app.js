@@ -8,6 +8,7 @@ const express = require("express"),
       routes = require('./routes/index'),
       usersRoute = require('./routes/usersRoute'),
       dojosRoute = require('./routes/dojosRoute'),
+      eventsRoute = require('./routes/eventsRoute'),
       bodyParser = require('body-parser'),
       expressValidator = require("express-validator"),
       mongoose = require('mongoose'),
@@ -16,7 +17,8 @@ const express = require("express"),
       passport = require('passport'),
       //passportLocal =   require('passport-local'),
       logger = require('./logger/logger'),
-      validator = require('./validator/validator');
+      validator = require('./validator/validator'),
+      helper = require('./auxiliary/helper');
 
 
 
@@ -31,7 +33,7 @@ mongoose.connect('mongodb://localhost/' + dataBaseName, function(err){
     }
 });
 
-
+helper.initializeApp();
 
 //Read data files
 //templating.initiate();
@@ -67,6 +69,7 @@ app.use(expressValidator({
 app.use("/", routes);
 app.use("/user", usersRoute);
 app.use("/dojos", dojosRoute);
+app.use("/events", eventsRoute);
 
 
 

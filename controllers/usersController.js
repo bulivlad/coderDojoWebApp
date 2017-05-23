@@ -9,6 +9,7 @@ const logger = require('winston');
 const validator = require('../validator/validator');
 const multer = require('multer');
 const mime = require('mime');
+const helper = require('./helperController');
 let upload;
 
 //Method for registering user
@@ -56,10 +57,11 @@ module.exports.registerUser = function(req, res){
 };
 
 module.exports.registerUsersChild = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.registerChildRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.registerChildRoute} for ${helper.getUser(req)}`);
     let childUser = req.body.user;
     logger.silly('user:' + JSON.stringify(childUser));
     let childUserType = childUser.userType;
+    //TODO sanitize the fields for malicious intent
     let errors = validateFields(req, childUserType);
     if (errors){
         res.json({errors: errors})
@@ -97,7 +99,6 @@ module.exports.registerUsersChild = function(req, res){
                     });
                 } else {
                     saveChildToDbsAndRegisterWithParent(req, res, childUser);
-
                 }
             }
         });
@@ -113,13 +114,13 @@ module.exports.loginUser = function(req, res){
 
 //Method for checking if user is authenticated and getting the user object
 module.exports.amIAuthenticated = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.amIAuthenticatedUserRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.amIAuthenticatedUserRoute} for ${helper.getUser(req)}`);
     res.json({user:req.user});
 };
 
 //Method for getting user's children
 module.exports.getUsersChildren = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.getChildrenRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.getChildrenRoute} for ${helper.getUser(req)}`);
     if(req.user && req.user.children && req.user.children.length > 0){
         User.find({_id: {$in: req.user.children}}, {password: false, creationDate: false, notifications:false},
             function(err, expandedChildren){
@@ -131,14 +132,14 @@ module.exports.getUsersChildren = function(req, res){
                 res.json({children:expandedChildren});
             });
     } else {
-        logger.error(`${getUser(req)} has no children but issued request for children`);
+        logger.error(`${helper.getUser(req)} has no children but issued request for children`);
         res.json({errors: keys.noChildrenError});
     }
 };
 
 //Method for getting user's parents
 module.exports.getUsersParents = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.getUsersParentsRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.getUsersParentsRoute} for ${helper.getUser(req)}`);
     if(req.user && req.user.parents && req.user.parents.length > 0){//TODO this always returns noParentsError (test why)
         User.find({_id: {$in: req.user.parents}}, {password: false, creationDate: false},function(err, expandedParents){
             if (err){
@@ -149,14 +150,14 @@ module.exports.getUsersParents = function(req, res){
             res.json({parents:expandedParents});
         });
     } else {
-        logger.error(`${getUser(req)} has no parents but issued request for parents`);
+        logger.error(`${helper.getUser(req)} has no parents but issued request for parents`);
         res.json({errors: keys.noParentsError});
     }
 };
 
 //Method for getting the parents of a user's child
 module.exports.getChildsParents = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.getChildsParentsRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.getChildsParentsRoute} for ${helper.getUser(req)}`);
     let parents = req.body.parents;
     //TODO add check that the current user is the parent of the child asking for parents
     logger.silly(`Parents to search for ${parents}`);
@@ -181,7 +182,7 @@ module.exports.logout = function(req, res){
 
 //method for editing a user
 module.exports.editUser = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.editUser} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.editUser} for ${helper.getUser(req)}`);
     let newUser = req.body.user;
     logger.silly(`Original user: ${JSON.stringify(req.user)}`);
     logger.silly(`Modified user: ${JSON.stringify(newUser)}`);
@@ -213,7 +214,7 @@ module.exports.editUser = function(req, res){
 
 //Method for editing a user's child
 module.exports.editUsersChild = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.editUsersChild} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.editUsersChild} for ${helper.getUser(req)}`);
     let usersChild = req.body.user;
     logger.silly(`Original user: ${JSON.stringify(req.user)}`);
     logger.silly(`Users child: ${JSON.stringify(usersChild)}`);
@@ -246,13 +247,13 @@ module.exports.editUsersChild = function(req, res){
 
 //Method for getting user's notifications
 module.exports.getUsersNotifications = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.getUsersNotificationsRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.getUsersNotificationsRoute} for ${helper.getUser(req)}`);
     User.findOne({_id: req.user._id}, {notifications:true}, function(err, user){
         if(err){
-            logger.error(`Error searching database for notifications for ${getUser(req)}:` + err);
+            logger.error(`Error searching database for notifications for ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
-        logger.debug(`Notifications for ${getUser(req)} are: ` + JSON.stringify(user.notifications));
+        logger.debug(`Notifications for ${helper.getUser(req)} are: ` + JSON.stringify(user.notifications));
         res.json({
             notificationObject:{
                 ownerOfNotifications: req.user._id,
@@ -264,12 +265,12 @@ module.exports.getUsersNotifications = function(req, res){
 
 //Method for getting user's child's notifications
 module.exports.getUsersChildsNotifications = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.getUsersChildNotificationsRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.getUsersChildNotificationsRoute} for ${helper.getUser(req)}`);
     let childId = req.body.childId;
     if(isUsersChild(req.user, {_id:childId})) {
         User.findOne({_id: childId}, {notifications: true}, function (err, child) {
             if (err) {
-                logger.error(`Error searching database for notifications for child (_id=${childId}) of ${getUser(req)}:` + err);
+                logger.error(`Error searching database for notifications for child (_id=${childId}) of ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
             }
             logger.debug(`Notifications for child (_id=${childId} are: ` + JSON.stringify(child.notifications));
@@ -290,8 +291,7 @@ module.exports.getUsersChildsNotifications = function(req, res){
 
 //Method for inviting a user to be parent
 module.exports.inviteUserToBeParent = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.inviteUserToBeParentRoute} for user (email=${req.user.email},
-                   alias=${req.user.alias})`);
+    logger.debug(`Entering UsersRoute: ${keys.inviteUserToBeParentRoute} for ${helper.getUser(req)}`);
     let invitation = req.body.invitation;
     logger.silly(`Invitation = ${JSON.stringify(invitation)}`);
 
@@ -354,12 +354,12 @@ module.exports.inviteUserToBeParent = function(req, res){
 
 //Method for deleting a single notification for a user
 module.exports.deleteNotificationForUser = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.deleteNotificationForUserRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.deleteNotificationForUserRoute} for ${helper.getUser(req)}`);
     let notificationId = req.body.notifId;
     User.findOneAndUpdate({_id: req.user._id}, {$pull: {notifications: {_id: notificationId}}},
         function(err, user){
             if (err){
-                logger.error(`Error deleting notification for ${getUser(req)}:` + err);
+                logger.error(`Error deleting notification for ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
             }
             logger.silly(`User after deleting notification ${JSON.stringify(user)}`);
@@ -369,14 +369,14 @@ module.exports.deleteNotificationForUser = function(req, res){
 
 //Method for deleteing a single notification for a user's child
 module.exports.deleteNotificationForUsersChild = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.deleteNotificationForUsersChildRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.deleteNotificationForUsersChildRoute} for ${helper.getUser(req)}`);
     let notificationId = req.body.notifId;
     let childId = req.body.childId;
     if(isUsersChild(req.user, {_id:childId})) {
         User.findOneAndUpdate({_id: childId}, {$pull: {notifications: {_id: notificationId}}},
             function(err, childUser){
                 if (err){
-                    logger.error(`Error deleting notification for the child (_id=${childId}) of ${getUser(req)}:` + err);
+                    logger.error(`Error deleting notification for the child (_id=${childId}) of ${helper.getUser(req)}:` + err);
                     return res.sendStatus(500);
                 }
                 logger.silly(`User after deleting notification ${JSON.stringify(childUser)}`);
@@ -393,16 +393,16 @@ module.exports.deleteNotificationForUsersChild = function(req, res){
 
 //Method for accepting a childs invitation to be a parent
 module.exports.acceptChildInvite = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.acceptChildInviteRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.acceptChildInviteRoute} for ${helper.getUser(req)}`);
     let notificationId = req.body.notifId;
     User.findById(req.user._id, {notifications: true}, function(err, user){
         if (err){
-            logger.error(`Error finding ${getUser(req)}:` + err);
+            logger.error(`Error finding ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
         let notification = getNotification(user.notifications, notificationId);
         if(!notification){
-            logger.debug(`Notification with id ${notificationId} does not exist for ${getUser(req)}`);
+            logger.debug(`Notification with id ${notificationId} does not exist for ${helper.getUser(req)}`);
             let errors = [];
             errors.push(createServerError('notification', 'Notification does not exist.'));
             res.json({errors:errors});
@@ -417,7 +417,7 @@ module.exports.acceptChildInvite = function(req, res){
                 function(err, user){
                     if (err){
                         logger.error(`Error deleting notification and adding child (childId=${childId})
-                                   for ${getUser(req)}:` + err);
+                                   for ${helper.getUser(req)}:` + err);
                         return res.sendStatus(500);
                     }
                     logger.silly(`Updated the user with the notification and the child`);
@@ -435,7 +435,7 @@ module.exports.acceptChildInvite = function(req, res){
                         function(err, child){
                             if (err){
                                 logger.error(`Error adding the notification and adding the parent to the child (childId=${childId})
-                                   for ${getUser(req)}:` + err);
+                                   for ${helper.getUser(req)}:` + err);
                                 return res.sendStatus(500);
                             }
                             res.json({success:true});
@@ -450,13 +450,13 @@ module.exports.acceptChildInvite = function(req, res){
 
 //Module for uploading user photos
 module.exports.uploadUserPicture = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${getUser(req)}`);
+    logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${helper.getUser(req)}`);
     upload(req, res, function(err){
         let userToUpdatePhoto = req.body.userId;
         let fileName = req.file.filename;
         let user = req.user;
         if (err){
-            logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${getUser(req)}:` + err);
+            logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
 
@@ -465,13 +465,13 @@ module.exports.uploadUserPicture = function(req, res){
         if(user._id == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
             User.updatePhotoForUser(userToUpdatePhoto, fileName, function(err){
                 if(err){
-                    logger.error(`Error updating user photo for for ${userToUpdatePhoto} by ${getUser(req)}:` + err);
+                    logger.error(`Error updating user photo for for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
                     return res.sendStatus(500);
                 }
                 res.json({userPhoto:fileName, userId: userToUpdatePhoto});
             })
         } else {
-            logger.error(` ${getUser(req)} (children=${user.children}) tried to change photo for user _id=${userToUpdatePhoto} while not being the user or the users child`)
+            logger.error(` ${helper.getUser(req)} (children=${user.children}) tried to change photo for user _id=${userToUpdatePhoto} while not being the user or the users child`)
             res.json({errors:keys.wrongUserError});
         }
     })
@@ -533,13 +533,6 @@ function getNotification(notifications, notificationId){
                 return notification;
             }
         }
-    }
-}
-
-//Method for displaying user information for logging
-function getUser(req){
-    if(req.user){
-        return `user=(email=${req.user.email}, alias=${req.user.alias}, _id=${req.user._id})`;
     }
 }
 

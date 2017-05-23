@@ -66,6 +66,8 @@ const keys = {
     acceptPendingMemberRoute: 'acceptPendingMember',
     rejectPendingMemberRoute: 'rejectPendingMember',
     uploadUserPictureRoute: 'uploadUserPicture',
+    getAuthCurrentDojoEventsRoute: 'getAuthCurrentDojoEvents',
+    getCurrentDojoEventsRoute: 'getCurrentDojoEvents',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
@@ -151,10 +153,10 @@ const keys = {
     showMultiEventTypes: 'showMultiEventTypes',
 
     //Enums
-    daysOfWeek: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată', 'Duminică'],
+    daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],
     typesOfTickets: ['voluntar', 'mentor', 'cursant'],
     eventTypes: ['recurent', 'unic'],
-    eventStatus: ['Activ', 'Inactiv']
+    eventStatus: ['Activ', 'Inactiv'],
 
 };
 

@@ -3,23 +3,32 @@
  */
 
 angular.module("coderDojoTimisoara")
-    .controller("headerController", function($scope, $rootScope, $location, dataService){
+    .controller("headerController", function($scope, $rootScope, $location, dataService, helperSvc){
         //Method that logs out user
         $scope.logoutUser = function(){
-            dataService.logoutUser()
-                .then(function(response){
-                    if (response.data && response.data.success){
-                        //Erasing current user
-                        $scope.deleteUser('logoutUser');
-                        $scope.hideUserMenuNarrow();
-                        $location.path('/' + keys.despre);
-                    } else {
-                        console.log("Error");
-                    }
-                })
-                .catch(function(err){
-                    console.log(err);
-                });
+            if($scope.isUserLoggedIn()){
+                dataService.logoutUser()
+                    .then(function(response){
+                        if (response.data && response.data.success){
+                            //Erasing current user
+                            $scope.deleteUser('logoutUser');
+                            $scope.hideUserMenuNarrow();
+                            $location.path('/' + keys.despre);
+                        } else {
+                            console.log("Error");
+                        }
+                    })
+                    .catch(function(err){
+                        //If an unauthorized error occurs, we close the menus
+                        helperSvc.handlerCommunicationErrors(err, 'logoutUser', $scope, function(){
+                            if(err.status === 401){
+                                $scope.hideUserMenuNarrow();
+                                $scope.hideMenuNarrow();
+                            }
+
+                        });
+                    });
+            }
         };
 
         //Method for showing the navigation for narrow views(mobile)

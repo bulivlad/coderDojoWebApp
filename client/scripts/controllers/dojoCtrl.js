@@ -13,7 +13,8 @@ angular.module("coderDojoTimisoara")
                 .then(function(response){
                     if (response.data.dojo){
                         $scope.dojo = response.data.dojo;
-                        createMapWithDojo($scope.dojo, 'dojo-map-single-dojo')
+                        createMapWithDojo($scope.dojo, 'dojo-map-single-dojo');
+                        getCurrentDojoEvents();
                     }
                 })
                 .catch(function(err){
@@ -121,35 +122,78 @@ angular.module("coderDojoTimisoara")
             return $scope.views[thisView];
         };
 
+        //Method for getting the event date
+        $scope.getEventDate = function(event){
+            var ret = '';
+            var startTime = new Date(event.startTime);
+            var endTime = new Date(event.endTime);
+            //This is a weekly event
+            if(event.copyOfRecurrentEvent){
+                ret = 'În fiecare ' + keys.daysOfWeek[startTime.getDay()] + ' ' +
+                      startTime.getHours() + ':' +
+                    helperSvc.adjustOneNumberMinutes(startTime.getMinutes() + '') + ' - ' +
+                    endTime.getHours() + ':' +
+                    helperSvc.adjustOneNumberMinutes(endTime.getMinutes() + '');
+            } else {
+                ret = event.name + ' la ' + $scope.dojo.name;
+            }
+            return ret;
+        };
+
+        //Method for informing the GUI to show user not registered for event
+        $scope.showUserNotRegistered = function(dojoEvent){
+            if($scope.isUserLoggedIn()){
+                if(!(dojoEvent.recUser && dojoEvent.recUser.length > 0)){
+                    return true;
+                }
+            }
+        };
+
+        $scope.getRegisterButtonLabel = function(dojoEvent){
+            var ret = 'Rezervă';
+            if($scope.isUserLoggedIn()){
+                if((dojoEvent.recUser && dojoEvent.recUser.length > 0)){
+                    ret = 'Rezervă/renunță';
+                }
+            }
+            return ret;
+        };
+
+
+        //Method for getting the dojo name to display
+        $scope.getDojoName = function(event){
+            var ret = '';
+            //This is a weekly event
+            if(event.copyOfRecurrentEvent){
+                ret = 'Sesiuni săptămânale la ' + $scope.dojo.name;
+            } else {
+                ret = event.name + ' la ' + $scope.dojo.name;
+            }
+            return ret;
+        };
+
         $scope.createSchedule = function(rawSchedule){
             var ret = '';
 
             if(rawSchedule){
-                //rawSchedules.forEach(function(rawSchedule){
-                var startHour = rawSchedule.startHour + '';
-                startHour = startHour.length == 1 ? '0' + startHour : startHour;
+                var startHour = helperSvc.adjustOneNumberMinutes(rawSchedule.startHour + '');
 
-                var endHour = rawSchedule.endHour + '';
-                endHour = endHour.length == 1 ? '0' + endHour : endHour;
+                var endHour =  helperSvc.adjustOneNumberMinutes(rawSchedule.endHour + '');
 
-                var startMinute = rawSchedule.startMinute + '';
-                startMinute = startMinute.length == 1 ? '0' + startMinute : startMinute;
+                var startMinute = helperSvc.adjustOneNumberMinutes(rawSchedule.startMinute + '');
 
-                var endMinute = rawSchedule.endMinute + '';
-                endMinute = endMinute.length == 1 ? '0' + endMinute : endMinute;
+                var endMinute = helperSvc.adjustOneNumberMinutes(rawSchedule.endMinute + '');
 
                 var schedule = 'In fiecare ' +  rawSchedule.day + ' de la ' + startHour + ':' + startMinute +
                     ' la ' + endHour + ':' + endMinute;
 
                 ret += schedule;
-                //ret += '\n';
-                //});
             }
 
             return ret;
         };
 
-        //Method for sernding request to server to become a member of a dojo
+        //Method for sending request to server to become a member of a dojo
         $scope.becomeMemberOfDojo = function($event, whatMember){
             $event.stopPropagation();
             var currentDojoId = $scope.dojo._id;
@@ -276,6 +320,30 @@ angular.module("coderDojoTimisoara")
             }, 200);
         };
 
+        var getCurrentDojoEvents = function(){
+            dataService.getCurrentDojoEvents({dojoId: $scope.dojo._id})
+                .then(function(response){
+                    if(response.data.events){
+                        $scope.dojo.events = response.data.events;
+                    }
+                })
+                .catch(function(err){
+                    helperSvc.handlerCommunicationErrors(err, 'getCurrentDojoEvents', $scope);
+                })
+        };
+
+        var getAuthCurrentDojoEvents = function(){
+            dataService.getAuthCurrentDojoEvents({dojoId: $scope.dojo._id})
+                .then(function(response){
+                    if(response.data.events){
+                        $scope.dojo.events = response.data.events;
+                    }
+                })
+                .catch(function(err){
+                    helperSvc.handlerCommunicationErrors(err, 'getAuthCurrentDojoEvents', $scope);
+                 })
+        };
+
         $scope.initializeDojoCtrl = function(){
             var toBeViewedDojoId = $scope.getToBeViewedDojoId();
             //We check the a dojo to be viewed has been set in another view (it should have been, otherwise an error
@@ -284,9 +352,11 @@ angular.module("coderDojoTimisoara")
                 $scope.setView(keys.viewDojo, [keys.showBackButton]);
                 if($scope.isUserLoggedIn()){
                     $scope.getAuthDojoFromServerAndMakeMap(toBeViewedDojoId);
+                    //getAuthCurrentDojoEvents();
                 } else {
                     $scope.getDojoFromServerAndMakeMap(toBeViewedDojoId);
                 }
+
             } else {
                 $location.path('/' + keys.cautaUnDojo);
             }

@@ -80,7 +80,8 @@ let dojoFields = {
     twitter: true,
     requirements: true,
     dojoEvents: true,
-    pictureUrl: true
+    pictureUrl: true,
+    recurrentEvents: true
 };
 
 //This are dojos for users that ARE NOT authenticated
@@ -166,7 +167,13 @@ module.exports.updateDojo = function(dojo, callback){
             requirements: dojo.requirements, recurrentEvents: dojo.recurrentEvents}},
         {new:true},
         function(err, dojo){
-            logger.silly(`Updated dojo: ${JSON.stringify(dojo, null, 2)}`);
+            logger.silly(`Updated dojo: ${JSON.stringify(dojo)}`);
             callback(err);
         })
 };
+
+//Method for retrieving the dojos that have recurrent events
+module.exports.findDojosWithRecurrentEvents = function(callback){
+    Dojo.find({recurrentEvents: {$exists: true, $ne:[]}}, {recurrentEvents: true, name: true}, callback);
+};
+

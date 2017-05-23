@@ -7,20 +7,24 @@ const Dojo = require('../models/dojoModel');
 const User = require('../models/userModel');
 const UserController = require('../controllers/usersController')
 const logger = require('winston');
+const validator = require('validator');
+const helper  = require('./helperController');
 
 
 //Method for adding a new dojo (only the admin can do that)
 module.exports.addDojo = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.addDojoRoute} by ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.addDojoRoute} by ${helper.helper.getUser(req)}`);
     //First we check that the user trying to add the dojo is an administrator
     if(req.user.authorizationLevel === keys.admin){
         let dojo = req.body.dojo;
-        logger.silly(`Dojo to save: ${JSON.stringify(dojo)}`);
+        logger.silly(`Dojo to save before sanitize: ${JSON.stringify(dojo)}`);
+        dojo = sanitizeDojo(dojo);
+        logger.silly(`Dojo to save after sanitize: ${JSON.stringify(dojo)}`);
         let newDojo = new Dojo(dojo);
         //We save the dojo to the database
         newDojo.save(function(err){
             if(err){
-                logger.error(`Error adding a dojo by ${getUser(req)}:` + err);
+                logger.error(`Error adding a dojo by ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
             }
             //If the save was successful, we return a success message to the client.
@@ -29,14 +33,14 @@ module.exports.addDojo = function(req, res){
     } else {
         //If the user is not an administrator, we log this as an error, and respond with a not authorized error to the
         //client.
-        logger.error(`${getUser(req)} tried to add a dojo while not authorized to do so`);
+        logger.error(`${helper.getUser(req)} tried to add a dojo while not authorized to do so`);
         res.json({errors: keys.notAuthorizedError});
     }
 };
 
 //Method for deleting a dojo (only the admin can do that)
 module.exports.deleteDojo = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.deleteDojoRoute} by ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.deleteDojoRoute} by ${helper.getUser(req)}`);
     //First we check that the user trying to add the dojo is an administrator
     if(req.user.authorizationLevel === keys.admin){
         let dojoId = req.body.dojoId;
@@ -44,7 +48,7 @@ module.exports.deleteDojo = function(req, res){
         //We save the dojo to the database
         Dojo.remove({_id: dojoId}, function(err){
             if(err){
-                logger.error(`Error deleting dojo (_id=${dojoId}) by ${getUser(req)}:` + err);
+                logger.error(`Error deleting dojo (_id=${dojoId}) by ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
             }
             //If the save was successful, we return a success message to the client.
@@ -53,7 +57,7 @@ module.exports.deleteDojo = function(req, res){
     } else {
         //If the user is not an administrator, we log this as an error, and respond with a not authorized error to the
         //client.
-        logger.error(`${getUser(req)} tried to add a dojo while not authorized to do so`);
+        logger.error(`${helper.getUser(req)} tried to add a dojo while not authorized to do so`);
         res.json({errors: keys.notAuthorizedError});
     }
 };
@@ -62,28 +66,30 @@ module.exports.deleteDojo = function(req, res){
 
 //Route for editing an existing dojo (only the admin and champion can do that)
 module.exports.editDojo = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.editDojoRoute} by ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.editDojoRoute} by ${helper.getUser(req)}`);
     let user = req.user;
     let modifiedDojo = req.body.dojo;
-    logger.silly(`Modified dojo: ${JSON.stringify(modifiedDojo)}`);
+    logger.silly(`Modified dojo before sanitize: ${JSON.stringify(modifiedDojo)}`);
+    modifiedDojo = sanitizeDojo(modifiedDojo);
+    logger.silly(`Modified dojo after sanitize: ${JSON.stringify(modifiedDojo)}`);
     //We get the dojos from the database to check the user's credentials
     Dojo.getDojoForInternalAuthentication(modifiedDojo._id, function(err, dojo){
         if(err){
-            logger.error(`Error getting dojo by ${getUser(req)}, for  ${keys.editDojoRoute}:` + err);
+            logger.error(`Error getting dojo by ${helper.getUser(req)}, for  ${keys.editDojoRoute}:` + err);
             return res.sendStatus(500);
         }
         //Checking if the user has permission to edit the dojo (is champion in dojo or admin)
         if(isUserAdmin(user) || isUserChampionInDojo(dojo, user._id)){
             Dojo.updateDojo(modifiedDojo, function(err){
                 if(err){
-                    logger.error(`Error adding a dojo by ${getUser(req)}:` + err);
+                    logger.error(`Error adding a dojo by ${helper.getUser(req)}:` + err);
                     return res.sendStatus(500);
                 }
                 res.json({success: true});
             });
         } else {
             //If the user is not champion of dojo or admin, we log it, and we send back an unauthorized error
-            logger.error(`${getUser(req)} tried to edit a dojo (id=${modifiedDojo._id}) while not authorized to do so`);
+            logger.error(`${helper.getUser(req)} tried to edit a dojo (id=${modifiedDojo._id}) while not authorized to do so`);
             res.json({errors: keys.notAuthorizedError});
         }
     });
@@ -110,7 +116,7 @@ module.exports.getMyDojos = function(req, res){
     //Go to the database to get all dojos
     Dojo.getDojos(true, function(err, dojos){
         if (err){
-            logger.error(`Problems retrieving dojos by ${getUser(req)} for ${keys.getMyDojosRoute} from database: ` + err);
+            logger.error(`Problems retrieving dojos by ${helper.getUser(req)} for ${keys.getMyDojosRoute} from database: ` + err);
             return res.sendStatus(500);
         }
         //We filter the dojos so only the ones where the user is a member remain (or all if the user is admin).
@@ -129,7 +135,7 @@ module.exports.getMyChildsDojos = function(req, res){
         //Go to the database to get all dojos
         Dojo.getDojos(true, function(err, dojos){
             if (err){
-                logger.error(`Problems retrieving dojos by ${getUser(req)}  for ${keys.getMyChildsDojosRoute} from database: ` + err);
+                logger.error(`Problems retrieving dojos by ${helper.getUser(req)}  for ${keys.getMyChildsDojosRoute} from database: ` + err);
                 return res.sendStatus(500);
             }
             //We filter the dojos so only the childs dojo's are sent
@@ -138,7 +144,7 @@ module.exports.getMyChildsDojos = function(req, res){
         });
     } else {
         //If the user is not the parent of the child (the user for which the dojos were requested) we sent a wrongUserError back
-        logger.error(`${getUser(req)} is not parent of child(id=${childId}`);
+        logger.error(`${helper.getUser(req)} is not parent of child(id=${childId}`);
         res.json({errors:keys.wrongUserError});
     }
 };
@@ -149,10 +155,15 @@ module.exports.getDojo = function(req, res){
     let dojoId = req.body.dojoId;
     //Get a single dojo from the database, with the basic fields
     Dojo.getDojo(dojoId, function(err, dojo){
+        //We need to copy it because the object received from the database is frozen
+        dojo = JSON.parse(JSON.stringify(dojo));
         if (err){
-            logger.error(`Problems retrieving dojo by ${getUser(req)}  for ${keys.getDojoRoute} from database: ` + err);
+            logger.error(`Problems retrieving dojo by ${helper.getUser(req)}  for ${keys.getDojoRoute} from database: ` + err);
             return res.sendStatus(500);
         }
+        //logger.silly(`before dojo=${JSON.stringify(dojo)}`);
+        let adjustedRecEvents = adjustRecurrentEventsForRegularUsers(dojo.recurrentEvents);
+        dojo.recurrentEvents = adjustedRecEvents;
         res.json({dojo:dojo});
     });
 };
@@ -165,7 +176,7 @@ module.exports.getAuthDojo = function(req, res){
     //Get a single dojo from the database, with all the fields
     Dojo.getAuthDojo(dojoId, function(err, dojo){
         if (err){
-            logger.error(`Problems retrieving dojo by ${getUser(req)}  for ${keys.getAuthDojoRoute} from database: ` + err);
+            logger.error(`Problems retrieving dojo by ${helper.getUser(req)}  for ${keys.getAuthDojoRoute} from database: ` + err);
             return res.sendStatus(500);
         }
         //Next we filter the dojos, based on user permisions. Flags are added to inform the client app which actions the
@@ -177,18 +188,18 @@ module.exports.getAuthDojo = function(req, res){
 
 //Method for becoming member of dojo
 module.exports.becomeMemberOfDojo = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.becomeMemberOfDojoRoute} for ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.becomeMemberOfDojoRoute} for ${helper.getUser(req)}`);
     let dojoId = req.body.dojoId;
     //First we get the dojos and check if the user is not a member or a pending member of this dojo (fail safe)
     Dojo.getDojoForInternalAuthentication(dojoId, function(err, dojo){
         if (err){
-            logger.error(`Problems retrieving dojo by ${getUser(req)}  for ${keys.becomeMemberOfDojoRoute} from database: ` + err);
+            logger.error(`Problems retrieving dojo by ${helper.getUser(req)}  for ${keys.becomeMemberOfDojoRoute} from database: ` + err);
             return res.sendStatus(500);
         }
         if( isUserMemberOrPendingMemberOfDojo(dojo, req.user._id) ){
             //IF the user is already a member, we send a userAlreadyJoined error
             res.json({errors: keys.userAlreadyJoinedDojoError});
-            logger.error(`${getUser(req)} already has joined dojo ${JSON.stringify(dojo)}`);
+            logger.error(`${helper.getUser(req)} already has joined dojo ${JSON.stringify(dojo)}`);
 
         } else {
             //if user is not already joined or pending a dojo he/she becomes a member or a pendingJoining is added
@@ -216,7 +227,7 @@ function becomeMemberOfDojo(req, res){
     } else if(whatMember === keys.volunteer){
         listToUpdate = {$addToSet: {pendingVolunteers: req.user._id}};
     } else {
-        logger.error(`Request unknown by ${getUser(req)}`);
+        logger.error(`Request unknown by ${helper.getUser(req)}`);
         return res.sendStatus(500);
     }
     logger.silly(`dojoId=${dojoId},whatMember:${whatMember}, listToUpdate:${JSON.stringify(listToUpdate)}`);
@@ -226,7 +237,7 @@ function becomeMemberOfDojo(req, res){
         listToUpdate,
         function(err){
             if(err){
-                logger.error(`Error joining dojo by ${getUser(req)}:` + err);
+                logger.error(`Error joining dojo by ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
             }
             res.json({success: true});
@@ -235,7 +246,7 @@ function becomeMemberOfDojo(req, res){
 
 //Method by which a use leaves a dojo
 module.exports.leaveDojo = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.leaveDojoRoute} for ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.leaveDojoRoute} for ${helper.getUser(req)}`);
     let dojoId = req.body.dojoId;
     // We go at this in a brute force manner. Instead of determining what kind of member the user was, we just remove
     // the user from every userType array there is in the database.
@@ -246,7 +257,7 @@ module.exports.leaveDojo = function(req, res){
             parents:req.user._id, attendees:req.user._id}},
         function(err, dojo){
             if(err){
-                logger.error(`Error leaving dojo by ${getUser(req)}:` + err);
+                logger.error(`Error leaving dojo by ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
             }
             res.json({success: true});
@@ -257,13 +268,13 @@ module.exports.leaveDojo = function(req, res){
 
 //Method that gets summary info about members for a dojo xxxxxxxx(aici am ramas)
 module.exports.getUsersForMember = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.getUsersForMember} for ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.getUsersForMember} for ${helper.getUser(req)}`);
     let user = req.user;
     let dojoId = req.body.dojoId;
     let typeOfUsers = req.body.typeOfUsers;
     Dojo.getDojoForInternalAuthentication(dojoId, function(err, dojo){
         if (err){
-            logger.error(`Error getting dojo for getting members for ${getUser(req)}, for dojo(${dojoId}):` + err);
+            logger.error(`Error getting dojo for getting members for ${helper.getUser(req)}, for dojo(${dojoId}):` + err);
             return res.sendStatus(500);
         }
         logger.silly('dojoToSearh:', JSON.stringify(dojo));
@@ -282,15 +293,15 @@ module.exports.getUsersForMember = function(req, res){
             }
         }
         if(isUserAuthorized){
-            User.getUsersForMember(dojo[typeOfUsers], function(err, users){
+            User.helper.getUsersForMember(dojo[typeOfUsers], function(err, users){
                 if (err){
-                    logger.error(`Error getting members for ${getUser(req)}, for dojo(${dojoId}):` + err);
+                    logger.error(`Error getting members for ${helper.getUser(req)}, for dojo(${dojoId}):` + err);
                     return res.sendStatus(500);
                 }
                 res.json({users: users});
             })
         } else {
-            logger.error(`${getUser(req)} tried to get members of dojo (${dojoId}) while not authorized`);
+            logger.error(`${helper.getUser(req)} tried to get members of dojo (${dojoId}) while not authorized`);
             res.json({errors: keys.notAuthorizedError});
         }
     })
@@ -298,13 +309,13 @@ module.exports.getUsersForMember = function(req, res){
 
 //Method that gets full info about a user in a dojo
 module.exports.getDetailedUserForMember = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.getDetailedUserForMemberRoute} for ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.getDetailedUserForMemberRoute} for ${helper.getUser(req)}`);
     let userToSearchForId = req.body.userId;
     let dojoToSearchInId = req.body.dojoId;
     let user = req.user;
     Dojo.getDojoForInternalAuthentication(dojoToSearchInId, function(err, dojo){
         if (err){
-            logger.error(`Error getting dojo for for ${getUser(req)}, for ${keys.getDetailedUserForMemberRoute}:` + err);
+            logger.error(`Error getting dojo for for ${helper.getUser(req)}, for ${keys.getDetailedUserForMemberRoute}:` + err);
             return res.sendStatus(500);
         }
         // We determine if the user is authorized for the action
@@ -314,11 +325,10 @@ module.exports.getDetailedUserForMember = function(req, res){
             if (isUserMemberOrPendingMemberOfDojo(dojo, userToSearchForId)){
                 User.getDetailedUserForMember(userToSearchForId, function(err, user){
                     if (err){
-                        logger.error(`Error finding user (userId=${userToSearchForId}) for ${getUser(req)},
+                        logger.error(`Error finding user (userId=${userToSearchForId}) for ${helper.getUser(req)},
                                         for getting member info:` + err);
                         return res.sendStatus(500);
                     }
-                    console.log('getDetailedUserForMember answered');
                     res.json({user:user});
                 })
             } else {
@@ -326,7 +336,7 @@ module.exports.getDetailedUserForMember = function(req, res){
                 res.json({errors: keys.notAuthorizedError});
             }
         } else {
-            logger.error(`${getUser(req)} tried to get info on member (userId=${userToSearchForId}) of dojo (${dojoToSearchInId})
+            logger.error(`${helper.getUser(req)} tried to get info on member (userId=${userToSearchForId}) of dojo (${dojoToSearchInId})
                             while not authorized`);
             res.json({errors: keys.notAuthorizedError});
         }
@@ -336,13 +346,13 @@ module.exports.getDetailedUserForMember = function(req, res){
 
 //Method for rejecting a users application to become a member for a dojo
 module.exports.rejectPendingMember = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.rejectPendingMemberRoute} for ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.rejectPendingMemberRoute} for ${helper.getUser(req)}`);
     let userToRejectId = req.body.userId;
     let dojoId = req.body.dojoId;
     let user = req.user;
     Dojo.getDojoForInternalAuthentication(dojoId, function(err, dojo){
         if (err){
-            logger.error(`Error getting dojo for for ${getUser(req)}, for rejecting member id=${userToRejectId}:` + err);
+            logger.error(`Error getting dojo for for ${helper.getUser(req)}, for rejecting member id=${userToRejectId}:` + err);
             return res.sendStatus(500);
         }
         // We determine if the user is authorized for the action
@@ -367,7 +377,7 @@ module.exports.rejectPendingMember = function(req, res){
                     dojoModifications,
                     function(err, dojo){
                         if(err){
-                            logger.error(`Error updating dojo while rejecting pending member in dojo by ${getUser(req)}:` + err);
+                            logger.error(`Error updating dojo while rejecting pending member in dojo by ${helper.getUser(req)}:` + err);
                             return res.sendStatus(500);
                         }
                         if(dojo){
@@ -385,7 +395,7 @@ module.exports.rejectPendingMember = function(req, res){
                             res.json({success: true});
 
                         } else {
-                            logger.error(`Dojo (id=${dojoId}) not found by: ${getUser(req)}, while rejecting pending member`);
+                            logger.error(`Dojo (id=${dojoId}) not found by: ${helper.getUser(req)}, while rejecting pending member`);
                             return res.sendStatus(500);
                         }
                     })
@@ -393,7 +403,7 @@ module.exports.rejectPendingMember = function(req, res){
                 res.json({success: true});
             }
         } else {
-            logger.error(`${getUser(req)} tried to reject pending member (userId=${userToRejectId}) of dojo (${dojoId})
+            logger.error(`${helper.getUser(req)} tried to reject pending member (userId=${userToRejectId}) of dojo (${dojoId})
                             while not authorized`);
             res.json({errors: keys.notAuthorizedError});
         }
@@ -402,13 +412,13 @@ module.exports.rejectPendingMember = function(req, res){
 
 //Method for accepting a users application to become a member for a dojo
 module.exports.acceptPendingMember = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.acceptPendingMemberRoute} for ${getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.acceptPendingMemberRoute} for ${helper.getUser(req)}`);
     let userToAcceptId = req.body.userId;
     let dojoId = req.body.dojoId;
     let user = req.user;
     Dojo.getDojoForInternalAuthentication(dojoId, function(err, dojo){
         if (err){
-            logger.error(`Error getting dojo for for ${getUser(req)}, for accepting member id=${userToAcceptId}:` + err);
+            logger.error(`Error getting dojo for for ${helper.getUser(req)}, for accepting member id=${userToAcceptId}:` + err);
             return res.sendStatus(500);
         }
         // We determine if the user is authorized for the action
@@ -433,7 +443,7 @@ module.exports.acceptPendingMember = function(req, res){
                     dojoModifications,
                     function(err, dojo){
                         if(err){
-                            logger.error(`Error updating dojo while accepting pending member in dojo by ${getUser(req)}:` + err);
+                            logger.error(`Error updating dojo while accepting pending member in dojo by ${helper.getUser(req)}:` + err);
                             return res.sendStatus(500);
                         }
                         if(dojo){
@@ -451,7 +461,7 @@ module.exports.acceptPendingMember = function(req, res){
                             res.json({success: true});
 
                         } else {
-                            logger.error(`Dojo (id=${dojoId}) not found by: ${getUser(req)}, while accepting pending member`);
+                            logger.error(`Dojo (id=${dojoId}) not found by: ${helper.getUser(req)}, while accepting pending member`);
                             return res.sendStatus(500);
                         }
                     })
@@ -459,7 +469,7 @@ module.exports.acceptPendingMember = function(req, res){
                 res.json({success: true});
             }
         } else {
-            logger.error(`${getUser(req)} tried to accept pending member (userId=${userToRejectId}) of dojo (${dojoId})
+            logger.error(`${helper.getUser(req)} tried to accept pending member (userId=${userToRejectId}) of dojo (${dojoId})
                             while not authorized`);
             res.json({errors: keys.notAuthorizedError});
         }
@@ -639,8 +649,26 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
         dojoRet.dojoEvents = dojo.dojoEvents;
         dojoRet.pictureUrl = dojo.pictureUrl;
         dojoRet._id = dojo._id;
+        //If the recurrent events have not been added (only champions and admins get them by default), we add the schedule
+        //so it is displayed in the dojo info
+        if(!dojoRet.recurrentEvents){
+            dojoRet.recurrentEvents = adjustRecurrentEventsForRegularUsers(dojo.recurrentEvents);
+        }
     }
     return dojoRet;
+}
+
+//We only add the schedule of active events
+function adjustRecurrentEventsForRegularUsers(recurrentEvents){
+    let ret = [];
+    recurrentEvents.forEach(function(recEvent){
+        if(helper.isActive(recEvent)){
+            let simpleRecEvent = {startHour: recEvent.startHour, endHour: recEvent.endHour, startMinute: recEvent.startMinute,
+                endMinute: recEvent.endMinute, day: recEvent.day};
+            ret.push(simpleRecEvent);
+        }
+    });
+    return ret;
 }
 
 function isUserAdmin(user){
@@ -725,10 +753,78 @@ function isUserMemberOrPendingMemberOfDojo(dojo, userId){
     return isUserMemberOfDojo(dojo, userId) || isUserPendingMemberOfDojo(dojo, userId);
 }
 
-//Method for displaying user information for logging
-function getUser(req){
-    if(req.user){
-        return `user=(email=${req.user.email}, alias=${req.user.alias}, _id=${req.user._id}, authorizationLevel=${req.user.authorizationLevel})`;
+//Method for sanitizing the fields of a dojo
+function sanitizeDojo(dojo){
+    //Cloning the dojo
+    let ret = JSON.parse(JSON.stringify(dojo));
+    const whiteListNames = 'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!?+- ';
+
+
+    //Sanitizing the name
+    let sanitName = validator.trim(dojo.name);
+    sanitName = validator.whitelist(sanitName, whiteListNames);
+    ret.name = sanitName;
+
+    //Sanitizing the adress
+    let sanitAdress = validator.trim(dojo.address);
+    sanitAdress = validator.whitelist(sanitAdress, whiteListNames);
+    ret.address = sanitAdress;
+
+    //Sanitizing the email
+    let sanitEmail = validator.trim(dojo.email);
+    sanitEmail = validator.whitelist(sanitEmail, whiteListNames);
+    ret.email = sanitEmail;
+
+    //Sanitizing the statuses
+    let sanitStatuses = ret.statuses.map(function(status){
+        return validator.whitelist(status, whiteListNames);
+    });
+    ret.statuses = sanitStatuses;
+
+    //Sanitizing the requirements
+    let sanitRequirements = ret.requirements.map(function(requirement){
+        return validator.whitelist(requirement, whiteListNames);
+    });
+    ret.requirements = sanitRequirements;
+
+    //Sanitizing the recurrent events
+    for(let i = 0; i < ret.recurrentEvents.length; i++){
+        let event = ret.recurrentEvents[i];
+        //Sanitizing the event name
+        let eventName = event.name;
+        let sanitEventName = validator.trim(eventName);
+        sanitEventName = validator.whitelist(sanitEventName, whiteListNames);
+        event.name = sanitEventName;
+
+        //Sanitizing the event description
+        let eventDescr = event.description;
+        let sanitEventDescr = validator.trim(eventDescr);
+        event.description = sanitEventDescr;
+
+        for(let j = 0; j < event.sessions.length; j++){
+            let session = event.sessions[j];
+
+            //Sanitizing session workshop
+            let sessionWorkshop = session.workshop;
+            let sanitWorkshop = validator.trim(sessionWorkshop);
+            sanitWorkshop = validator.whitelist(sanitWorkshop, whiteListNames);
+            session.workshop = sanitWorkshop;
+
+            //Sanitizing the tickets
+            for(let k = 0; k < session.tickets.length; k++){
+                let ticket = session.tickets[k];
+
+                //Sanitizing ticket name
+                let ticketName = ticket.nameOfTicket;
+                let sanitTicketName = validator.trim(ticketName);
+                sanitTicketName = validator.whitelist(sanitTicketName, whiteListNames);
+                ticket.nameOfTicket = sanitTicketName;
+            }
+        }
     }
+
+    return ret;
 }
+
+
 

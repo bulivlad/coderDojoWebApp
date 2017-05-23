@@ -294,6 +294,22 @@ angular.module('coderDojoTimisoara')
                 data: data,
                 headers: {'Content-Type': undefined}
             });
-        }
+        };
+
+        this.getCurrentDojoEvents = function(data){
+            return $http({
+                url: '/events/' + keys.getCurrentDojoEventsRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.getAuthCurrentDojoEvents = function(data){
+            return $http({
+                url: '/events/' + keys.getAuthCurrentDojoEventsRoute,
+                method: "POST",
+                data: data,
+            });
+        };
 
     });

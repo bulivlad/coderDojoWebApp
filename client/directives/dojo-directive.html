@@ -60,7 +60,7 @@
                     <p ng-repeat="status in dojo.statuses">{{status}}</p>
 
                     <label><i class="fa fa-clock-o"></i> Orar</label>
-                    <p ng-repeat="schedule in dojo.schedules">{{createSchedule(schedule)}}</p>
+                    <p ng-repeat="recEvent in dojo.recurrentEvents">{{createSchedule(recEvent)}}</p>
                     <label><i class="fa fa-clock"></i>Social</label>
                     <p>
                         <a target="_blank" ng-if="dojo.twitter" href="{{dojo.twitter}}">
@@ -98,7 +98,26 @@
     <div class="dojo-events">
         <h3>Evenimente</h3>
         <hr>
-        <p ng-if="dojo.dojoEvents.length === 0">Nu există momentan evenimente</p>
+        <div class="dojo-events-container">
+            <div class="dojo-event" ng-repeat="dojoEvent in dojo.events">
+                <div class="col1-dojo-events">
+                    <h3>{{getDojoName(dojoEvent)}}</h3>
+                    <p>{{dojoEvent.description}}</p>
+                    <div class="workshops">
+                        <p>La acest eveniment vor avea loc atelierele:</p>
+                        <ul>
+                            <li ng-repeat="session in dojoEvent.sessions">{{session.workshop}}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col2-dojo-events">
+                    <h4 class="event-date">{{getEventDate(dojoEvent)}}</h4>
+                    <button class="go-to-event-button">{{getRegisterButtonLabel(dojoEvent)}}</button>
+                    <p ng-if="showUserNotRegistered(dojoEvent)">Utilizatorul nu este inregistrat</p>
+                </div>
+            </div>
+        </div>
+        <p ng-if="dojo.events.length === 0">Nu există momentan evenimente</p>
     </div>
     <div class="dojo-map-holder">
        <div id="dojo-map-single-dojo"></div>

@@ -341,7 +341,7 @@ angular.module('coderDojoTimisoara')
             return clientErrors;
         };
 
-        this.handlerCommunicationErrors = function(err, methodInfo, scope){
+        this.handlerCommunicationErrors = function(err, methodInfo, scope, callback){
             if (err.status === 401){
                 console.log('Not authorized:' + err.msg);
                 $rootScope.deleteUser(methodInfo);
@@ -357,6 +357,11 @@ angular.module('coderDojoTimisoara')
                 console.log('Unexpected error for method (' + methodInfo + '):' + err.msg);
                 $location.path('/' + keys.despre);
             }
+            if(callback){
+                callback();
+            }
+            //TODO think of all possible problems and add decisions for them (like when the server does not answer because
+            // of high latency)
         };
 
         //Method for getting a dojo from a list of dojos
@@ -423,7 +428,7 @@ angular.module('coderDojoTimisoara')
 
                             if(!curTicket.numOfTickets){
                                 hasErrors = true;
-                                curSession.error.ticketsError = 'Unul dintre tickete nu are număr';
+                                curSession.error.ticketsError = 'Unul dintre tickete nu are număr, sau numărul e mai mic de 1';
                                 break;
                             }
                         }
@@ -459,6 +464,11 @@ angular.module('coderDojoTimisoara')
                 })
             }
             return true;
+        };
+
+        //Method for adding a 0 if the minutes are just one number (eg 2 to display 02)
+        this.adjustOneNumberMinutes = function(number){
+            return number.length == 1 ? '0' + number : number;
         }
 
         this.numberValueIsNullOrUndefined  = function(number){

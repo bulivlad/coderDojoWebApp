@@ -68,7 +68,7 @@ module.exports.registerUsersChild = function(req, res){
     } else {
         //No validation errors at this point
         //We make sure the alias is unique
-        User.findOne({alias: childUser.alias}, function(err, aliasFound){
+        User.findOne({alias: childUser.alias}, function(err, aliasFound){//TODO make one call for email and alias checking
             if (err){
                 logger.error('Error seaching database for alias (' + childUser.alias + ') : ' + err);
                 return res.sendStatus(500);
@@ -248,16 +248,17 @@ module.exports.editUsersChild = function(req, res){
 //Method for getting user's notifications
 module.exports.getUsersNotifications = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.getUsersNotificationsRoute} for ${helper.getUser(req)}`);
-    User.findOne({_id: req.user._id}, {notifications:true}, function(err, user){
+    User.getUserNotificationsAndResetNewNotifications(req.user._id, function(err, user){
         if(err){
             logger.error(`Error searching database for notifications for ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
         logger.debug(`Notifications for ${helper.getUser(req)} are: ` + JSON.stringify(user.notifications));
+        let usersNotifications = user.notifications ? user.notifications.notifications: [];
         res.json({
             notificationObject:{
                 ownerOfNotifications: req.user._id,
-                notifications: user.notifications
+                notifications: usersNotifications
             }
         })
     })
@@ -268,7 +269,7 @@ module.exports.getUsersChildsNotifications = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.getUsersChildNotificationsRoute} for ${helper.getUser(req)}`);
     let childId = req.body.childId;
     if(isUsersChild(req.user, {_id:childId})) {
-        User.findOne({_id: childId}, {notifications: true}, function (err, child) {
+        User.getUserNotificationsAndResetNewNotifications(childId, function (err, child) {
             if (err) {
                 logger.error(`Error searching database for notifications for child (_id=${childId}) of ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
@@ -277,7 +278,7 @@ module.exports.getUsersChildsNotifications = function(req, res){
             res.json({
                 notificationObject: {
                     ownerOfNotifications: childId,
-                    notifications: child.notifications
+                    notifications: child.notifications.notifications
                 }
             })
         })
@@ -356,8 +357,7 @@ module.exports.inviteUserToBeParent = function(req, res){
 module.exports.deleteNotificationForUser = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.deleteNotificationForUserRoute} for ${helper.getUser(req)}`);
     let notificationId = req.body.notifId;
-    User.findOneAndUpdate({_id: req.user._id}, {$pull: {notifications: {_id: notificationId}}},
-        function(err, user){
+    User.deleteNotificationForUser(req.user._id, notificationId, function(err, user){
             if (err){
                 logger.error(`Error deleting notification for ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
@@ -373,8 +373,7 @@ module.exports.deleteNotificationForUsersChild = function(req, res){
     let notificationId = req.body.notifId;
     let childId = req.body.childId;
     if(isUsersChild(req.user, {_id:childId})) {
-        User.findOneAndUpdate({_id: childId}, {$pull: {notifications: {_id: notificationId}}},
-            function(err, childUser){
+        User.deleteNotificationForUser(childId, notificationId, function(err, childUser){
                 if (err){
                     logger.error(`Error deleting notification for the child (_id=${childId}) of ${helper.getUser(req)}:` + err);
                     return res.sendStatus(500);
@@ -422,12 +421,14 @@ module.exports.acceptChildInvite = function(req, res){
                     }
                     logger.silly(`Updated the user with the notification and the child`);
                     //Create the notification for the child
-                    let childNotification = {};
+                    let msg = `${user.firstName} ${user.lastName} ți-a acceptat invitația de a îți fii părinte pe
+                                Coder Dojo Timișoara`;
+                    let childNotification = helper.makeInfoNotification(msg);
                     childNotification.typeOfNot = keys.infoNotification;
                     childNotification.data = {
-                        msg: `${user.firstName} ${user.lastName} ți-a acceptat invitația de a îți fii părinte pe
-                                Coder Dojo Timișoara`
+
                     };
+
                     //If we have been successful so far, we add the parent to the child, and a notification for the child
                     // that the parent has added it
                     User.findOneAndUpdate({_id: childId},
@@ -445,8 +446,18 @@ module.exports.acceptChildInvite = function(req, res){
     })
 };
 
-
-
+//Function for getting the new notifications count for a user
+module.exports.getNewNotificationsCount = function(req, res){
+    logger.debug(`Entering UsersRoute: ${keys.getNewNotificationsCountRoute} for ${helper.getUser(req)}`);
+    User.getUserNotifications(req.user._id, function(err, user){
+        if(err){
+            logger.error(`Error getting new notifications for ${helper.getUser(req)}: ` + err);
+            return res.sendStatus(500);
+        }
+        let newNotificationsCount = user.notifications? user.notifications.newNotificationCount : 0;
+        res.json({newNotificationCount: newNotificationsCount});
+    });
+};
 
 //Module for uploading user photos
 module.exports.uploadUserPicture = function(req, res){
@@ -497,8 +508,6 @@ function saveChildToDbsAndRegisterWithParent(req, res, child){
     let parent = req.user;
     child.password2 = undefined;
     child.parents = [parent._id];
-    logger.silly(`saveChildToDbsAndRegisterWithParent(child=${JSON.stringify(child)})`);
-    logger.silly(`saveChildToDbsAndRegisterWithParent(parent=${JSON.stringify(parent)})`);
     let newUser = new User(child);
 
     User.createUser(newUser, function(err, savedChild){
@@ -506,6 +515,7 @@ function saveChildToDbsAndRegisterWithParent(req, res, child){
             logger.error('Error saving user in the database:' + err);
             return res.status(500).json({errors:keys.dbsUserCreationError})
         } else {
+            //TODO register the child to the users' dojos
             //At this point the child user was saved
             logger.debug(`Child user saved email(${savedChild.email}), alias(${savedChild.alias})`);
             //We have to find the parent and add a reference to the saved child to it
@@ -685,19 +695,8 @@ function createServerError(errorType, errorMessage){
 
 //Function that determine if a child is a users child
 module.exports.isUsersChild = isUsersChild = function (user, child){
-    //logger.silly('Entering isUsersChild');
-    logger.silly(`child_id=${child._id}`);
-    if(user.children){
-        //logger.silly(`user.children=${user.children}`);
-        for(let i = 0; i < user.children.length; i++){
-            let tmpChild = user.children[i];
-            //logger.silly(`tmpChild=${tmpChild}`);
-            if(tmpChild == child._id){//We need weak comparison because the two values are not of the same type
-                return true;
-            }
-        }
-    }
-}
+  return helper.isUsersChild(user, child);
+};
 //This method is used to restrict the fields that are modified when a user edits his profile
 function selectUserFieldsForSaving(user){
     return {

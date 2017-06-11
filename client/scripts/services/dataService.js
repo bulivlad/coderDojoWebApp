@@ -308,8 +308,62 @@ angular.module('coderDojoTimisoara')
             return $http({
                 url: '/events/' + keys.getAuthCurrentDojoEventsRoute,
                 method: "POST",
-                data: data,
+                data: data
             });
         };
 
+        this.getEvent = function(data){
+            return $http({
+                url: '/events/' + keys.getEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.getAuthEvent = function(data){
+            return $http({
+                url: '/events/' + keys.getAuthEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.registerUserForEvent = function(data){
+            return $http({
+                url: '/events/' + keys.registerUserForEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.removeUserFromEvent = function(data){
+            return $http({
+                url: '/events/' + keys.removeUserFromEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.getUsersRegisteredForEvent = function(data){
+            return $http({
+                url: '/events/' + keys.getUsersRegisteredForEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.confirmOrRemoveUserFromEvent = function(data){
+            return $http({
+                url: '/events/' + keys.confirmOrRemoveUserFromEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.getNewNotificationsCount = function(){
+            return $http({
+                url: '/user/' + keys.getNewNotificationsCountRoute,
+                method: "GET"
+            });
+        }
     });

@@ -31,8 +31,8 @@ angular.module("coderDojoTimisoara")
                             // If we receive a success message from the server we go the the default page and get the
                             // user from the server.
                             $location.path('/' + keys.despre);
-                            //We get the user from the server
-                            $scope.getUserFromServer();
+                            //We get the user from the server (and the user's notifications)
+                            $scope.getUserFromServer($scope.getNewNotificationsCount);
                         }
                     })
                     .catch(function(err){

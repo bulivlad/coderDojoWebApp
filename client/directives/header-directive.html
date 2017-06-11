@@ -13,7 +13,12 @@
             <div class="user-menu" ng-show="user">
                 <div id="user-menu-header" ng-click="showUserMenuDropDown($event)">
                     <img src="../img/poza_profil.png" alt="Poza profil">
-                    <span >{{user.firstName + ' ' + user.lastName}}</span>
+                    <span class="user-name">
+                        {{user.firstName + ' ' + user.lastName}}
+                        <span class="new-notification-info" ng-if="newNotificationCount" ng-click="viewNotificationsFromWide($event)">
+                            {{newNotificationCount}}
+                        </span>
+                    </span>
                     <i class="fa fa-chevron-down"></i>
                 </div>
 

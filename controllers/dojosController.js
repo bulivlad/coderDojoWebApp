@@ -235,12 +235,17 @@ function becomeMemberOfDojo(req, res){
     Dojo.findOneAndUpdate(
         {_id: dojoId},
         listToUpdate,
-        function(err){
+        function(err, dojo){
             if(err){
                 logger.error(`Error joining dojo by ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
             }
             res.json({success: true});
+            // After the user has successfully joined the dojo, we add his children to the dojo as attendees (only parents
+            // join automatically)
+            if(whatMember === keys.parent){
+                addUsersChildrenToDojo(req.user, dojo);
+            }
         });
 }
 
@@ -253,7 +258,7 @@ module.exports.leaveDojo = function(req, res){
     Dojo.findOneAndUpdate(
         {_id: dojoId},
         {$pull:{mentors:req.user._id, pendingMentors:req.user._id, volunteers:req.user._id,
-            pendingVolunteers:req.user._id, champion:req.user._id, pendingChampions:req.user._id,
+            pendingVolunteers:req.user._id, champions:req.user._id, pendingChampions:req.user._id,
             parents:req.user._id, attendees:req.user._id}},
         function(err, dojo){
             if(err){
@@ -293,7 +298,7 @@ module.exports.getUsersForMember = function(req, res){
             }
         }
         if(isUserAuthorized){
-            User.helper.getUsersForMember(dojo[typeOfUsers], function(err, users){
+            User.getUsersForMember(dojo[typeOfUsers], function(err, users){
                 if (err){
                     logger.error(`Error getting members for ${helper.getUser(req)}, for dojo(${dojoId}):` + err);
                     return res.sendStatus(500);
@@ -459,6 +464,15 @@ module.exports.acceptPendingMember = function(req, res){
                                 }
                             });
                             res.json({success: true});
+                            //After the user was accepted in the dojo, we add the user's children to the dojo
+                            User.getUsersAndHisChildren(userToAcceptId, function(err, addedUser){
+                                if(err){
+                                    logger.error(`Error getting user and his children (_id=${userToAcceptId} by ` +
+                                        ` ${helper.printUser(user)} for adding user's children this just joined dojo (_id=${dojoId}`);
+                                    return;
+                                }
+                                addUsersChildrenToDojo(addedUser, dojo);
+                            });
 
                         } else {
                             logger.error(`Dojo (id=${dojoId}) not found by: ${helper.getUser(req)}, while accepting pending member`);
@@ -469,12 +483,81 @@ module.exports.acceptPendingMember = function(req, res){
                 res.json({success: true});
             }
         } else {
-            logger.error(`${helper.getUser(req)} tried to accept pending member (userId=${userToRejectId}) of dojo (${dojoId})
+            logger.error(`${helper.getUser(req)} tried to accept pending member (userId=${userToAcceptId}) of dojo (${dojoId})
                             while not authorized`);
             res.json({errors: keys.notAuthorizedError});
         }
     });
 };
+
+//Method that returns the user's role in a dojo
+module.exports.getUserRoleInDojo = function(dojo, userId){
+    if(isUserMentorInDojo(dojo, userId)){
+        return keys.typesOfTickets[1];
+    } else if(isUserVolunteerInDojo(dojo, userId)){
+        return keys.typesOfTickets[0];
+    } else if(isUserAttendeeInDojo(dojo, userId)){
+        return keys.typesOfTickets[2];
+    }
+};
+
+
+//Method for adding user's children to the dojo the user just joined
+//Arguments
+//  user - user from the session
+//  dojo - the fields required are the _id (for searching) and the name for logging
+let addUsersChildrenToDojo = module.exports.addUsersChildrenToDojo = function(user, dojo){
+    logger.silly(`Entering addUsersChildrenToDojo()`);
+    let usersChildren = user.children;
+    let dojoId = dojo._id;
+    if(usersChildren.length > 0){
+        //The second argument is a flag to only search for children that are minors
+        User.getUsersBirthdate(usersChildren, true, function(err, usersMinorChildren){
+            if(err){
+                logger.error(`Problems retrieving users children under 18 by ${helper.printUser(user)} for adding his/her ` +
+                 `children to his/her dojo _id=${dojoId}: ` + err);
+            }
+            if(usersMinorChildren.length > 0){
+                //The list of user's children is a list of objects (_id: xxxxxx), we need a list of ids, so we convert it
+                let childrenToAddToDojo = helper.getListOfFieldsFromListOfObjects(usersMinorChildren, '_id');
+                Dojo.addUsersChildrenToDojo(childrenToAddToDojo, dojoId, function(err){
+                    if(err){
+                        logger.error(`Problems adding user's children to the dojo _id=${dojoId} by ${helper.printUser(user)}` +
+                            ` for adding his/her children to his/her dojos: ` + err);
+                        return;
+                    }
+                    logger.silly(`Children added to dojo (_id=${dojoId}, name=${dojo.name})`)
+                });
+            }
+        });
+    }
+};
+
+//Method for adding user's children to the users dojos
+module.exports.addUsersChildUsersDojos = function(user, childId){
+    let usersChildren = user.children;
+    if(usersChildren.length > 0){
+        Dojo.getDojos(true, function(err, dojos){
+            if (err){
+                logger.error(`Problems retrieving dojos by ${helper.printUser(user)} for adding his/her children` +
+                    ` to his/her dojos: ` + err);
+            }
+            //We filter the dojos so only the ones where the user is a member remain (or all if the user is admin).
+            let userDojos = filterDojosForMyDojos(user, dojos);
+            let listOfUsersDojosIds = helper.getListOfFieldsFromListOfObjects(userDojos, '_id');
+            Dojo.addUsersChildUsersDojos(childId, listOfUsersDojosIds, function(err){
+                if(err){
+                    logger.error(`Problems adding user's child (id=${childId}) to user's  dojos by ${helper.printUser(user)}: ` + err);
+                    return;
+                }
+                logger.silly(`Child (id=${childId})  of ${helper.printUser(user)} added to user's dojos`);
+            })
+
+        });
+    }
+
+};
+
 
 //Method for getting a dojo from a list of dojos
 function getDojoFromDojos(dojoId, dojos){
@@ -534,12 +617,6 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             if(isUserMentorInDojo(dojo, user._id)){
                 //We have determined that the user is a mentor in this dojos
                 logger.silly(`User is a mentor in this dojo`);
-                //Adding fields the user does has access to
-                dojoRet.champions = dojo.champions;
-                dojoRet.mentors = dojo.mentors;
-                dojoRet.volunteers = dojo.volunteers;
-                dojoRet.parents = dojo.parents;
-                dojoRet.attendees = dojo.attendees;
 
                 dojoRet[keys.hasJoined] = true;
                 dojoRet[keys.showMembers] = true;
@@ -548,10 +625,6 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             }
             else if(isUserVolunteerInDojo(dojo, user._id)){
                 logger.silly(`User is a Volunteer or attendee or parent in this dojo`);
-                //We have determined that the user is a volunteer an attendee or a parent in this dojo
-                dojoRet.champions = dojo.champions;
-                dojoRet.mentors = dojo.mentors;
-                dojoRet.volunteers = dojo.volunteers;
 
                 dojoRet[keys.hasJoined] = true;
                 dojoRet[keys.showMembers] = true;
@@ -559,10 +632,6 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             }
             else if(isUserAttendeeInDojo(dojo, user._id)){
                 logger.silly(`User is a Volunteer or attendee or parent in this dojo`);
-                //We have determined that the user is a volunteer an attendee or a parent in this dojo
-                dojoRet.champions = dojo.champions;
-                dojoRet.mentors = dojo.mentors;
-                dojoRet.volunteers = dojo.volunteers;
 
                 dojoRet[keys.hasJoined] = true;
                 dojoRet[keys.showMembers] = true;
@@ -570,10 +639,6 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             }
             else if(isUserParentInDojo(dojo, user._id) ){
                 logger.silly(`User is a Volunteer or attendee or parent in this dojo`);
-                //We have determined that the user is a volunteer an attendee or a parent in this dojo
-                dojoRet.champions = dojo.champions;
-                dojoRet.mentors = dojo.mentors;
-                dojoRet.volunteers = dojo.volunteers;
 
                 dojoRet[keys.hasJoined] = true;
                 dojoRet[keys.showMembers] = true;
@@ -581,16 +646,7 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
             }
             else if (isUserChampionInDojo(dojo, user._id)){
                 logger.silly(`User is champion`);
-                //We have determined that the user is a champion in this dojo
-                //TODO remove if deemed unecessary (noticed this info was not used, but not sure now)
-                //dojoRet.champions = dojo.champions;
-                //dojoRet.pendingChampions = dojo.pendingChampions;
-                //dojoRet.mentors = dojo.mentors;
-                //dojoRet.pendingMentors = dojo.pendingMentors;
-                //dojoRet.volunteers = dojo.volunteers;
-                //dojoRet.pendingVolunteers = dojo.pendingVolunteers;
-                //dojoRet.parents = dojo.parents;
-                //dojoRet.attendees = dojo.attendees;
+
                 dojoRet.recurrentEvents = dojo.recurrentEvents;
 
                 dojoRet[keys.canEditDojo] = true;
@@ -601,15 +657,6 @@ function prepareDojoBasedOnUserPermisions(user, dojo){
                 dojoRet[keys.champion] = true;
             } else if(isUserAdmin(user)){
                 logger.silly(`User is admin`);
-                //We determine that the user is an admin in this dojo
-                //dojoRet.champions = dojo.champions;
-                //dojoRet.pendingChampions = dojo.pendingChampions;
-                //dojoRet.mentors = dojo.mentors;
-                //dojoRet.pendingMentors = dojo.pendingMentors;
-                //dojoRet.volunteers = dojo.volunteers;
-                //dojoRet.pendingVolunteers = dojo.pendingVolunteers;
-                //dojoRet.parents = dojo.parents;
-                //dojoRet.attendees = dojo.attendees;
                 dojoRet.recurrentEvents = dojo.recurrentEvents;
 
                 dojoRet[keys.canEditDojo] = true;
@@ -672,92 +719,58 @@ function adjustRecurrentEventsForRegularUsers(recurrentEvents){
 }
 
 function isUserAdmin(user){
-    return user.authorizationLevel === keys.admin;
+    return helper.isUserAdmin(user);
 }
 
 function isUserVolunteerInDojo(dojo, userId){
-    if(dojo.volunteers){
-        return (dojo.volunteers.indexOf(userId.toString()) > -1);
-    } else {
-        logger.debug(`dojo.volunteers is not defined, dojo ${JSON.stringify(dojo)}`);
-    }
+    return helper.isUserVolunteerInDojo(dojo, userId);
 }
 
 function isUserPendingVolunteerInDojo(dojo, userId){
-    if(dojo.pendingVolunteers){
-        return (dojo.pendingVolunteers.indexOf(userId.toString()) > -1);
-    } else {
-        logger.debug(`dojo.pendingVolunteers is not defined, dojo ${JSON.stringify(dojo)}`);
-    }
+    return helper.isUserPendingVolunteerInDojo(dojo, userId);
 }
 
 function isUserAttendeeInDojo(dojo, userId){
-    if(dojo.attendees){
-        return (dojo.attendees.indexOf(userId.toString()) > -1);
-    } else {
-        logger.debug(`dojo.attendees is not defined, dojo ${JSON.stringify(dojo)}`);
-    }
+    return helper.isUserAttendeeInDojo(dojo, userId);
 }
 
 function isUserParentInDojo(dojo, userId){
-    if(dojo.parents){
-        return (dojo.parents.indexOf(userId.toString()) > -1);
-    } else {
-        logger.debug(`dojo.parents is not defined, dojo ${JSON.stringify(dojo)}`);
-    }
+    return helper.isUserParentInDojo(dojo, userId);
 }
 
 function isUserMentorInDojo(dojo, userId){
-    if(dojo.mentors){
-        return (dojo.mentors.indexOf(userId.toString()) > -1);
-    } else {
-        logger.debug(`dojo.mentors is not defined, dojo ${JSON.stringify(dojo)}`);
-    }
+    return helper.isUserMentorInDojo(dojo, userId);
 }
 
 function isUserPendingMentorInDojo(dojo, userId){
-    if(dojo.pendingMentors){
-        return (dojo.pendingMentors.indexOf(userId.toString()) > -1);
-    } else {
-        logger.debug(`dojo.pendingMentors is not defined, dojo ${JSON.stringify(dojo)}`);
-    }
+    return helper.isUserPendingMentorInDojo(dojo, userId);
 }
 
 function isUserChampionInDojo(dojo, userId){
-    if(dojo.champions){
-        return (dojo.champions.indexOf(userId.toString()) > -1);
-    } else {
-        logger.debug(`dojo.champion is not defined, dojo ${JSON.stringify(dojo)}`);
-    }
+    return helper.isUserChampionInDojo(dojo, userId);
 }
 
 function isUserPendingChampionInDojo(dojo, userId){
-    if(dojo.pendingChampions){
-        return (dojo.pendingChampions.indexOf(userId.toString()) > -1);
-    } else {
-        logger.debug(`dojo.pendingChampions is not defined, dojo ${JSON.stringify(dojo)}`);
-    }
+    return helper.isUserPendingChampionInDojo(dojo, userId);
 }
 
 function isUserMemberOfDojo(dojo, userId){
-    return isUserAttendeeInDojo(dojo, userId) || isUserMentorInDojo(dojo, userId) ||
-        isUserChampionInDojo(dojo, userId) || isUserParentInDojo(dojo, userId) || isUserVolunteerInDojo(dojo, userId);
+    return helper.isUserMemberOfDojo(dojo, userId);
 }
 
 function isUserPendingMemberOfDojo(dojo, userId){
-    return isUserPendingChampionInDojo(dojo, userId) || isUserPendingMentorInDojo(dojo, userId) ||
-        isUserPendingVolunteerInDojo(dojo, userId);
+    return helper.isUserPendingMemberOfDojo(dojo, userId);
 }
 
 function isUserMemberOrPendingMemberOfDojo(dojo, userId){
-    return isUserMemberOfDojo(dojo, userId) || isUserPendingMemberOfDojo(dojo, userId);
+    return helper.isUserMemberOrPendingMemberOfDojo(dojo, userId);
 }
 
 //Method for sanitizing the fields of a dojo
 function sanitizeDojo(dojo){
     //Cloning the dojo
     let ret = JSON.parse(JSON.stringify(dojo));
-    const whiteListNames = 'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!?+- ';
+    const whiteListNames = 'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!?\\-+ ';
 
 
     //Sanitizing the name

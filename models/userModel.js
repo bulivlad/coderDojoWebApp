@@ -4,9 +4,19 @@
 
 'use strict';
 const mongoose = require('mongoose'),
-      bcrypt = require('bcryptjs'),
-      keys = require('../static_keys/project_keys'),
-      logger = require('winston');
+    bcrypt = require('bcryptjs'),
+    keys = require('../static_keys/project_keys'),
+    logger = require('winston');
+
+let notificationSchema = mongoose.Schema({
+        notifications: [{
+            typeOfNot: String,
+            data: mongoose.Schema.Types.Mixed
+        }],
+        newNotificationCount: Number,
+        dateNotificationsRead: Date
+    }
+);
 
 let UserSchema = mongoose.Schema({
     email: {
@@ -70,7 +80,7 @@ let UserSchema = mongoose.Schema({
         type: String
     },
     gender: {
-      type: String
+        type: String
     },
     children: {
         type: Array
@@ -82,12 +92,7 @@ let UserSchema = mongoose.Schema({
         type:Array,
         select:false
     },
-    notifications: [
-        {
-            typeOfNot: String,
-            data: mongoose.Schema.Types.Mixed //TODO make notifications not selectable by default
-        }
-    ],
+    notifications: notificationSchema,
     userPhoto: {
         type: String
     }
@@ -161,9 +166,8 @@ let fieldsToGetForUsersForMember = {
 //Method for adding a notification for a user
 module.exports.addNotificationForUser = function(userId, notification, callback){
     logger.silly(`enter addNotification, notification =${JSON.stringify(notification)}`);
-    User.findOneAndUpdate({_id: userId}, {$addToSet: {notifications: notification}}, function(err, user){
-        callback(err, user);
-    });
+    User.findOneAndUpdate({_id: userId},
+        {$push: {'notifications.notifications': notification}, $inc: {'notifications.newNotificationCount':1}}, callback);
 };
 
 
@@ -194,3 +198,45 @@ module.exports.updatePhotoForUser = function(userId, userPhotoName, callback){
     User.findOneAndUpdate({_id: userId}, {$set :{userPhoto: userPhotoName}}, callback);
 };
 
+let fieldsToGetForUsersNames = {firstName: true, lastName: true};
+//Method for getting user's names
+module.exports.getUsersNames = function(usersIds, usersThatAreMinors, callback){
+    let query = {_id: {$in: usersIds}};
+    if(usersThatAreMinors){
+        let date18YearsAgo = new Date();
+        date18YearsAgo.setFullYear(date18YearsAgo.getFullYear() - 18);
+        query = {_id: {$in: usersIds}, birthDate:{$gt: date18YearsAgo}}
+    }
+    User.find(query, fieldsToGetForUsersNames, callback);
+};
+
+let fieldsToGetUForsersBirthdate = {_id: true};
+//Method for getting user's names
+module.exports.getUsersBirthdate = function(usersIds, usersThatAreMinors, callback){
+    let query = {_id: {$in: usersIds}};
+    if(usersThatAreMinors){
+        let date18YearsAgo = new Date();
+        date18YearsAgo.setFullYear(date18YearsAgo.getFullYear() - 18);
+        query = {_id: {$in: usersIds}, birthDate:{$gt: date18YearsAgo}}
+    }
+    User.find(query, fieldsToGetUForsersBirthdate, callback);
+};
+
+let fieldsToGetForGettingUsersAndHisChildren = {children:true, email:true, alias:true, authorizationLevel: true};
+//Method for getting user's children for adding them to a dojo when a user has been accepted to
+module.exports.getUsersAndHisChildren = function(userId, callback){
+    User.findOne({_id:userId}, fieldsToGetForGettingUsersAndHisChildren, callback);
+};
+
+module.exports.getUserNotifications = function(userId, callback){
+    User.findOne({_id:userId}, {notifications:true}, callback);
+};
+
+module.exports.getUserNotificationsAndResetNewNotifications = function(userId, callback){
+    User.findOneAndUpdate({_id:userId},
+        {$set: {'notifications.newNotificationCount': 0, dateNotificationsRead: Date.now()}},{notifications:true}, callback);
+};
+
+module.exports.deleteNotificationForUser = function(userId, notificationId, callback){
+    User.findOneAndUpdate({_id: userId}, {$pull: {'notifications.notifications': {_id: notificationId}}}, callback);
+};

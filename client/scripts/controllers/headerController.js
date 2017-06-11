@@ -72,5 +72,17 @@ angular.module("coderDojoTimisoara")
             }, 400)
         };
 
+        //This is used when the notification bubble is clicked
+        $scope.viewNotificationsFromNarrow = function($event){
+            $event.stopPropagation();
+            $scope.hideMenuNarrow();
+            $scope.goToViewUserProfile();
+        };
+
+        $scope.viewNotificationsFromWide = function($event){
+            $event.stopPropagation();
+            $scope.goToViewUserProfile();
+        };
+
 
     });

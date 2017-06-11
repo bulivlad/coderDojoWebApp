@@ -148,15 +148,13 @@ let fieldsForInternalDojoAuthentication = {
 
 //This method retrieves a dojos used for internal app verifications, the fields retrieved are mentioned above
 module.exports.getDojoForInternalAuthentication = function(dojoId, callback){
-    Dojo.findOne({_id: dojoId},
-        fieldsForInternalDojoAuthentication, //Filter for dojo fields
-        function(err, dojo){
-            if(err){
-                callback(err);
-            } else {
-                callback(null, dojo);
-            }
-        });
+    Dojo.findOne({_id: dojoId}, fieldsForInternalDojoAuthentication, callback);
+};
+
+//This method retrieves a dojos used for internal app verifications, the fields retrieved are mentioned above
+module.exports.getDojoForChampionAuthentification = function(dojoId, callback){
+    Dojo.findOne({_id: dojoId}, {champions:true}, callback);
+
 };
 
 //We only modify the fields that can be edited
@@ -177,3 +175,25 @@ module.exports.findDojosWithRecurrentEvents = function(callback){
     Dojo.find({recurrentEvents: {$exists: true, $ne:[]}}, {recurrentEvents: true, name: true}, callback);
 };
 
+
+let fieldsForFindDojoForAuthEvent = {
+    champions:true,
+    mentors: true,
+    volunteers: true,
+    attendees:true,
+    parents: true
+};
+//Method for getting a dojo for use in preparing authenticated events
+module.exports.findDojoForAuthEvent = function(dojoId, callback){
+    Dojo.findOne({_id:dojoId}, fieldsForFindDojoForAuthEvent, callback);
+};
+
+//Method for adding user's children to the dojo the user just joined
+module.exports.addUsersChildrenToDojo = function(usersChildren, dojoId, callback){
+    Dojo.findOneAndUpdate({_id:dojoId}, {$addToSet : {attendees : {$each:usersChildren}}}, callback);
+};
+
+//Method for adding user's children to the user's dojos
+module.exports.addUsersChildUsersDojos = function(childId, dojos, callback){
+    Dojo.update({_id: {$in:dojos}}, {$addToSet : {attendees : childId}}, callback);
+};

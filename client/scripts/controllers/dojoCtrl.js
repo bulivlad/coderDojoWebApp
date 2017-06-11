@@ -29,7 +29,8 @@ angular.module("coderDojoTimisoara")
                 .then(function(response){
                     if (response.data.dojo){
                         $scope.dojo = response.data.dojo;
-                        createMapWithDojo($scope.dojo, 'dojo-map-single-dojo')
+                        createMapWithDojo($scope.dojo, 'dojo-map-single-dojo');
+                        getAuthCurrentDojoEvents();
                     }
                 })
                 .catch(function(err){
@@ -79,7 +80,7 @@ angular.module("coderDojoTimisoara")
             } else  if($scope.dojo.champion){
                 return 'Campion';
             } else  if($scope.dojo.volunteer){
-                return 'Voluntar in asteptare';
+                return 'Voluntar';
             } else  if($scope.dojo.pendingMentor){
                 return 'Mentor in asteptare';
             }else  if($scope.dojo.pendingVolunteer){
@@ -96,20 +97,27 @@ angular.module("coderDojoTimisoara")
         //Method for deleting a dojo
         $scope.deleteDojo = function(){
             var confirmed  = confirm('Sigur vrei sa stergi dojo-ul ' + $scope.dojo.name + '?');
-            if(confirmed){
-                dataService.deleteDojo({dojoId: $scope.dojo._id})
-                    .then(function(response){
-                        if(response.data.success){
-                            goToDojoSelector();
-                        } else if(response.data.errors === keys.notAuthorizedError){
-                            $scope.showNotAuthorizedError();
-                        }
+            if(confirmed) {
+                confirmed = confirm('Esti foarte sigur ca vrei sa stergi dojo-ul ' + $scope.dojo.name + '?');
+                if (confirmed) {
+                    dataService.deleteDojo({dojoId: $scope.dojo._id})
+                        .then(function (response) {
+                            if (response.data.success) {
+                                goToDojoSelector();
+                            } else if (response.data.errors === keys.notAuthorizedError) {
+                                $scope.showNotAuthorizedError();
+                            }
 
-                    })
-                    .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err, 'deleteDojo', $scope);
-                    });
+                        })
+                        .catch(function (err) {
+                            helperSvc.handlerCommunicationErrors(err, 'deleteDojo', $scope);
+                        });
+                }
             }
+        };
+
+        $scope.addEventAction = function(){
+          $scope.setView(keys.addEvent);
         };
 
         //Method for goin into edit dojo mode
@@ -124,26 +132,13 @@ angular.module("coderDojoTimisoara")
 
         //Method for getting the event date
         $scope.getEventDate = function(event){
-            var ret = '';
-            var startTime = new Date(event.startTime);
-            var endTime = new Date(event.endTime);
-            //This is a weekly event
-            if(event.copyOfRecurrentEvent){
-                ret = 'În fiecare ' + keys.daysOfWeek[startTime.getDay()] + ' ' +
-                      startTime.getHours() + ':' +
-                    helperSvc.adjustOneNumberMinutes(startTime.getMinutes() + '') + ' - ' +
-                    endTime.getHours() + ':' +
-                    helperSvc.adjustOneNumberMinutes(endTime.getMinutes() + '');
-            } else {
-                ret = event.name + ' la ' + $scope.dojo.name;
-            }
-            return ret;
+            return helperSvc.getEventDate(event);
         };
 
         //Method for informing the GUI to show user not registered for event
         $scope.showUserNotRegistered = function(dojoEvent){
             if($scope.isUserLoggedIn()){
-                if(!(dojoEvent.recUser && dojoEvent.recUser.length > 0)){
+                if(!(dojoEvent.regUsers && dojoEvent.regUsers.length > 0)){
                     return true;
                 }
             }
@@ -152,13 +147,12 @@ angular.module("coderDojoTimisoara")
         $scope.getRegisterButtonLabel = function(dojoEvent){
             var ret = 'Rezervă';
             if($scope.isUserLoggedIn()){
-                if((dojoEvent.recUser && dojoEvent.recUser.length > 0)){
-                    ret = 'Rezervă/renunță';
+                if((dojoEvent.regUsers && dojoEvent.regUsers.length > 0)){
+                    ret = 'Editează';
                 }
             }
             return ret;
         };
-
 
         //Method for getting the dojo name to display
         $scope.getDojoName = function(event){
@@ -324,7 +318,7 @@ angular.module("coderDojoTimisoara")
             dataService.getCurrentDojoEvents({dojoId: $scope.dojo._id})
                 .then(function(response){
                     if(response.data.events){
-                        $scope.dojo.events = response.data.events;
+                        $scope.dojo.events = prepareDojoEvents(response.data.events);
                     }
                 })
                 .catch(function(err){
@@ -336,12 +330,32 @@ angular.module("coderDojoTimisoara")
             dataService.getAuthCurrentDojoEvents({dojoId: $scope.dojo._id})
                 .then(function(response){
                     if(response.data.events){
-                        $scope.dojo.events = response.data.events;
+                        $scope.dojo.events = prepareDojoEvents(response.data.events);
                     }
                 })
                 .catch(function(err){
                     helperSvc.handlerCommunicationErrors(err, 'getAuthCurrentDojoEvents', $scope);
                  })
+        };
+
+        //Prepare the events for display
+        var prepareDojoEvents = function(events){
+            //We need to convert the ticket based to session based
+            events.forEach(function(event){
+                event.sessions = helperSvc.convertEventTicketsToSessions(event.tickets);
+                event.tickets = undefined;
+            })
+            return events;
+        };
+
+        $scope.viewEventAction = function(event){
+          $scope.setEventView(event._id, keys.getDojoRoute);
+          $scope.goToViewEvent();
+        };
+
+        $scope.getRegUserInfo = function(regUser){
+            return regUser.name + ' este ' + (regUser.status ? 'confirmat' : 'înregistrat')  + ' ca ' + regUser.nameOfTicket +
+                    ' la eveniment.'
         };
 
         $scope.initializeDojoCtrl = function(){

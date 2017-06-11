@@ -21,6 +21,7 @@ angular.module("coderDojoTimisoara", [
             .when('/' + keys.getDojoRoute, {templateUrl:'../views/view-dojo.html'})
             .when('/' + keys.addDojoRoute, {templateUrl:'../views/adauga-dojo.html'})
             .when('/' + keys.cautaUnDojo, {templateUrl:'../views/cauta-un-dojo.html'})
+            .when('/' + keys.viewEventLocation, {templateUrl:'../views/view-event.html'})
             .otherwise({redirectTo: '/despre'})
     }]);
 
@@ -68,10 +69,22 @@ const keys = {
     uploadUserPictureRoute: 'uploadUserPicture',
     getAuthCurrentDojoEventsRoute: 'getAuthCurrentDojoEvents',
     getCurrentDojoEventsRoute: 'getCurrentDojoEvents',
+    getAuthEventRoute: 'getAuthEvent',
+    getEventRoute: 'getEvent',
+    registerUserForEventRoute: 'registerUserForEvent',
+    removeUserFromEventRoute: 'removeUserFromEvent',
+    getUsersRegisteredForEventRoute: 'getUsersRegisteredForEvent',
+    confirmOrRemoveUserFromEventRoute: 'confirmOrRemoveUserFromEvent',
+    getNewNotificationsCountRoute: 'getNewNotificationsCount',
+    //TODO change the communication routes to view locations (for getDojo for ex)
+
+    //View locations
+    viewEventLocation: 'viewevent',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
     infoNotification: 'infoNotification',
+    newNotificationCount: 'newNotificationCount',
 
     //Errors
     dbsUserCreationError: 'dbsUserCreationError',
@@ -84,6 +97,7 @@ const keys = {
     noParentsError: 'noParentsError',
     notAuthorizedError: 'notAuthorizedError',
     userAlreadyJoinedDojoError: 'userAlreadyJoinedDojoError',
+    userAlreadyRegisteredForEventError: 'userAlreadyRegisteredForEvent',
     userNoLongerPartOfDojo: 'userNoLongerPartOfDojo',
 
     //Alerts
@@ -91,6 +105,9 @@ const keys = {
     savingUserErrorAlert: 'savingUserErrorAlert',
     infoAlert: 'infoAlert',
     errorAlert: 'errorAlert',
+
+    //Information
+    eventFilterRegisteredUsers: 'eventFilterRegisteredUsers',
 
     //User roles
     user: 'user',
@@ -131,9 +148,9 @@ const keys = {
     viewMap: 'viewMap',
     viewList: 'viewList',
     viewDojo: 'viewDojo',
-    viewEvent: 'viewEvent',
     editDojo: 'editDojo',
-    editEvent: 'editEvent',
+    addEvent: 'addEvent',
+
     viewMembers: 'viewMembers',
 
     //View keys for various views
@@ -151,13 +168,39 @@ const keys = {
 
     //Views for events
     showMultiEventTypes: 'showMultiEventTypes',
+    viewEvent: 'viewEvent',
+    editEvent: 'editEvent',
+    collapseTickets: 'collapseTickets',
+    filterRegisteredEventUsers: 'filterRegisteredEventUsers',
+    filterRegisteredEventUsersValues: {
+        name: 'name', nameUp: 'name-up', nameDown: 'name-down',
+        status: 'status', statusUp: 'status-up', statusDown:'status-down',
+        role: 'role', roleUp: 'role-up', roleDown: 'role-down',
+        nameWritten: 'name-written'
+    },
+    viewFilterPanel: 'viewFilterPanel',
+
+    //Permissions for events
+    canDeleteEvent: 'canDeleteEvent',
+    canEditEvent: 'canEditEvent',
+    canSeeJoinedEventUsers: 'canSeeJoinedUsers',
+    canConfirmEventUsers: 'canConfirmUsers',
 
     //Enums
     daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],
     typesOfTickets: ['voluntar', 'mentor', 'cursant'],
     eventTypes: ['recurent', 'unic'],
     eventStatus: ['Activ', 'Inactiv'],
+    months: ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie' , 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'],
 
+
+    //Key-values
+    eventStatus_Confirmed:'Confirmat',
+    eventStatus_Registered: 'Înscris',
+    eventStatus_NotRegistered: "Neînscris",
+    eventStatus_userNotLoggedIn: 'Not logged in',
+    eventConfirmUser: 'confirm',
+    eventRemoveUser: 'remove',
 };
 
 

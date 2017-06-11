@@ -61,6 +61,36 @@ angular.module('coderDojoTimisoara')
             }
         };
 
+        //This method helps filtering (too hard to put in english what it actually does, look to the name)
+        this.addDiacriticsToSearch = function(originalString){
+            var ret = '';
+            for(var i = 0; i < originalString.length; i++){
+                var strChar = originalString.charAt(i).toLowerCase();
+                if(strChar === 'a' || strChar === 'ă' || strChar === 'â'){
+                    ret += '[aăâ]';
+                } else if(strChar === 'i' || strChar === 'î'){
+                    ret += '[iî]';
+                } else if(strChar === 't' || strChar === 'ț'){
+                    ret += '[tț]';
+                } else if(strChar === 's' || strChar === 'ș'){
+                    ret += '[sș]';
+                } else {
+                    if(!charIsUnsupportedValue(strChar)){
+                        ret += strChar;
+                    }
+                }
+            }
+            return ret;
+
+        };
+
+        var charIsUnsupportedValue = function(strChar){
+            //I used an array instead of a regex because the regex would throw an exception when testing for '['
+            return  ['¬', '`', '!', '\'', '"', '£','$','%','^','&','*','(',',',')','_','-','+','=','{','[',',', ']',
+                    '}', '@', '"', '/','?','.','>','\\'].indexOf(strChar) > -1;
+
+        };
+
 
         //Method used to validate input fileds for registering (returns an error object)
         this.validateFields = function(user, validationForWhat){
@@ -341,9 +371,45 @@ angular.module('coderDojoTimisoara')
             return clientErrors;
         };
 
+        this.capitalizeFirstLetter = function(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        };
+
+        //Method that constructs an event date
+        this.getEventDate = function(event){
+            var ret = '';
+            var startTime = new Date(event.startTime);
+            var endTime = new Date(event.endTime);
+            //This is a weekly event
+            if(event.copyOfRecurrentEvent){
+                ret = 'În fiecare ' + keys.daysOfWeek[startTime.getDay()] + ' ' +
+                    startTime.getHours() + ':' +
+                    this.adjustOneNumberMinutes(startTime.getMinutes() + '') + ' - ' +
+                    endTime.getHours() + ':' +
+                    this.adjustOneNumberMinutes(endTime.getMinutes() + '');
+            } else {
+                ret = this.capitalizeFirstLetter(keys.daysOfWeek[startTime.getDay()]) + ' ' +  startTime.getDate() +
+                    ' ' + keys.months[startTime.getMonth()] + ' de la ' + startTime.getHours() + ':'  + startTime.getHours() +
+                    endTime.getHours() + ':'  + endTime.getHours();
+            }
+            return ret;
+        };
+
+        //Method that constructs an event date
+        this.getEventName = function(event){
+            var ret = '';
+            //This is a weekly event
+            if(event.copyOfRecurrentEvent){
+                ret = 'Evenimente săptămânale'
+            } else {
+                ret = event.name;
+            }
+            return ret;
+        };
+
         this.handlerCommunicationErrors = function(err, methodInfo, scope, callback){
             if (err.status === 401){
-                console.log('Not authorized:' + err.msg);
+                console.log('Not authorized:' + err.statusText);
                 $rootScope.deleteUser(methodInfo);
                 $location.path('/' + keys.login);
             } else if (err.status === 500){
@@ -351,10 +417,11 @@ angular.module('coderDojoTimisoara')
                 if(scope){
                     scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
                 }
-                console.log('Problems with the database for method (' + methodInfo + '):' + err.msg);
+                console.log('Internal server error when using method (' + methodInfo + '):');
                 $location.path('/' + keys.despre);
             }  else {
-                console.log('Unexpected error for method (' + methodInfo + '):' + err.msg);
+                console.log('Unexpected error for method (' + methodInfo + '): errData= '+ err.data + ', errStatusText=' +
+                    err.statusText + ', errStatus=' + err.status + ', err=' + err);
                 $location.path('/' + keys.despre);
             }
             if(callback){
@@ -469,7 +536,7 @@ angular.module('coderDojoTimisoara')
         //Method for adding a 0 if the minutes are just one number (eg 2 to display 02)
         this.adjustOneNumberMinutes = function(number){
             return number.length == 1 ? '0' + number : number;
-        }
+        };
 
         this.numberValueIsNullOrUndefined  = function(number){
             if(number === undefined || number === null){
@@ -477,7 +544,132 @@ angular.module('coderDojoTimisoara')
             } else {
                 return false;
             }
-        }
+        };
+
+        //Method for separating event tickets per session (list of tickets => list of sessions)
+        this.convertEventTicketsToSessions = function(tickets){
+            var ret = [];
+            var tempRet = {};
+            //This will store unique session ids
+            var sessionsIds = [];
+
+            tickets.forEach(function(ticket){
+                var sessionId = ticket.sessionId;
+                if(tempRet[sessionId]){
+                    //If there already is a key with the session Id, we push the ticket in the tickets array
+                    tempRet[sessionId].tickets.push(ticket);
+                } else {
+                    //If there isn't a key with the sessionId, we add a key (sessionId) - value (the session)
+                    tempRet[sessionId] = {
+                        workshop: ticket.workshop,
+                        tickets: [ticket],
+                        sessionRegUsers: [],
+                        _id: sessionId
+
+                    };
+                    //We add the keys to an array for easier manipulation
+                    sessionsIds.push(ticket.sessionId);
+                }
+            });
+            //We iterate over the keys adding every session to the returning array.
+            sessionsIds.forEach(function(sessionId){
+                ret.push(tempRet[sessionId]);
+            });
+
+            return ret;
+        };
+
+        this.sortEventStatusDesc = function(elem1, elem2){
+            //If user 1 is not confirmed and user 2 is confirmed
+            if(!elem1.confirmed && elem2.confirmed){
+                return -1;
+            }
+            //If user 1 is confirmed and user 2 is not confirmed
+            else if (elem1.confirmed && !elem2.confirmed){
+                return 1;
+            } else {
+                //If both are confirmed or both not confirmed
+                return sortNameAsc(elem1, elem2);
+            }
+        };
+
+        this.sortEventStatusAsc = function(elem1, elem2){
+            //If user 1 is not confirmed and user 2 is confirmed
+            if(!elem1.confirmed && elem2.confirmed){
+                return 1;
+            }
+            //If user 1 is confirmed and user 2 is not confirmed
+            else if (elem1.confirmed && !elem2.confirmed){
+                return -1;
+            } else {
+                //If both are confirmed or both not confirmed
+                return sortNameAsc(elem1, elem2);
+            }
+        };
+
+        this.sortEventRoleDesc = function(elem1, elem2){
+            var statusVal = elem1.nameOfTicket.localeCompare(elem2.nameOfTicket);
+            //if elem1.role is before elem2.role we return 1
+            if(statusVal < 0){
+                return 1;
+            }
+            //if elem1.role is after elem2.role we return -1
+            else if (statusVal > 0){
+                return -1;
+            } else {
+                return sortNameAsc(elem1, elem2);
+            }
+        };
+
+        this.sortEventRoleAsc = function(elem1, elem2, descending){
+            var statusVal = elem1.nameOfTicket.localeCompare(elem2.nameOfTicket);
+            //if elem1.role is before elem2.role we return -1
+            if(statusVal < 0){
+                return -1;
+            }
+            //if elem1.role is after elem2.role we return 1
+            else if (statusVal > 0){
+                return 1;
+            } else {
+                return sortNameAsc(elem1, elem2);
+            }
+        };
+
+
+        var sortNameDesc = this.sortNameDesc = function(elem1, elem2){
+            return sortNameAsc(elem2, elem1);
+        };
+
+        //Method for sorting names in a-z
+        var sortNameAsc = this.sortNameAsc = function(elem1, elem2){
+            //last name compare
+            var lastNameVal = elem1.lastName.localeCompare(elem2.lastName);
+            //if elem1.lastName is before elem2.lastName we return -1
+            if(lastNameVal < 0){
+                return -1;
+            }
+            //if elem1.lastName is after elem2.lastName we return 1
+            else if (lastNameVal > 0){
+                return 1;
+            } else {
+                //If the last names are the same, we do the same for the first name
+                //first name compare
+                var firstNameVal = elem1.firstName.localeCompare(elem2.firstName);
+                //if elem1.lastName is before elem2.lastName we return -1
+                if(firstNameVal < 0){
+                    return -1;
+                }
+                //if elem1.lastName is after elem2.lastName we return 1
+                else if (firstNameVal > 0){
+                    return 1;
+                } else {
+                    //If all the names are the same, the values are equal
+                    return 0;
+                }
+            }
+
+        };
+
     })
     .service('dojosService', function(){
     });

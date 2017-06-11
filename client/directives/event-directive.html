@@ -1,0 +1,158 @@
+<div class="event-view-container">
+    <div class="pages-banner dojo-banner">
+        <h2>{{event.eventName}}</h2>
+    </div>
+    <div class="event-buttons-div-container">
+        <div class="event-buttons-div">
+            <button ng-if="event[keys.canDeleteEvent]" class="event-btn">Șterge<br>evenimentul</button>
+            <button ng-if="event[keys.canEditEvent]" class="event-btn">Editează<br>evenimentul</button>
+            <button class="event-btn back-button" ng-click="goBackAction()">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i><br>
+                Inapoi
+            </button>
+        </div>
+        <hr>
+    </div>
+
+    <div class="event-info">
+        <div class="event-info-tuple">
+            <label>La care dojo?</label>
+            <p>{{event.dojo.name}}</p>
+        </div>
+        <div class="event-info-tuple">
+            <label>Unde are loc?</label>
+            <p>{{event.dojo.address}}</p>
+        </div>
+        <div class="event-info-tuple">
+            <label>Cand este?</label>
+            <p>{{event.eventDate}}</p>
+        </div>
+        <div class="event-info-tuple">
+            <label>Despre eveniment</label>
+            <p>{{event.description}}</p>
+        </div>
+    </div>
+
+    <div class="event-sessions">
+        <div class="event-session" ng-repeat="session in event.sessions">
+            <h3 class="session-title">
+                Atelier - {{session.workshop}}
+                <a ng-click="toggleCollapseTickets()">
+                    <i class="fa fa-caret-down" aria-hidden="true" ng-if="views[keys.collapseTickets]"></i>
+                    <i class="fa fa-caret-right" aria-hidden="true" ng-if="!views[keys.collapseTickets]"></i>
+                </a>
+            </h3>
+            <div class="session-tickets">
+                <div class=session-tickets-container" ng-if="!views[keys.collapseTickets]">
+                    <div class="session-ticket" ng-repeat="ticket in session.tickets" ng-class="ticket.typeOfTicket">
+                        <div class="ticket-heading-1">
+                            <h3>{{ticket.nameOfTicket}}</h3>
+                            <label class="label-heading">Locuri rămase {{ticket.remainingSeats}}</label>
+                        </div>
+
+                        <div class="ticket-heading-2" ng-if="ticket.ticketOptions.length > 0">
+                            <label class="label-heading heading-2-name">Nume</label>
+                            <label class="label-heading heading-2-status" >Status</label>
+                            <label class="label-heading heading-2-action">Acțiune</label>
+                        </div>
+                        <div class="ticket-info-2" ng-repeat="ticketOption in ticket.ticketOptions">
+                            <label class="info-2-name">{{ticketOption.firstName + ' ' + ticketOption.lastName}}</label>
+                            <label class="info-2-status">{{ticketOption.status}}</label>
+                        <span class="info-2-action">
+                            <button ng-click="actOnTicket(ticketOption, ticket)">{{getTicketOptionButtonName(ticketOption)}}</button>
+                        </span>
+                        </div>
+                    </div><!-- class="session-ticket"-->
+                </div>
+                <div class="view-users" ng-if="event[keys.canSeeJoinedEventUsers]">
+                    <button class="collapse-button" ng-click="toggleViewUsers(session)">
+                        {{session.viewUsers ? 'Inchide utilizatorii' : 'Vezi utilizatorii'}}
+                        <i class="fa fa-caret-down" aria-hidden="true"></i>
+                    </button>
+                    <div ng-if="session.viewUsers">
+                        <div class="ticket-heading-3">
+                            <label class="label-heading user-name">Nume</label>
+                            <label class="label-heading role-in-event">Rol</label>
+                        </div>
+                        <div ng-if="session.sessionRegUsers.length == 0">
+                            <p class="center-text">Nu există utilizatori înregistrați la această sesiune.</p>
+                        </div>
+                        <div class="filter-register-users" ng-if="session.sessionRegUsers.length > 0">
+                            <div class="filter-container" ng-if="session[keys.viewFilterPanel]">
+                                <div class="info-panel">
+
+                                </div>
+                                <div class="filter-register-users-row1">
+                                    <label class="filter-row1-name" ng-click="selectRegisteredUsersFilter(keys.filterRegisteredEventUsersValues.name)">
+                                        Nume
+                                        <i class="fa fa-caret-down" aria-hidden="true"
+                                           ng-if="views[keys.filterRegisteredEventUsers] === keys.filterRegisteredEventUsersValues.nameDown"></i>
+                                        <i class="fa fa-caret-up" aria-hidden="true"
+                                           ng-if="views[keys.filterRegisteredEventUsers] === keys.filterRegisteredEventUsersValues.nameUp"></i>
+                                    </label>
+                                    <label class="filter-row1-role" ng-click="selectRegisteredUsersFilter(keys.filterRegisteredEventUsersValues.role)">
+                                        Rol
+                                        <i class="fa fa-caret-down" aria-hidden="true"
+                                           ng-if="views[keys.filterRegisteredEventUsers] === keys.filterRegisteredEventUsersValues.roleDown"></i>
+                                        <i class="fa fa-caret-up" aria-hidden="true"
+                                           ng-if="views[keys.filterRegisteredEventUsers] === keys.filterRegisteredEventUsersValues.roleUp"></i>
+                                    </label>
+                                    <label class="filter-row1-status" ng-click="selectRegisteredUsersFilter(keys.filterRegisteredEventUsersValues.status)">
+                                        Status
+                                        <i class="fa fa-caret-down" aria-hidden="true"
+                                           ng-if="views[keys.filterRegisteredEventUsers] === keys.filterRegisteredEventUsersValues.statusDown"></i>
+                                        <i class="fa fa-caret-up" aria-hidden="true"
+                                           ng-if="views[keys.filterRegisteredEventUsers] === keys.filterRegisteredEventUsersValues.statusUp"></i>
+                                    </label>
+                                    <span class="filter-row1-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                    </span>
+                                </div>
+                                <div class="filter-register-users-row2">
+                                    <label class="filter-row2-name-label">
+                                        <i class="fa fa-search" aria-hidden="true"></i>
+                                    </label>
+                                    <input class="filter-row-2-name-input" placeholder="Caută un utilizator" ng-model="session.filterName"
+                                           ng-change="filterUsersBasedOnInput(session)" ng-focus="filterUsersBasedOnInput(session)">
+                                    <label class="filter-row2-name-label">
+                                        <i class="fa fa-search" aria-hidden="true"></i>
+                                    </label>
+                                </div>
+                            </div> <!--<div class="filter-container">-->
+                            <div class="filter-collapse">
+                                <a ng-click="toggleViewFilterPanel(session)">
+                                    filtrează
+                                    <i class="fa fa-caret-down" aria-hidden="true"
+                                       ng-if="!session[keys.viewFilterPanel]"></i>
+                                    <i class="fa fa-caret-up" aria-hidden="true"
+                                       ng-if="session[keys.viewFilterPanel]"></i>
+
+                                </a>
+                            </div>
+
+                        </div> <!--class="filter-register-users"-->
+                        <div class="reg-user" ng-repeat="regUser in session.filteredSessionRegUsers">
+                            <label class="user-name">{{regUser.firstName + ' ' + regUser.lastName}}</label>
+                            <label class="role-in-event">{{regUser.nameOfTicket}}</label>
+                            <button class="confirm-bttn" ng-disabled="regUser.confirmed"
+                                    ng-click="confirmOrRemoveUserFromEvent(regUser, keys.eventConfirmUser)">
+                                {{regUser.confirmed ? 'Confirmat' : 'Confirmă'}}
+                            </button>
+                            <button class="remove-bttn" ng-click="confirmOrRemoveUserFromEvent(regUser, keys.eventRemoveUser)">
+                                Sterge
+                            </button>
+                        </div>
+                        <button class="collapse-button" ng-click="session.viewUsers = false">
+                            Inchide utilizatorii
+                            <i class="fa fa-caret-up" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div><!--div class="session-tickets"-->
+        </div>
+    </div>
+
+</div>
+
+</div> <!--class="event-view-container"-->

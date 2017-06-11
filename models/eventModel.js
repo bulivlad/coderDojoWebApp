@@ -17,7 +17,26 @@ let ticketSchemaEvents = new mongoose.Schema({
     numOfTickets: {
         type: Number
     },
-    registeredMembers: [{userId: String, confirmed: Boolean}]
+    registeredMembers: [
+        {
+            userId: {type: String, required: true},
+            confirmed: Boolean
+        }
+    ],
+
+    workshop: {
+        type: String
+    },
+
+    sessionId: {
+        type: String
+    },
+
+    activeStatus: {
+        type: String,
+        enum: keys.eventStatus,
+        default: keys.eventStatus[0]
+    }
 });
 
 
@@ -31,18 +50,6 @@ let ticketSchemaRecurrentEvents = new mongoose.Schema({
     },
     numOfTickets: {
         type: Number
-    }
-});
-
-let sessionSchemaEvents = new mongoose.Schema({
-    workshop: {
-        type: String
-    },
-    tickets: [ticketSchemaEvents],
-
-    activeStatus: {
-        type: String,
-        enum: keys.eventStatus
     }
 });
 
@@ -77,9 +84,12 @@ let eventSchema = module.exports.eventSchema = new mongoose.Schema({
         index: true
     },
     copyOfRecurrentEvent: {
-      type:String
+        type:String
     },
-    sessions: [sessionSchemaEvents],
+    //This has a list of tickets instead of a list of sessions with tickets inside because you cannot to an atomic
+    // operation to add something to an array within an array withing an array (sessions.tickets.registeredMembers)
+    // but you can with only two levels(tickets.registeredMembers)
+    tickets: [ticketSchemaEvents],
 
     isActualEvent: {//This exists to easily differentiate between recurrent event and events (it is never changed)
         type: Boolean,
@@ -135,10 +145,65 @@ let fieldsToGetForCurrentDojoEvents = {
     name: true,
     description: true,
     dojoId: true,
-    sessions: true,
+    tickets: true,
     copyOfRecurrentEvent: true
 };
 
 module.exports.getCurrentDojoEvents = function(dojoId, callback){
     Event.find({dojoId:dojoId, endTime: {$gt: Date.now()}}, fieldsToGetForCurrentDojoEvents, callback);
+};
+
+let fieldsToGetForAuthCurrentDojoEvents = {
+    startTime: true,
+    endTime: true,
+    name: true,
+    description: true,
+    dojoId: true,
+    tickets: true,
+    copyOfRecurrentEvent: true,
+};
+
+module.exports.getAuthCurrentDojoEvents = function(dojoId, callback){
+    Event.find({dojoId:dojoId, endTime: {$gt: Date.now()}}, fieldsToGetForAuthCurrentDojoEvents, callback);
+};
+
+module.exports.getEvent = function(eventId, callback){
+    Event.findOne({_id: eventId}, callback);
+};
+
+module.exports.getEventTickets = function(eventId, callback){
+    Event.findOne({_id: eventId}, {tickets: true},callback);
+};
+
+//Method for registering user to event
+module.exports.registerUserForEvent = function(eventId, ticketId, userIdToAddToEvent, callback){
+    Event.findOneAndUpdate({_id: eventId, 'tickets._id': ticketId},
+        {$addToSet: {'tickets.$.registeredMembers': {userId: userIdToAddToEvent, confirmed: false}}}, callback);
+};
+
+//Method for removing user from event
+module.exports.removeUserFromEvent = function(eventId, ticketId, userIdToRemoveFromEvent, callback){
+    Event.findOneAndUpdate({_id: eventId, 'tickets._id': ticketId},
+        {$pull: {'tickets.$.registeredMembers': {userId: userIdToRemoveFromEvent}}}, callback);
+};
+
+module.exports.confirmOrRemoveUserFromEvent = function(data, callback){
+    if(data.whichAction === keys.eventRemoveUser){
+        Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
+            {$pull: {'tickets.$.registeredMembers': {_id: data.regUserId}}}, {new:true}, callback);
+    } else {
+        //Confirm user path. First we must remove the user from the database, and then add him/her back confirmed
+        // I have not found a more efficient way to do this at the moment, but there must be one
+        Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
+            {$pull: {'tickets.$.registeredMembers': {_id: data.regUserId}}}, {_id:1}, function(err){
+                if(err){
+                    logger.error(`Error removing user (id=${data.userToAddOrRemoveId}) from event right before adding him confirmed:` + err);
+                    return res.sendStatus(500);
+                }
+                //Now we add the user as confirmed
+                Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
+                    {$addToSet: {'tickets.$.registeredMembers':
+                    {_id:data.regUserId,userId: data.userToAddOrRemoveId, confirmed: true}}}, {new:true}, callback);
+            });
+    }
 };

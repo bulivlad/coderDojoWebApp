@@ -14,6 +14,27 @@ const authentification = require('../passport/authentification');
 router.post('/' + keys.getCurrentDojoEventsRoute, eventController.getCurrentDojoEvents);
 
 //Route for getting events for a dojo for unauthenticated users
-router.post('/' + keys.getCurrentDojoEventsRoute, authentification.ensureAuthenticated, eventController.getAuthCurrentDojoEvents);
+router.post('/' + keys.getAuthCurrentDojoEventsRoute, authentification.ensureAuthenticated, eventController.getAuthCurrentDojoEvents);
+
+//method for getting an event for unauthenticated users
+router.post('/' + keys.getEventRoute, eventController.getEvent);
+
+//method for getting an event for authenticated users
+router.post('/' + keys.getAuthEventRoute, authentification.ensureAuthenticated, eventController.getAuthEvent);
+
+//Method for registering a user for an event
+router.post('/' + keys.registerUserForEventRoute, authentification.ensureAuthenticated, eventController.registerUserForEvent);
+
+//Method for canceling a user's registration for an event
+router.post('/' + keys.removeUserFromEventRoute, authentification.ensureAuthenticated,
+                eventController.removeUserFromEventEvent);
+
+//Method for registering a user for an event
+router.post('/' + keys.getUsersRegisteredForEventRoute, authentification.ensureAuthenticated,
+                eventController.getUsersRegisteredForEvent);
+
+//Method for confirming a users registration for an event, or removing him/her from the event
+router.post('/' + keys.confirmOrRemoveUserFromEventRoute, authentification.ensureAuthenticated,
+    eventController.confirmOrRemoveUserFromEvent);
 
 module.exports = router;

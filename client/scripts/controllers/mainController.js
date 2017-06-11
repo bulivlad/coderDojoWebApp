@@ -6,7 +6,7 @@
 
 
 angular.module("coderDojoTimisoara")
-    .controller("mainController", function($scope, $rootScope, $location, dataService, helperSvc){
+    .controller("mainController", function($scope, $rootScope, $route,  $location, dataService, helperSvc){
         //Copying the keys to the scope for user in the view
         $scope.keys = keys;
         $scope.getUserFromServer = function(callback){
@@ -23,37 +23,70 @@ angular.module("coderDojoTimisoara")
                     }
                 })
                 .catch(function(err){
-                    if (err.status === 401){
-                        //If not authorized, we must delete the current user
-                        $rootScope.user = undefined;
-                    }
-                    if(callback){
-                        callback(err);
-                    }
+                    helperSvc.handlerCommunicationErrors(err, 'getUserFromServer', $scope);
+                    callback(err);
                 });
         };
 
-        $scope.setAlert = function(alertType, alertMessage){
-            $rootScope.alert = alertType;
-            $rootScope.alertMessage = alertMessage;
-            helperSvc.scrollToTop();
+        $scope.getNewNotificationsCount = function(err){
+            if(!err && $scope.isUserLoggedIn()){
+                dataService.getNewNotificationsCount()
+                    .then(function(response){
+                        if(response.data[keys.newNotificationCount]){
+                            $scope[keys.newNotificationCount] = response.data[keys.newNotificationCount];
+                        }
+                    })
+                    .catch(function(err){
+                        helperSvc.handlerCommunicationErrors(err, 'getNewNotificationsCount', $scope);
+                    })
+            }
         };
 
+        $scope.resetNewNotificationCount = function(){
+            $scope.newNotificationCount = 0;
+        };
+
+        //Method for displaying a modal alert
+        $scope.setAlert = function(alertType, alertMessage){
+            $scope.resetAlerts();
+            $rootScope.alert = alertType;
+            $rootScope.alertMessage = alertMessage;
+        };
+
+        //Method for displaying a modal information about a topic
+        $scope.setInformation = function(infoType){
+            $scope.resetInformation();
+            $rootScope.information = infoType;
+        };
+
+        $scope.resetInformation = function(){
+            $rootScope.information = undefined;
+        };
 
         $scope.getPrettyDate = function(date){
             return helperSvc.prettyDate(date, false);
         };
-
-
 
         $rootScope.deleteUser = function(methodName){
             $rootScope.user = undefined;
             console.log('User deleted by: ' + methodName);
         };
 
+        $scope.isUserLoggedIn = function(){
+            if($rootScope.user){
+                return true;
+            }
+        };
+
         $scope.deleteUser = $rootScope.deleteUser;
 
-        $scope.getUserFromServer();
+
+        $scope.getUserFromServer($scope.getNewNotificationsCount);
+
+        //Starting the get new Notifications interval
+        setInterval(function(){
+            $scope.getNewNotificationsCount(null);
+        }, 10000);
 
         $scope.setCorrectPathForWideNavigation = function(){
             var currentPath = $location.path();
@@ -66,19 +99,53 @@ angular.module("coderDojoTimisoara")
 
         $scope.setCorrectPathForWideNavigation();
 
+
         $scope.goToLogin = function(){
             $location.path('/' + keys.login);
+        };
+
+        $scope.goToViewUserProfile = function(){
+            if($location.path() === '/'+ keys.myProfile){
+                $route.reload()
+            } else {
+                $location.path('/' + keys.myProfile);
+            }
+        };
+
+        $scope.goToLoginAndResetAlerts = function(){
+            $scope.goToLogin();
             $rootScope.alert = undefined;
         };
 
         $scope.goToRegister = function(){
             $location.path('/' + keys.register);
+        };
+
+        $scope.goToRegisterAndResetAlerts = function(){
+            $scope.goToRegister();
             $rootScope.alert = undefined;
         };
 
-        $scope.goToV = function(){
-            $location.path('/' + keys.register);
-            $rootScope.alert = undefined;
+        $scope.goToDespre = function(){
+            $location.path('/' + keys.despre);
+        };
+
+        $scope.goToViewEvent = function(){
+            $location.path('/' + keys.viewEventLocation);
+        };
+
+        $scope.goToViewDojo = function(){
+            $location.path('/' + keys.getDojoRoute);
+        };
+
+        //This sets the eventId for the event to be downloaded, and the location where the event was accessed,
+        // to be used when going back.
+        $scope.setEventView = function(eventId, previousLocation){
+            $scope.eventView = {eventId: eventId, previousLocation: previousLocation};
+        };
+
+        $scope.getEventView = function(){
+            return $scope.eventView;
         };
 
         $scope.resetAlerts = function(){

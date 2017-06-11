@@ -64,9 +64,34 @@ angular.module("coderDojoTimisoara")
             replace: true
         }
     })
-    .directive("eventDirective", function(){
+    .directive("eventCreateDirective", function(){
         return {
             templateUrl: "directives/create-or-edit-dojo-event-directive.html",
             replace: true
         }
-    });
+    })
+    .directive("eventDirective", function(){
+        return {
+            templateUrl: "directives/event-directive.html",
+            replace: true
+        }
+    })
+    .directive("informationDirective", function(){
+        return {
+            templateUrl: "directives/information-directive.html",
+            replace: true
+        }
+    })
+    .directive("addEventDirective", function(){
+        return {
+            templateUrl: "directives/add-event-directive.html",
+            replace: true
+        }
+    })
+    .directive("editEventDirective", function(){
+    return {
+        templateUrl: "directives/edit-event-directive.html",
+        replace: true
+    }
+});
+

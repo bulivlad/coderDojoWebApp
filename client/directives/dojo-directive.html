@@ -2,18 +2,43 @@
     <div class="pages-banner dojo-banner">
         <h2>{{dojo.name}}</h2>
     </div>
-    <button class="back-button" ng-click="goBackAction()" ng-if="views[keys.showBackButton]">
-        Inapoi
-    </button>
+    <div class="dojo-buttons-container">
+        <div class="dojo-buttons-bar">
+            <button class="a-button" href="" ng-click="goToViewMembers()" ng-if="dojo[keys.showMembers]">
+                Membrii<br>dojo-ului
+            </button>
+            <button class="a-button" href="" ng-click="goToEditDojo()" ng-if="dojo[keys.canEditDojo]">
+                Editează<br>dojo-ul
+            </button>
+            <button class="a-button" href="" ng-click="deleteDojo()" ng-if="dojo[keys.canDeleteDojo]">
+                Șterge<br>dojo-ul
+            </button>
+            <button class="a-button" href="" ng-click="addEventAction()" ng-if="dojo[keys.canAddEvent]">
+                Adaugă<br>eveniment
+            </button>
+            <button class="leave-join-button" ng-click="leaveDojoAction()"
+                    ng-if="dojo[keys.isPendingJoining]">
+                Renunță<br>la înscriere
+            </button>
+            <button class="leave-join-button" ng-if="dojo[keys.hasJoined] && !dojo[keys.admin]" ng-click="leaveDojoAction()">
+                Părăsește<br>dojo-ul
+            </button>
+            <button class="leave-join-button" ng-if="!dojo[keys.hasJoined] && !dojo[keys.isPendingJoining] && !dojo[keys.admin];"
+                    ng-click="joinDojoAction()">
+                Participă<br>la dojo
+            </button>
+            <button ng-click="goBackAction()" ng-if="views[keys.showBackButton]">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i><br>
+                Inapoi
+            </button>
+        </div>
+        <hr>
+    </div>
     <div class="dojo-description">
         <div class="dojo-description-container">
             <div class="col1-dojo-description">
                 <div class="">
                     <span class="join-leave-container" ng-if="!dojo[keys.admin]">
-                        <button class="leave-join-button" ng-if="!dojo[keys.hasJoined] && !dojo[keys.isPendingJoining]"
-                                ng-click="joinDojoAction()">
-                            Participă
-                        </button>
                         <div class="join-dojo-screen" ng-if="views.showJoin" ng-click="closeJoinModal()">
                             <div class="container">
                                 <div class="role mentor" ng-if="views.isAdult">
@@ -43,13 +68,7 @@
                                 </div>
                             </div> <!--container-->
                         </div>
-                        <button class="leave-join-button" ng-click="leaveDojoAction()"
-                                ng-if="dojo[keys.isPendingJoining]">
-                            Cancel joining
-                        </button>
-                        <button class="leave-join-button" ng-if="dojo[keys.hasJoined]" ng-click="leaveDojoAction()">
-                            Părăsește dojo
-                        </button>
+
                     </span><!--span join leave dojo-->
                     <label><i class="fa fa-user-o"></i> Rol in dojo</label>
                     <p>{{getUserRoleInDojo()}}</p>
@@ -76,15 +95,7 @@
                 <div class="container">
                     <label>Locație</label>
                     <p class="location">{{dojo.address}}</p>
-                    <a class="a-button" href="" ng-click="goToViewMembers()" ng-if="dojo[keys.showMembers]">
-                        Membrii dojo-ului
-                    </a>
-                    <a class="a-button" href="" ng-click="goToEditDojo()" ng-if="dojo[keys.canEditDojo]">
-                        Editează dojo-ul
-                    </a>
-                    <a class="a-button" href="" ng-click="deleteDojo()" ng-if="dojo[keys.canDeleteDojo]">
-                        Șterge dojo-ul
-                    </a>
+
                     <label>Copii ar trebui să vină cu:</label>
                     <ul class="requirements-list">
                         <li ng-repeat=" requirement in dojo.requirements">
@@ -111,16 +122,27 @@
                     </div>
                 </div>
                 <div class="col2-dojo-events">
-                    <h4 class="event-date">{{getEventDate(dojoEvent)}}</h4>
-                    <button class="go-to-event-button">{{getRegisterButtonLabel(dojoEvent)}}</button>
-                    <p ng-if="showUserNotRegistered(dojoEvent)">Utilizatorul nu este inregistrat</p>
-                </div>
+                    <div class="xxx">
+                        <div class="col2-info">
+                            <h4 class="event-date">{{getEventDate(dojoEvent)}}</h4>
+                            <button class="go-to-event-button" ng-click="viewEventAction(dojoEvent)">
+                                {{getRegisterButtonLabel(dojoEvent)}}
+                            </button>
+                        </div>
+                        <p class="center-text reg-users-info" ng-repeat="regUser in dojoEvent.regUsers">
+                            <code>{{regUser.firstName + ' ' + regUser.lastName}}</code> este {{regUser.status ? 'confirmat' : 'înregistrat'}} ca si
+                            <code>{{regUser.nameOfTicket}}</code> la atelierul de <code>{{regUser.workshop}}</code>.
+
+                        </p>
+                        <p class="center-text" ng-if="showUserNotRegistered(dojoEvent)">Utilizatorul nu este inregistrat la eveniment</p>
+                    </div>
+                </div><!--class="col2-dojo-events"-->
             </div>
         </div>
         <p ng-if="dojo.events.length === 0">Nu există momentan evenimente</p>
     </div>
     <div class="dojo-map-holder">
-       <div id="dojo-map-single-dojo"></div>
+        <div id="dojo-map-single-dojo"></div>
     </div>
 
 </div>

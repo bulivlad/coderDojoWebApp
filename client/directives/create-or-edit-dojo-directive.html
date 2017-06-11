@@ -92,7 +92,7 @@
             <div class="weekly-event-body">
                 <div ng-repeat="event in localDojo.recurrentEvents">
                     <h5>Eveniment {{$index + 1}}</h5>
-                    <event-directive></event-directive>
+                    <event-create-directive></event-create-directive>
                     <div class="buttons-div">
                         <button class="add-bttn" ng-if="isLastItemInArray(localDojo.recurrentEvents, $index)" ng-click="addEmptyEvent(localDojo.recurrentEvents)">
                             Adauga eveniment

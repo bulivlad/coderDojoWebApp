@@ -34,6 +34,7 @@ angular.module("coderDojoTimisoara")
 
                         //getting users notifications
                         getNotificationsForUser(true);//TODO move this to the main controller
+                        //reset notification info bubble
 
                         //getting users dojos
                         getUsersDojosFromServer();
@@ -110,6 +111,7 @@ angular.module("coderDojoTimisoara")
                     //If the user currently displayed is the owner of the notifications (in case of slow communication)
                     if(notificationObject.ownerOfNotifications == $scope.myProfile.user._id){
                         $scope.myProfile.user.notifications = notificationObject.notifications;
+                        $scope.resetNewNotificationCount();
                     }
                     if(setToRoot && (notificationObject.ownerOfNotifications == $rootScope.user._id)){
                         $rootScope.user.notifications = notificationObject.notifications;

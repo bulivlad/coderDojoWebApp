@@ -70,6 +70,9 @@ router.post('/' + keys.acceptChildInviteRoute, authentification.ensureAuthentica
 //Method for uploading user pictures
 router.post('/' + keys.uploadUserPictureRoute, authentification.ensureAuthenticated, userController.uploadUserPicture);
 
+//Method for getting the count of new notifications for a user
+router.get('/' + keys.getNewNotificationsCountRoute, authentification.ensureAuthenticated, userController.getNewNotificationsCount);
+
 
 //This is the local strategy password uses to log in a user and save a session
 passport.use(new passportLocal.Strategy(
@@ -114,7 +117,7 @@ passport.use(new passportLocal.Strategy(
     }));
 
 passport.serializeUser(function(user, done){
-    logger.silly('Serialize user: ', JSON.stringify(user));
+    //logger.silly('Serialize user: ', JSON.stringify(user));
     if (user){
         done(null, {_id:user._id, email:user.email});
     } else {
@@ -134,7 +137,7 @@ passport.deserializeUser(function(user, done){
                 logger.warn(`User (${user.email}) not found in database by deserialize function`);
                 done(null, false);
             } else {
-                logger.silly('Deserialized user after delete:', JSON.stringify(user));
+                //logger.silly('Deserialized user after delete:', JSON.stringify(user));
                 done(null, user);
             }
         }

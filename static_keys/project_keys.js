@@ -45,10 +45,21 @@ let keyMap = {
     uploadUserPictureRoute: 'uploadUserPicture',
     getAuthCurrentDojoEventsRoute: 'getAuthCurrentDojoEvents',
     getCurrentDojoEventsRoute: 'getCurrentDojoEvents',
+    getAuthEventRoute: 'getAuthEvent',
+    getEventRoute: 'getEvent',
+    registerUserForEventRoute: 'registerUserForEvent',
+    removeUserFromEventRoute: 'removeUserFromEvent',
+    getUsersRegisteredForEventRoute: 'getUsersRegisteredForEvent',
+    confirmOrRemoveUserFromEventRoute: 'confirmOrRemoveUserFromEvent',
+    getNewNotificationsCountRoute: 'getNewNotificationsCount',
+
+    //View locations
+    viewEventLocation: 'viewevent',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
     infoNotification: 'infoNotification',
+    newNotificationCount: 'newNotificationCount',
 
     //Errors
     dbsUserCreationError: 'dbsUserCreationError',
@@ -61,6 +72,7 @@ let keyMap = {
     noParentsError: 'noParentsError',
     notAuthorizedError: 'notAuthorizedError',
     userAlreadyJoinedDojoError: 'userAlreadyJoinedDojoError',
+    userAlreadyRegisteredForEventError: 'userAlreadyRegisteredForEvent',
     userNoLongerPartOfDojo: 'userNoLongerPartOfDojo',
 
     //Alerts
@@ -68,6 +80,9 @@ let keyMap = {
     savingUserErrorAlert: 'savingUserErrorAlert',
     infoAlert: 'infoAlert',
     errorAlert: 'errorAlert',
+
+    //Information
+    eventFilterRegisteredUsers: 'eventFilterRegisteredUsers',
 
     //User roles
     user: 'user',
@@ -108,10 +123,9 @@ let keyMap = {
     viewMap: 'viewMap',
     viewList: 'viewList',
     viewDojo: 'viewDojo',
-    viewEvent: 'viewEvent',
     editDojo: 'editDojo',
-    editEvent: 'editEvent',
     viewMembers: 'viewMembers',
+    addEvent: 'addEvent',
 
     //View keys for various views
     showBackButton: 'showBackButton',
@@ -128,12 +142,38 @@ let keyMap = {
 
     //Views for events
     showMultiEventTypes: 'showMultiEventTypes',
+    editEvent: 'editEvent',
+    viewEvent: 'viewEvent',
+    collapseTickets: 'collapseTickets',
+    filterRegisteredEventUsers: 'filterRegisteredEventUsers',
+    filterRegisteredEventUsersValues: {
+        name: 'name', nameUp: 'name-up', nameDown: 'name-down',
+        status: 'status', statusUp: 'status-up', statusDown:'status-down',
+        role: 'role', roleUp: 'role-up', roleDown: 'role-down',
+        nameWritten: 'name-written'
+    },
+    viewFilterPanel: 'viewFilterPanel',
+
+    //Permissions for events
+    canDeleteEvent: 'canDeleteEvent',
+    canEditEvent: 'canEditEvent',
+    canSeeJoinedEventUsers: 'canSeeJoinedUsers',
+    canConfirmEventUsers: 'canConfirmUsers',
 
     //Enums
     daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],
     typesOfTickets: ['voluntar', 'mentor', 'cursant'],
     eventTypes: ['recurent', 'unic'],
     eventStatus: ['Activ', 'Inactiv'],
+    months: ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie' , 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'],
+
+    //Key-values
+    eventStatus_Confirmed:'Confirmat',
+    eventStatus_Registered: 'Înscris',
+    eventStatus_NotRegistered: "Neînscris",
+    eventStatus_userNotLoggedIn: 'Not logged in',
+    eventConfirmUser: 'confirm',
+    eventRemoveUser: 'remove',
 };
 
 module.exports = keyMap;

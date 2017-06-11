@@ -9,7 +9,12 @@
             </div>
             <div class="user-logout" ng-show="user" ng-click="showUserMenuNarrow($event)">
                 <img src="../img/arrow-left.png" alt="Sageata stanga">
-                <span >{{user.firstName + ' ' + user.lastName}}</span>
+
+                <span class="user-name" >
+                    <span class="new-notification-info" ng-if="newNotificationCount" ng-click="viewNotificationsFromNarrow($event)">
+                        {{newNotificationCount}}
+                    </span>
+                    {{user.firstName + ' ' + user.lastName}}</span>
             </div>
             <ul>
                 <li>

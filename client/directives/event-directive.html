@@ -4,8 +4,12 @@
     </div>
     <div class="event-buttons-div-container">
         <div class="event-buttons-div">
-            <button ng-if="event[keys.canDeleteEvent]" class="event-btn">Șterge<br>evenimentul</button>
-            <button ng-if="event[keys.canEditEvent]" class="event-btn">Editează<br>evenimentul</button>
+            <button ng-if="event[keys.canDeleteEvent]" class="event-btn" ng-click="deleteEvent()">
+                Șterge<br>evenimentul
+            </button>
+            <button ng-if="event[keys.canEditEvent]" class="event-btn" ng-click="editEventAction()">
+                Editează<br>evenimentul
+            </button>
             <button class="event-btn back-button" ng-click="goBackAction()">
                 <i class="fa fa-arrow-left" aria-hidden="true"></i><br>
                 Inapoi

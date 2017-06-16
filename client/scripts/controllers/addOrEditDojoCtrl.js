@@ -17,7 +17,12 @@ angular.module("coderDojoTimisoara")
             }
         };
 
-        var initializeAddDojoCtrl = function(){
+        //Method for closing the panel informing the user the dojo has suffered modifications when sanitizing
+        $scope.closeHasBeenSanitizedInfo = function(){
+            $scope.hasBeenSanitized = undefined;
+        };
+
+        var initializeAddOrEditDojoCtrl = function(){
             if($scope.dojo){//If the this controller is launched to edit a dojo (a dojo exists in the scope)
                 //We clone the object so we do not modify the original
                 $scope.localDojo = angular.copy($scope.dojo);
@@ -51,6 +56,7 @@ angular.module("coderDojoTimisoara")
                     }
                 }
             } else {
+                //Add dojo mode
                 $scope.localDojo.recurrentEvents = [];
                 $scope.addEmptyEvent($scope.localDojo.recurrentEvents);
                 $scope.localDojo.requirements = [{data:''}];
@@ -59,7 +65,7 @@ angular.module("coderDojoTimisoara")
             }
         };
 
-        initializeAddDojoCtrl();
+        initializeAddOrEditDojoCtrl();
 
         //Deletes an event in the que
         $scope.deleteEvent = function(index){
@@ -75,7 +81,7 @@ angular.module("coderDojoTimisoara")
             $scope.localDojo.requirements.splice(index, 1);
             //If the requirement array is empty, we add an empty requirement (which isn't saved, but we need to display something)
             if($scope.localDojo.requirements.length === 0){
-                $scope.localDojo.requirements.push('');
+                $scope.localDojo.requirements.push({data:''});
             }
         };
 
@@ -83,7 +89,7 @@ angular.module("coderDojoTimisoara")
             $scope.localDojo.statuses.splice(index, 1);
             //If the requirement array is empty, we add an empty requirement (which isn't saved, but we need to display something)
             if($scope.localDojo.statuses.length === 0){
-                $scope.localDojo.statuses.push('');
+                $scope.localDojo.statuses.push({data:''});
             }
         };
 
@@ -113,15 +119,80 @@ angular.module("coderDojoTimisoara")
                     .then(function(response){
                         if(response.data.errors === keys.notAuthorizedError){
                             $scope.showNotAuthorizedError();
-                        } else if (response.data.success){
+                        } else if(response.data.errors === keys.notSanitizedError){
+                            var dojoWithSanitizedFlags = addSanitizedFlag($scope.localDojo, response.data.sanitizedDojo);
+                            $scope.localDojo = addNecessaryEmptyFields(dojoWithSanitizedFlags);
+                            $scope.hasBeenSanitized = true;
+                        }else if (response.data.success){
                             $location.path('/' + keys.cautaUnDojo);
-                            $scope.setAlert(keys.infoAlert, 'Dojo creeat cu succes!');
+                            $scope.setAlert(keys.infoAlert, 'Dojo creat cu succes!');
                         }
                     })
                     .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err, 'addDojo() - addDojosCtrl', $scope);
+                        helperSvc.handlerCommunicationErrors(err, 'addDojo() - addOrEditDojoCtrl', $scope);
                     })
             }
+        };
+
+        //Statuses, requirements and events cannot we empty for them to be displayed correctly using nr-repeat
+        // so filler objects must be added (they are removed later when the event is sent to the server)
+        var addNecessaryEmptyFields = function(dojo){
+            if(dojo.requirements.length == 0){
+                dojo.requirements.push({data:''})
+            }
+            if(dojo.statuses.length == 0){
+                dojo.statuses.push({data:''})
+            }
+            if(dojo.recurrentEvents.length == 0){
+                $scope.addEmptyEvent(dojo.recurrentEvents);
+            }
+
+            return dojo;
+        };
+
+        var addSanitizedFlag = function(dojo, sanitizedDojo){
+            if(dojo.name != sanitizedDojo.name){
+                sanitizedDojo.sanitName = true;
+            }
+            if(dojo.address != sanitizedDojo.address){
+                sanitizedDojo.sanitAddress = true;
+            }
+            if(dojo.latitude != sanitizedDojo.latitude){
+                sanitizedDojo.sanitLatitude = true;
+            }
+            if(dojo.longitude != sanitizedDojo.longitude){
+                sanitizedDojo.sanitLongitude = true;
+            }
+            if(dojo.email != sanitizedDojo.email){
+                sanitizedDojo.sanitEmail = true;
+            }
+            if(dojo.facebook != sanitizedDojo.facebook){
+                sanitizedDojo.sanitFacebook = true;
+            }
+            if(dojo.twitter != sanitizedDojo.twitter){
+                sanitizedDojo.sanitTwitter = true;
+            }
+
+            for(var i = 0; i < dojo.requirements.length; i++){
+                //First we convert the requirement into the into the required form for the ng-repeat algorithm
+                sanitizedDojo.requirements[i] = {data: sanitizedDojo.requirements[i]};
+                if(dojo.requirements[i] != sanitizedDojo.requirements[i].data){
+                    sanitizedDojo.requirements[i].sanitRequirement = true;
+                }
+            }
+
+            for(var i = 0; i < dojo.statuses.length; i++){
+                //First we convert the status into the into the required form for the ng-repeat algorithm
+                sanitizedDojo.statuses[i] = {data: sanitizedDojo.statuses[i]};
+                if(dojo.statuses[i] != sanitizedDojo.statuses[i].data){
+                    sanitizedDojo.statuses[i].sanitStatus = true;
+                }
+            }
+
+            for(var i = 0; i < dojo.recurrentEvents.length; i++){
+                helperSvc.addSanitizedFlagToEvent(dojo.recurrentEvents[i], sanitizedDojo.recurrentEvents[i]);
+            }
+            return sanitizedDojo;
         };
 
         $scope.editDojo = function(){
@@ -133,7 +204,11 @@ angular.module("coderDojoTimisoara")
                     .then(function(response){
                         if(response.data.errors === keys.notAuthorizedError){
                             $scope.showNotAuthorizedError();
-                        } else if (response.data.success){
+                        } else if(response.data.errors === keys.notSanitizedError){
+                            var dojoWithSanitizedFlags = addSanitizedFlag($scope.localDojo, response.data.sanitizedDojo);
+                            $scope.localDojo = addNecessaryEmptyFields(dojoWithSanitizedFlags);
+                            $scope.hasBeenSanitized = true;
+                        }else if (response.data.success){
                             //If the dojo was updated, we reload the dojo, running the initialize method from dojoCtrl
                             if($scope.initializeDojoCtrl){
                                 $scope.initializeDojoCtrl();
@@ -141,13 +216,23 @@ angular.module("coderDojoTimisoara")
                         }
                     })
                     .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err, 'addDojo() - addDojosCtrl', $scope);
+                        helperSvc.handlerCommunicationErrors(err, 'addDojo() - addOrEditDojoCtrl', $scope);
                     })
             }
         };
 
 
         var prepareDojoForSending = function(dojo){
+            //Remove sanitize flags from dojo
+            dojo.sanitName = undefined;
+            dojo.sanitAddress = undefined;
+            dojo.sanitLatitude = undefined;
+            dojo.sanitLongitude = undefined;
+            dojo.sanitEmail = undefined;
+            dojo.sanitFacebook = undefined;
+            dojo.sanitTwitter = undefined;
+
+            //We clone it because we may need the original later when comparing for sanitization
             var preparedRequirements = [];
             //The requirements/statuses were modified from an array of Strings to an array of objects for the ng-repeat
             // directive to work. Now we are reconverting them back to Strings, and we are removing the empty ones.
@@ -176,24 +261,12 @@ angular.module("coderDojoTimisoara")
             var preparedRecurrentEvents = [];
             dojo.recurrentEvents.forEach(function(reccurentEvent){
                 if(!helperSvc.eventIsEmpty(reccurentEvent)){
-                    preparedRecurrentEvents.push(reccurentEvent);
+                    preparedRecurrentEvents.push(helperSvc.removeSanitizedFlagsAndErrorsFromEvent(reccurentEvent));
                 }
             });
             dojo.recurrentEvents = preparedRecurrentEvents;
 
-            removeEventErrors(dojo.recurrentEvents);
-
             return dojo;
-        };
-
-        //Method that removes the extraneous fields from the recurrent events
-        var removeEventErrors = function(recurrentEvents){
-            recurrentEvents.forEach(function(event){
-                event.error = undefined;
-                event.sessions.forEach(function(session){
-                    session.error = undefined;
-                })
-            });
         };
 
         var validateDojoFields = function(dojo){
@@ -224,9 +297,6 @@ angular.module("coderDojoTimisoara")
                 hasErrors = true;
                 errors.email = 'Dojo-ul trebuie sa aibe email';
             }
-
-            //we need to remove the previous errors if the dojo is resubmitted
-            removeEventErrors(dojo.recurrentEvents);
 
             var hasEventErrors = helperSvc.validateEventFields(dojo.recurrentEvents);
 

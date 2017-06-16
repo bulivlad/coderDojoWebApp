@@ -106,7 +106,7 @@ angular.module("coderDojoTimisoara")
 
         $scope.goToViewUserProfile = function(){
             if($location.path() === '/'+ keys.myProfile){
-                $route.reload()
+                $route.reload();
             } else {
                 $location.path('/' + keys.myProfile);
             }
@@ -131,11 +131,19 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.goToViewEvent = function(){
-            $location.path('/' + keys.viewEventLocation);
+            if($location.path() === '/'+ keys.viewEventLocation){
+                $route.reload();
+            } else {
+                $location.path('/' + keys.viewEventLocation);
+            }
         };
 
         $scope.goToViewDojo = function(){
-            $location.path('/' + keys.getDojoRoute);
+            if($location.path() === '/'+ keys.getDojoRoute){
+                $route.reload();
+            } else {
+                $location.path('/' + keys.getDojoRoute);
+            }
         };
 
         //This sets the eventId for the event to be downloaded, and the location where the event was accessed,
@@ -240,11 +248,11 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.eventIsRecurrent = function(eventType){
-          return eventType === keys.eventTypes[0];
+            return helperSvc.eventIsRecurrent(eventType);
         };
 
         $scope.eventIsUnique = function(eventType){
-            return eventType === keys.eventTypes[1];
+            return helperSvc.eventIsUnique(eventType)
         };
 
         //Method for setting the view that selected a dojo (ex cauta un dojo view). This info is used when going back

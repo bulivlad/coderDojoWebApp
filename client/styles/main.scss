@@ -952,9 +952,6 @@ My PROFILE
     top: 25px;
 
   }
-
-
-
   @media screen and (min-width: $transition_resolution){//Fix for overlapping navigation
     top: 8px;
   }
@@ -1013,14 +1010,14 @@ My PROFILE
         }
       }
 
-      p { //The error
+      p.error { //The error
         border-radius: 3px;
         color: red;
         display: inline-block;
-        font-size: 0.45em;
+        font-size: 0.65em;
         position: absolute;
         left: 38%;
-        top: -16px;
+        top: -23px;
       }
 
       #personal-data-gender {
@@ -1155,9 +1152,7 @@ My PROFILE
     }
 
   }
-
 }
-
 
 #my-profile {
   position: relative;
@@ -1744,8 +1739,6 @@ div.dojos-view-container {
 
 }
 
-
-
 /***************
 Dojo members
 ***************/
@@ -1864,6 +1857,25 @@ Add or create dojos
 
 #add-dojo {
 
+  div.info-panel {
+    text-align: right;
+  }
+
+  p.sanitize-info {
+    background-color: rgba(144, 238, 144, 0.1);
+    box-sizing: border-box;
+    float: right;
+    font-size: 0.8em;
+    max-width: 66%;
+    padding: 5px;
+
+    i.fa-window-close {
+      cursor: pointer;
+      float: right;
+    }
+
+  }
+
   label {
     color: $my_profile_color;
   }
@@ -1960,11 +1972,10 @@ Add or create dojos
     }
   }
 
-
+  .sanitized {
+    background-color: rgba(144, 238, 144, 0.3) !important;
+  }
 }
-
-
-
 
 /******************
 Dojo bubble viewer
@@ -1996,6 +2007,10 @@ div.dojo-bubble-container {
     }
   }
 }
+/********************
+Add/Edit event of dojo
+*********************/
+
 
 
 /******************************
@@ -2010,6 +2025,7 @@ MY DOJOS
   }
 
 }
+
 
 
 /******************************
@@ -2089,8 +2105,6 @@ EVENTS
               text-align: center;
             }
           }
-
-
           div.ticket-heading-2 {
             display: flex;
             margin-bottom: 1%;
@@ -2260,18 +2274,6 @@ EVENTS
                   outline: none;
                 }
               }
-              //button.filter-row-2-name-button { TODO delete if the button to activate the filter is not needed
-              //  background-color: rgba(213, 233, 250, 0.74);
-              //  border: 1px solid rgba(213, 233, 250, 0.74);
-              //  margin: 0 2%;
-              //  width: 21%;
-              //
-              //  &:hover {
-              //    background-color: white;
-              //    color: black;
-              //  }
-              //}
-
             }
 
             div.filter-collapse {
@@ -2371,11 +2373,50 @@ Event directive
   }
 }
 
-div.create-or-edit-event {
+div.add-or-edit-event {
 
+  div.info-panel {
+    text-align: right;
+  }
 
+  p.sanitize-info {
+    background-color: rgba(144, 238, 144, 0.1);
+    box-sizing: border-box;
+    float: right;
+    font-size: 0.8em;
+    max-width: 66%;
+    padding: 5px;
 
+    i.fa-window-close {
+      cursor: pointer;
+      float: right;
+    }
+  }
+  div.button-bar-add-event{
+    display: flex;
+    button {
+      margin-left: auto;
+    }
+  }
+
+  div.wrapper {
+    margin: auto;
+    width: 80%;
+  }
+
+  button.add-event-button {
+    display: block;
+    margin: 15px auto;
+  }
+
+  .sanitized {
+    background-color: rgba(144, 238, 144, 0.3) !important;
+  }
+} //div.add-or-edit-event
+
+div.event-display {//This is part of the event directive, it is the actual event being shown
   label.event-label {
+    color: $my_profile_color;
     display: inline-block;
     font-size: 0.8em;
     text-align: left;
@@ -2383,6 +2424,10 @@ div.create-or-edit-event {
     margin-left:5px;
     max-width: 40%;
     width: 40%;
+  }
+
+  textarea.event-textarea {
+    margin-bottom: 8px;
 
   }
 
@@ -2416,6 +2461,7 @@ div.create-or-edit-event {
   }
 
   p.event-error {
+    color: red;
     display: block !important;
     font-size: .6em !important;
     left: auto !important;
@@ -2445,6 +2491,11 @@ div.create-or-edit-event {
     width: 15%;
   }
 
+  input#start-hour-unique-event {
+    width: 30%;
+  }
+
+
   div.event-description {
     textarea.event-textarea {
       float: none !important;
@@ -2457,6 +2508,12 @@ div.create-or-edit-event {
   div.event-session { //For the sessions editor
     margin: 0 auto;
     width: 95%;
+
+    h5 {
+      color: $my_profile_color;
+      margin: 0 auto 0.4em auto;
+      text-align: center;
+    }
 
     .individual-session {
       background-color: #f8f8f8;
@@ -2558,8 +2615,6 @@ div.create-or-edit-event {
               padding: 5px 0 0 0;
             }
           }
-
-
         }//div.tickets-display-wide
 
         select.ticket-type-wide {
@@ -2589,11 +2644,12 @@ div.create-or-edit-event {
         }
 
       }//div.tickets-container
-    }
+
+    }//div.event-session
 
   }
+}//div.event-display
 
-}//div.create-or-edit-event
 
 /******************************
 FOOTER

@@ -5,40 +5,57 @@
     <button class="back-button" ng-click="goBackAction()" ng-if="showBackButton">Inapoi</button>
     <div class="personal-data">
         <h3>Info dojo</h3>
+        <div class="label-and-value">
+            <div class="info-panel">
+                <span class="filter-row1-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </div>
+            <p class="sanitize-info" ng-if="hasBeenSanitized">
+                <i class="fa fa-window-close close-button" aria-hidden="true" ng-click="closeHasBeenSanitizedInfo()"></i>
+                Unele cîmpuri introduse au fost modificate deoarece nu se încadrează
+                în valorile acceptate (câmpurile sunt subliniate cu verde). Pentru mai multe informații despre
+                ce este permis, accesează informațiile.
+                <span class="filter-row1-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </p>
+        </div>
+
 
         <div class="label-and-value">
             <label class="left-label" for="dojo-name">Nume</label>
             <input class="dojo-simple-fields-input" type="text" id="dojo-name" ng-model="localDojo.name"
-                   ng-focus="errors.name = undefined"> <br>
-            <p ng-if="errors.name">{{errors.name}}</p>
+                   ng-focus="errors.name = undefined" ng-class="{sanitized: localDojo.sanitName}"> <br>
+            <p class="error" ng-if="errors.name">{{errors.name}}</p>
         </div>
 
         <div class="label-and-value">
             <label class="left-label" for="dojo-address">Adresa</label>
             <input class="dojo-simple-fields-input" type="text" id="dojo-address" ng-model="localDojo.address"
-                   ng-focus="errors.address = undefined"> <br>
-            <p ng-if="errors.address">{{errors.address}}</p>
+                   ng-focus="errors.address = undefined" ng-class="{sanitized: localDojo.sanitAddress}"> <br>
+            <p class="error" ng-if="errors.address">{{errors.address}}</p>
         </div>
 
         <div class="label-and-value">
             <label class="left-label" for="dojo-latitude">Latitudine</label>
             <input class="dojo-simple-fields-input" type="number" id="dojo-latitude" ng-model="localDojo.latitude"
-                   ng-focus="errors.latitude = undefined"> <br>
-            <p ng-if="errors.latitude">{{errors.latitude}}</p>
+                   ng-focus="errors.latitude = undefined" ng-class="{sanitized: localDojo.sanitLatitude}"> <br>
+            <p class="error" ng-if="errors.latitude">{{errors.latitude}}</p>
         </div>
 
         <div class="label-and-value">
             <label class="left-label" for="dojo-longitude">Longitudine</label>
             <input class="dojo-simple-fields-input" type="number" id="dojo-longitude" ng-model="localDojo.longitude"
-                   ng-focus="errors.longitude = undefined"> <br>
-            <p ng-if="errors.longitude">{{errors.longitude}}</p>
+                   ng-focus="errors.longitude = undefined" ng-class="{sanitized: localDojo.sanitLongitude}"> <br>
+            <p class="error" ng-if="errors.longitude">{{errors.longitude}}</p>
         </div>
 
         <div class="label-and-value">
             <label class="left-label" for="dojo-email">Email</label>
             <input class="dojo-simple-fields-input" type="email" id="dojo-email" ng-model="localDojo.email"
-                   ng-focus="errors.email = undefined"> <br>
-            <p ng-if="errors.email">{{errors.email}}</p>
+                   ng-focus="errors.email = undefined" ng-class="{sanitized: localDojo.sanitEmail}"> <br>
+            <p class="error" ng-if="errors.email">{{errors.email}}</p>
         </div>
 
         <div class="label-and-value">
@@ -46,7 +63,8 @@
             <div id="status-body">
                 <div ng-repeat="status in localDojo.statuses">
                     <h5>Status {{$index + 1}}</h5>
-                    <textarea class="requirement" ng-model="status.data" placeholder="Scrie un status pentru dojo">
+                    <textarea class="requirement" ng-model="status.data" placeholder="Scrie un status pentru dojo"
+                              ng-class="{sanitized: status.sanitStatus}">
                     </textarea>
                     <div class="buttons-div">
                         <button ng-click="deleteStatus($index)">Sterge status</button>
@@ -62,12 +80,14 @@
 
         <div class="label-and-value">
             <label class="left-label" for="dojo-facebook">Facebook</label>
-            <input class="dojo-simple-fields-input" type="text" id="dojo-facebook" ng-model="localDojo.facebook"> <br>
+            <input class="dojo-simple-fields-input" type="text" id="dojo-facebook" ng-model="localDojo.facebook"
+                   ng-class="{sanitized: localDojo.sanitFacebook}"> <br>
         </div>
 
         <div class="label-and-value">
             <label class="left-label" for="dojo-twitter">Twitter</label>
-            <input class="dojo-simple-fields-input" type="text" id="dojo-twitter" ng-model="localDojo.twitter"> <br>
+            <input class="dojo-simple-fields-input" type="text" id="dojo-twitter" ng-model="localDojo.twitter"
+                   ng-class="{sanitized: localDojo.sanitTwitter}"> <br>
         </div>
 
         <div class="label-and-value">
@@ -75,7 +95,9 @@
             <div id="requirements-body">
                 <div ng-repeat="requirement in localDojo.requirements">
                     <h5>Cerință {{$index + 1}}</h5>
-                    <textarea class="requirement" ng-model="requirement.data" placeholder="Scrie o cerință pentru dojo">
+                    <textarea class="requirement" ng-model="requirement.data" placeholder="Scrie o cerință pentru dojo"
+                              ng-class="{sanitized: requirement.sanitRequirement}"
+                    >
                     </textarea>
                     <div class="buttons-div">
                         <button ng-click="deleteRequirement($index)">Sterge cerință</button>
@@ -90,9 +112,9 @@
         <div class="label-and-value weekly-event">
             <label class="weekly-event-label">Evenimente săptămânale</label>
             <div class="weekly-event-body">
-                <div ng-repeat="event in localDojo.recurrentEvents">
+                <div ng-repeat="localEvent in localDojo.recurrentEvents">
                     <h5>Eveniment {{$index + 1}}</h5>
-                    <event-create-directive></event-create-directive>
+                    <display-event-directive></display-event-directive>
                     <div class="buttons-div">
                         <button class="add-bttn" ng-if="isLastItemInArray(localDojo.recurrentEvents, $index)" ng-click="addEmptyEvent(localDojo.recurrentEvents)">
                             Adauga eveniment

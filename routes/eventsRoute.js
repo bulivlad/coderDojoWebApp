@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const keys = require('../static_keys/project_keys');
-const eventController = require('../controllers/eventController')
+const eventController = require('../controllers/eventController');
 const authentification = require('../passport/authentification');
 
 //Route for getting events for a dojo for unauthenticated users
@@ -36,5 +36,14 @@ router.post('/' + keys.getUsersRegisteredForEventRoute, authentification.ensureA
 //Method for confirming a users registration for an event, or removing him/her from the event
 router.post('/' + keys.confirmOrRemoveUserFromEventRoute, authentification.ensureAuthenticated,
     eventController.confirmOrRemoveUserFromEvent);
+
+//Method for deleting an event
+router.post('/' + keys.deleteEventRoute, authentification.ensureAuthenticated, eventController.deleteEvent);
+
+//Method for gettng event for editing
+router.post('/' + keys.getEventForEditingRoute, authentification.ensureAuthenticated, eventController.getEventForEditing);
+
+//Method for editing an existing unique event
+router.post('/' + keys.editEventOfDojoRoute, authentification.ensureAuthenticated, eventController.editEvent);
 
 module.exports = router;

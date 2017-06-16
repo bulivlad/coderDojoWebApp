@@ -5,31 +5,39 @@
 const keys = require('../static_keys/project_keys');
 const Dojo = require('../models/dojoModel');
 const User = require('../models/userModel');
+const Event = require('../models/eventModel');
 const UserController = require('../controllers/usersController')
 const logger = require('winston');
 const validator = require('validator');
 const helper  = require('./helperController');
 
 
+
+
 //Method for adding a new dojo (only the admin can do that)
 module.exports.addDojo = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.addDojoRoute} by ${helper.helper.getUser(req)}`);
+    logger.debug(`Entering DojosRoute: ${keys.addDojoRoute} by ${helper.getUser(req)}`);
     //First we check that the user trying to add the dojo is an administrator
     if(req.user.authorizationLevel === keys.admin){
         let dojo = req.body.dojo;
-        logger.silly(`Dojo to save before sanitize: ${JSON.stringify(dojo)}`);
-        dojo = sanitizeDojo(dojo);
-        logger.silly(`Dojo to save after sanitize: ${JSON.stringify(dojo)}`);
-        let newDojo = new Dojo(dojo);
-        //We save the dojo to the database
-        newDojo.save(function(err){
-            if(err){
-                logger.error(`Error adding a dojo by ${helper.getUser(req)}:` + err);
-                return res.sendStatus(500);
-            }
-            //If the save was successful, we return a success message to the client.
-            res.json({success: true});
-        });
+        let sanitizedDojo = sanitizeDojo(dojo);
+        if(helper.areDojosEqual(dojo, sanitizedDojo)){
+            let newDojo = new Dojo(sanitizedDojo);
+            //We save the dojo to the database
+            newDojo.save(function(err){
+                if(err){
+                    logger.error(`Error adding a dojo by ${helper.getUser(req)}:` + err);
+                    return res.sendStatus(500);
+                }
+                //If the save was successful, we return a success message to the client.
+                res.json({success: true});
+            });
+        } else {
+            // If the dojo and the sanitized dojo are not equal, we send a sanitized error and the sanitizedDojo for the
+            // user to decide if they agree with the sanitized version
+            res.json({errors: keys.notSanitizedError, sanitizedDojo: sanitizedDojo});
+        }
+
     } else {
         //If the user is not an administrator, we log this as an error, and respond with a not authorized error to the
         //client.
@@ -62,37 +70,40 @@ module.exports.deleteDojo = function(req, res){
     }
 };
 
-
-
 //Route for editing an existing dojo (only the admin and champion can do that)
 module.exports.editDojo = function(req, res){
     logger.debug(`Entering DojosRoute: ${keys.editDojoRoute} by ${helper.getUser(req)}`);
     let user = req.user;
     let modifiedDojo = req.body.dojo;
-    logger.silly(`Modified dojo before sanitize: ${JSON.stringify(modifiedDojo)}`);
-    modifiedDojo = sanitizeDojo(modifiedDojo);
-    logger.silly(`Modified dojo after sanitize: ${JSON.stringify(modifiedDojo)}`);
-    //We get the dojos from the database to check the user's credentials
-    Dojo.getDojoForInternalAuthentication(modifiedDojo._id, function(err, dojo){
-        if(err){
-            logger.error(`Error getting dojo by ${helper.getUser(req)}, for  ${keys.editDojoRoute}:` + err);
-            return res.sendStatus(500);
-        }
-        //Checking if the user has permission to edit the dojo (is champion in dojo or admin)
-        if(isUserAdmin(user) || isUserChampionInDojo(dojo, user._id)){
-            Dojo.updateDojo(modifiedDojo, function(err){
-                if(err){
-                    logger.error(`Error adding a dojo by ${helper.getUser(req)}:` + err);
-                    return res.sendStatus(500);
-                }
-                res.json({success: true});
-            });
-        } else {
-            //If the user is not champion of dojo or admin, we log it, and we send back an unauthorized error
-            logger.error(`${helper.getUser(req)} tried to edit a dojo (id=${modifiedDojo._id}) while not authorized to do so`);
-            res.json({errors: keys.notAuthorizedError});
-        }
-    });
+
+    let sanitizedDojo = sanitizeDojo(modifiedDojo);
+    if(helper.areDojosEqual(dojo, sanitizedDojo)){
+        //We get the dojos from the database to check the user's credentials
+        Dojo.getDojoForInternalAuthentication(modifiedDojo._id, function(err, dojo){
+            if(err){
+                logger.error(`Error getting dojo by ${helper.getUser(req)}, for  ${keys.editDojoRoute}:` + err);
+                return res.sendStatus(500);
+            }
+            //Checking if the user has permission to edit the dojo (is champion in dojo or admin)
+            if(isUserAdmin(user) || isUserChampionInDojo(dojo, user._id)){
+                Dojo.updateDojo(modifiedDojo, function(err){
+                    if(err){
+                        logger.error(`Error adding a dojo by ${helper.getUser(req)}:` + err);
+                        return res.sendStatus(500);
+                    }
+                    res.json({success: true});
+                });
+            } else {
+                //If the user is not champion of dojo or admin, we log it, and we send back an unauthorized error
+                logger.error(`${helper.getUser(req)} tried to edit a dojo (id=${modifiedDojo._id}) while not authorized to do so`);
+                res.json({errors: keys.notAuthorizedError});
+            }
+        });
+    } else {
+        // If the dojo and the sanitized dojo are not equal, we send a sanitized error and the sanitizedDojo for the
+        // user to decide if they agree with the sanitized version
+        res.json({errors: keys.notSanitizedError, sanitizedDojo: sanitizedDojo});
+    }
 };
 
 //Method that returns the upcoming dojos for users (or myDojos, if a flag is set)
@@ -501,6 +512,40 @@ module.exports.getUserRoleInDojo = function(dojo, userId){
     }
 };
 
+//Method for adding an event to a dojo
+module.exports.addEventToDojo = function(req, res){
+    logger.debug(`Entering DojosRoute: ${keys.addEventToDojoRoute} for ${helper.getUser(req)}`);
+    let user = req.user;
+    let dojoId = req.body.dojoId;
+    let event = req.body.event;
+    let sanitizedEvent = helper.sanitizeEvent(event);
+    if(helper.areEventsEqual(event, sanitizedEvent)){
+        Dojo.getDojoForChampionAuthentification(dojoId, function(err, dojo){
+            if(err){
+                logger.error(`Error getting dojo for ${helper.getUser(req)}, for authenticating him/her for ` +
+                    `adding and event to a dojo (_id=${dojoId}):` + err);
+                return res.sendStatus(500);
+            }
+            if(helper.isUserAdmin(user) || isUserChampionInDojo(dojo, user._id)){
+                let covertedEvent = helper.convertClientEventToUniqueEvent(sanitizedEvent, dojo._id.toString());
+                Event.createEvent(covertedEvent, function(err){
+                    if(err){
+                        logger.error(`Error saving event by ${helper.getUser(req)}, for creating event for dojo (_id=${dojoId})` + err);
+                        return res.sendStatus(500);
+                    }
+                    res.json({success:true});
+                });
+
+            } else {
+                logger.error(`User ${helper.getUser(req)} tried to add an event to dojo (_id=${dojoId}) while not authorized to do so)`);
+                res.json({errors: keys.notAuthorizedError});
+            }
+        })
+    } else {
+        //If the sanitization has modified the event, we inform the user
+        res.json({errors: keys.notSanitizedError, sanitizedEvent: sanitizedEvent});
+    }
+};
 
 //Method for adding user's children to the dojo the user just joined
 //Arguments
@@ -515,7 +560,7 @@ let addUsersChildrenToDojo = module.exports.addUsersChildrenToDojo = function(us
         User.getUsersBirthdate(usersChildren, true, function(err, usersMinorChildren){
             if(err){
                 logger.error(`Problems retrieving users children under 18 by ${helper.printUser(user)} for adding his/her ` +
-                 `children to his/her dojo _id=${dojoId}: ` + err);
+                    `children to his/her dojo _id=${dojoId}: ` + err);
             }
             if(usersMinorChildren.length > 0){
                 //The list of user's children is a list of objects (_id: xxxxxx), we need a list of ids, so we convert it
@@ -770,74 +815,41 @@ function isUserMemberOrPendingMemberOfDojo(dojo, userId){
 function sanitizeDojo(dojo){
     //Cloning the dojo
     let ret = JSON.parse(JSON.stringify(dojo));
-    const whiteListNames = 'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!?\\-+ ';
-
 
     //Sanitizing the name
     let sanitName = validator.trim(dojo.name);
-    sanitName = validator.whitelist(sanitName, whiteListNames);
+    sanitName = validator.whitelist(sanitName, eventWhiteListNames);
     ret.name = sanitName;
 
     //Sanitizing the adress
     let sanitAdress = validator.trim(dojo.address);
-    sanitAdress = validator.whitelist(sanitAdress, whiteListNames);
+    sanitAdress = validator.whitelist(sanitAdress, eventWhiteListNames);
     ret.address = sanitAdress;
 
     //Sanitizing the email
     let sanitEmail = validator.trim(dojo.email);
-    sanitEmail = validator.whitelist(sanitEmail, whiteListNames);
+    sanitEmail = validator.whitelist(sanitEmail, eventWhiteListNames);
     ret.email = sanitEmail;
 
     //Sanitizing the statuses
     let sanitStatuses = ret.statuses.map(function(status){
-        return validator.whitelist(status, whiteListNames);
+        return validator.whitelist(status, eventWhiteListNames);
     });
     ret.statuses = sanitStatuses;
 
     //Sanitizing the requirements
     let sanitRequirements = ret.requirements.map(function(requirement){
-        return validator.whitelist(requirement, whiteListNames);
+        return validator.whitelist(requirement, eventWhiteListNames);
     });
     ret.requirements = sanitRequirements;
 
     //Sanitizing the recurrent events
-    for(let i = 0; i < ret.recurrentEvents.length; i++){
-        let event = ret.recurrentEvents[i];
-        //Sanitizing the event name
-        let eventName = event.name;
-        let sanitEventName = validator.trim(eventName);
-        sanitEventName = validator.whitelist(sanitEventName, whiteListNames);
-        event.name = sanitEventName;
-
-        //Sanitizing the event description
-        let eventDescr = event.description;
-        let sanitEventDescr = validator.trim(eventDescr);
-        event.description = sanitEventDescr;
-
-        for(let j = 0; j < event.sessions.length; j++){
-            let session = event.sessions[j];
-
-            //Sanitizing session workshop
-            let sessionWorkshop = session.workshop;
-            let sanitWorkshop = validator.trim(sessionWorkshop);
-            sanitWorkshop = validator.whitelist(sanitWorkshop, whiteListNames);
-            session.workshop = sanitWorkshop;
-
-            //Sanitizing the tickets
-            for(let k = 0; k < session.tickets.length; k++){
-                let ticket = session.tickets[k];
-
-                //Sanitizing ticket name
-                let ticketName = ticket.nameOfTicket;
-                let sanitTicketName = validator.trim(ticketName);
-                sanitTicketName = validator.whitelist(sanitTicketName, whiteListNames);
-                ticket.nameOfTicket = sanitTicketName;
-            }
-        }
-    }
+    ret.recurrentEvents = helper.sanitizeEvents(ret.recurrentEvents);
 
     return ret;
 }
+
+
 
 
 

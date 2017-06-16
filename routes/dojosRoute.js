@@ -55,9 +55,8 @@ router.post('/' + keys.rejectPendingMemberRoute, authentification.ensureAuthenti
 //Method for accepting a users application to become a member for a dojo
 router.post('/' + keys.acceptPendingMemberRoute, authentification.ensureAuthenticated, dojosController.acceptPendingMember);
 
-
-
-
+//Method for adding an event to a dojo
+router.post('/' + keys.addEventToDojoRoute, authentification.ensureAuthenticated, dojosController.addEventToDojo);
 
 
 module.exports = router;

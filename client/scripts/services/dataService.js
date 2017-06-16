@@ -365,5 +365,37 @@ angular.module('coderDojoTimisoara')
                 url: '/user/' + keys.getNewNotificationsCountRoute,
                 method: "GET"
             });
-        }
+        };
+
+        this.addEventToDojo = function(data){
+            return $http({
+                url: '/dojos/' + keys.addEventToDojoRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.editEventOfDojo = function(data){
+            return $http({
+                url: '/events/' + keys.editEventOfDojoRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.deleteEvent = function(data){
+            return $http({
+                url: '/events/' + keys.deleteEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.getEventForEditing = function(data){
+            return $http({
+                url: '/events/' + keys.getEventForEditingRoute,
+                method: "POST",
+                data: data
+            });
+        };
     });

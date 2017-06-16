@@ -56,12 +56,12 @@
         <h3>Contact</h3>
 
         <div class="label-and-value" ng-hide="isChildUnder14()">
-            <label class="left-label"for="personal-data-email">E-mail</label>
+            <label class="left-label" for="personal-data-email">E-mail</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-email" ng-model="myProfile.user.email" readonly><br>
         </div>
 
         <div class="label-and-value">
-            <label class="left-label"for="personal-data-phone">Telefon</label>
+            <label class="left-label" for="personal-data-phone">Telefon</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-phone"  placeholder="07xxxxx" ng-model="myProfile.user.phone"
                    ng-click="myProfile.errors.phone = undefined"><br>
             <p ng-show="myProfile.errors && myProfile.errors.phone">{{myProfile.errors.phone}}</p>
@@ -72,7 +72,7 @@
             <input class="dojo-simple-fields-input" type="text" id="personal-data-facebook"  placeholder="Cont Facebook" ng-model="myProfile.user.facebook"><br>
         </div>
         <div class="label-and-value" ng-hide="isChildUnder14()">
-            <label class="left-label"for="personal-data-Linkedin">Linkedin</label>
+            <label class="left-label" for="personal-data-Linkedin">Linkedin</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-Linkedin"  placeholder="Cont Linkedin" ng-model="myProfile.user.linkedin"><br>
         </div>
 

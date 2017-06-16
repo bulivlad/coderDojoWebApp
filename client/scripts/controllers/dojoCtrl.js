@@ -56,6 +56,8 @@ angular.module("coderDojoTimisoara")
                 $scope.isCurrentView(keys.editDojo)){     // or editing dojos
                 $scope.setView(keys.viewDojo, [keys.showBackButton]);
                 createMapWithSingleDojo();
+            } else if($scope.isCurrentView(keys.addEventToDojo)){
+                $scope.initializeDojoCtrl();
             }
 
         };
@@ -117,7 +119,7 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.addEventAction = function(){
-          $scope.setView(keys.addEvent);
+          $scope.setView(keys.addEventToDojo);
         };
 
         //Method for goin into edit dojo mode
@@ -344,7 +346,7 @@ angular.module("coderDojoTimisoara")
             events.forEach(function(event){
                 event.sessions = helperSvc.convertEventTicketsToSessions(event.tickets);
                 event.tickets = undefined;
-            })
+            });
             return events;
         };
 

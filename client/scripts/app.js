@@ -76,6 +76,10 @@ const keys = {
     getUsersRegisteredForEventRoute: 'getUsersRegisteredForEvent',
     confirmOrRemoveUserFromEventRoute: 'confirmOrRemoveUserFromEvent',
     getNewNotificationsCountRoute: 'getNewNotificationsCount',
+    addEventToDojoRoute: 'addEventToDojo',
+    editEventOfDojoRoute: 'editEventOfDojo',
+    getEventForEditingRoute: 'getEventForEditing',
+    deleteEventRoute: 'deleteEvent',
     //TODO change the communication routes to view locations (for getDojo for ex)
 
     //View locations
@@ -99,6 +103,7 @@ const keys = {
     userAlreadyJoinedDojoError: 'userAlreadyJoinedDojoError',
     userAlreadyRegisteredForEventError: 'userAlreadyRegisteredForEvent',
     userNoLongerPartOfDojo: 'userNoLongerPartOfDojo',
+    notSanitizedError: 'notSanitizedError',
 
     //Alerts
     childRegisterAlert: 'childRegisterAlert',
@@ -149,7 +154,7 @@ const keys = {
     viewList: 'viewList',
     viewDojo: 'viewDojo',
     editDojo: 'editDojo',
-    addEvent: 'addEvent',
+    addEventToDojo: 'addEventToDojo',
 
     viewMembers: 'viewMembers',
 
@@ -188,8 +193,10 @@ const keys = {
 
     //Enums
     daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],
+    daysOfWeekShort: ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ'],
     typesOfTickets: ['voluntar', 'mentor', 'cursant'],
-    eventTypes: ['recurent', 'unic'],
+    eventTypesRecurrent: 'recurent',
+    eventTypesUnique: 'unic',
     eventStatus: ['Activ', 'Inactiv'],
     months: ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie' , 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'],
 

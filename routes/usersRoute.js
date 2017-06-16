@@ -93,6 +93,10 @@ passport.use(new passportLocal.Strategy(
                     logger.debug('User: ' + email + 'does not exist');
                     done(null, false);
                 } else {
+                    //This is only for testing purposes to not keep introducint the password TODO remove
+                    if(email === 'boss.man@gmail.com'){
+                        done(null, user);
+                    }
                     //If the user was found we compare the password given by the user to the hash stored in the database
                     //for this we need to has the passport given, and then compare the hashes
                     bcrypt.compare(password, user.password, function (err, isMatch) {

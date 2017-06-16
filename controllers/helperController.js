@@ -3,12 +3,12 @@
  */
 
 const keys = require('../static_keys/project_keys');
+const validator = require('validator');
+const logger = require('winston');
 
 module.exports.isActive = function(eventOrSession){
     if(eventOrSession.activeStatus === keys.eventStatus[0]){ //If the event is active
         return true;
-    } else {
-        return false;
     }
 };
 
@@ -25,7 +25,7 @@ module.exports.printUser = function(user){
     }
 };
 
-let isUserAdmin = module.exports.isUserAdmin = function(user){
+module.exports.isUserAdmin = function(user){
     return user.authorizationLevel === keys.admin;
 };
 
@@ -103,7 +103,7 @@ let isUserPendingMemberOfDojo = module.exports.isUserPendingMemberOfDojo = funct
         isUserPendingVolunteerInDojo(dojo, userId);
 };
 
-let isUserMemberOrPendingMemberOfDojo = module.exports.isUserMemberOrPendingMemberOfDojo = function(dojo, userId){
+module.exports.isUserMemberOrPendingMemberOfDojo = function(dojo, userId){
     return isUserMemberOfDojo(dojo, userId) || isUserPendingMemberOfDojo(dojo, userId);
 };
 
@@ -194,14 +194,179 @@ module.exports.getPrettyHoursAndMinutes = function(date){
 //Method for adding a 0 if the minutes are just one number (eg 2 to display 02)
 function adjustOneNumberMinutes(number){
     return number.length == 1 ? '0' + number : number;
+}
+
+module.exports.areDojosEqual = function(dojo, sanitizedDojo){
+    if(dojo.name != sanitizedDojo.name ||
+        dojo.address != sanitizedDojo.address ||
+        dojo.latitude != sanitizedDojo.latitude ||
+        dojo.longitude != sanitizedDojo.longitude ||
+        dojo.email != sanitizedDojo.email ||
+        dojo.facebook != sanitizedDojo.facebook ||
+        dojo.twitter != sanitizedDojo.twitter){
+        return false;
+    }
+
+    for(let i = 0; i < dojo.requirements.length; i++){
+        if(dojo.requirements[i] != sanitizedDojo.requirements[i]){
+            return false;
+        }
+    }
+
+    for(let i = 0; i < dojo.statuses.length; i++){
+        if(dojo.statuses[i] != sanitizedDojo.statuses[i]){
+            return false;
+        }
+    }
+
+    for(let i = 0; i < dojo.recurrentEvents.length; i++){
+        if(!areEventsEqual(dojo.recurrentEvents[i], sanitizedDojo.recurrentEvents[i])){
+            return false;
+        }
+    }
+    return true;
 };
 
-module.exports.resetNewNotifications = function(notifications){
+let areEventsEqual = module.exports.areEventsEqual = function(event, sanitEvent){
+    if(event.startHour != sanitEvent.startHour ||
+        event.endHour != sanitEvent.endHour ||
+        event.startMinute != sanitEvent.startMinute ||
+        event.endMinute != sanitEvent.endMinute ||
+        event.day != sanitEvent.day ||
+        event.name != sanitEvent.name ||
+        event.description != sanitEvent.description ||
+        event.activeStatus != sanitEvent.activeStatus){
+        return false;
+    }
+
+    for(let j = 0; j < event.sessions.length; j++){
+        let session = event.sessions[j];
+        let sanitSession = sanitEvent.sessions[j];
+        if(session.workshop != sanitSession.workshop){
+            return false;
+        }
+
+        for(let k = 0; k < session.tickets.length; k++){
+            let ticket = session.tickets[k];
+            let sanitTicket = sanitSession.tickets[k];
+            if(ticket.typeOfTicket != sanitTicket.typeOfTicket ||
+                ticket.nameOfTicket != sanitTicket.nameOfTicket){
+                return false;
+            }
+        }
+    }
+    return true;
+};
+
+//Sanitization values
+//Characters allowed for dojo events TODO find a place for this info
+const eventWhiteListNames =  'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!?\\-+ ';
+
+module.exports.sanitizeEvents = function(events){
+    //cloning the events
+    let ret = JSON.parse(JSON.stringify(events));
+    for(let i = 0; i < ret.length; i++){
+        ret[i] = sanitizeEvent(ret[i]);
+    }
+    return ret;
+};
+
+//Method for sanitizing every field from an event
+let sanitizeEvent = module.exports.sanitizeEvent = function(event){
+    //clone the event
+    event = JSON.parse(JSON.stringify(event));
+    //Sanitizing the event name
+    let eventName = event.name;
+    let sanitEventName = validator.trim(eventName);
+    sanitEventName = validator.whitelist(sanitEventName, eventWhiteListNames);
+    event.name = sanitEventName;
+    //Sanitizing the event description
+    let eventDescr = event.description;
+    let sanitEventDescr = validator.trim(eventDescr);
+    event.description = validator.whitelist(sanitEventDescr, eventWhiteListNames);
+    for(let j = 0; j < event.sessions.length; j++){
+        let session = event.sessions[j];
+        //Sanitizing session workshop
+        let sessionWorkshop = session.workshop;
+        let sanitWorkshop = validator.trim(sessionWorkshop);
+        sanitWorkshop = validator.whitelist(sanitWorkshop, eventWhiteListNames);
+        session.workshop = sanitWorkshop;
+
+        //Sanitizing the tickets
+        for(let k = 0; k < session.tickets.length; k++){
+            let ticket = session.tickets[k];
+            //Sanitizing ticket name
+            let ticketName = ticket.nameOfTicket;
+            let sanitTicketName = validator.trim(ticketName);
+            sanitTicketName = validator.whitelist(sanitTicketName, eventWhiteListNames);
+            ticket.nameOfTicket = sanitTicketName;
+        }
+    }
+    return event;
+};
+
+//Method that converts and event received from the client (when adding events or editing events), and converts
+// it to a form that events are stored in the database (ticket based instead of session based).
+// clientEvent is an event object with the client format
+// dojoId is a String representation of the ObjectId
+module.exports.convertClientEventToUniqueEvent = function(clientEvent, dojoId){
+    logger.debug(`Entering convertClientEventToUniqueEvent`);
+    let event = {};
+    event._id = clientEvent._id;
+    event.name = clientEvent.name;
+    event.description = clientEvent.description;
+
+
+    let startTime = new Date(clientEvent.day);
+    startTime.setHours(clientEvent.startHour);
+    startTime.setMinutes(clientEvent.startMinute);
+
+    let endTime = new Date(clientEvent.day);
+    endTime.setHours(clientEvent.endHour);
+    endTime.setMinutes(clientEvent.endMinute);
+
+    event.startTime = startTime;
+    event.endTime = endTime;
+    event.dojoId = dojoId;
+    event.tickets = convertEventSessionsToTickets(clientEvent.sessions);
+    return event;
+};
+
+//Method that converts a list of sessions from the recurrent event to a list of tickets for the actual events
+let convertEventSessionsToTickets =  module.exports.convertEventSessionsToTickets = function(eventSessions){
     let ret = [];
-    notifications.forEach(function(notification){
-       let tem
+    eventSessions.forEach(function(session){
+        let sessionId = session._id;
+        //Events received from the gui sometimes (if you edit unique events) do not have a session _id so we need to
+        //create one (this is also done on the client, but in case it is missing)
+        if(!sessionId){
+            sessionId = Date.now() + '' + Math.floor((Math.random() * 10000000) + 1);
+        }
+        if(module.exports.isActive(session)){
+            session.tickets.forEach(function(ticket){
+                let cloneTicket = {};
+                cloneTicket.registeredMembers = [];
+                cloneTicket.workshop = session.workshop;
+                cloneTicket.sessionId = sessionId;
+                cloneTicket.nameOfTicket = ticket.nameOfTicket;
+                cloneTicket.numOfTickets = ticket.numOfTickets;
+                cloneTicket.activeStatus = ticket.activeStatus;
+                cloneTicket.typeOfTicket = ticket.typeOfTicket;
+                cloneTicket._id = ticket._id;
+                ret.push(cloneTicket);
+            });
+
+        }
     });
     return ret;
-}
+};
+
+//Method that removes the field with the registered members from the event tickets
+module.exports.removeRegisteredUserFromDataBaseEvent = function(event){
+    event.tickets.forEach(function(ticket){
+        ticket.registeredMembers = undefined;
+    });
+    return event;
+};
 
 

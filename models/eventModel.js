@@ -86,6 +86,11 @@ let eventSchema = module.exports.eventSchema = new mongoose.Schema({
     copyOfRecurrentEvent: {
         type:String
     },
+    activeStatus: {
+        type: String,
+        enum:keys.eventStatus,
+        default: keys.eventStatus[0]
+    },
     //This has a list of tickets instead of a list of sessions with tickets inside because you cannot to an atomic
     // operation to add something to an array within an array withing an array (sessions.tickets.registeredMembers)
     // but you can with only two levels(tickets.registeredMembers)
@@ -206,4 +211,12 @@ module.exports.confirmOrRemoveUserFromEvent = function(data, callback){
                     {_id:data.regUserId,userId: data.userToAddOrRemoveId, confirmed: true}}}, {new:true}, callback);
             });
     }
+};
+
+module.exports.deleteEvent = function(eventId, callback){
+    Event.remove({_id:eventId}, callback);
+};
+
+module.exports.editEvent = function(updatedEvent, callback){
+    Event.findOneAndUpdate({_id: updatedEvent._id}, updatedEvent, callback);
 };

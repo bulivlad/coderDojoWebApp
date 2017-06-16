@@ -154,7 +154,6 @@ module.exports.getDojoForInternalAuthentication = function(dojoId, callback){
 //This method retrieves a dojos used for internal app verifications, the fields retrieved are mentioned above
 module.exports.getDojoForChampionAuthentification = function(dojoId, callback){
     Dojo.findOne({_id: dojoId}, {champions:true}, callback);
-
 };
 
 //We only modify the fields that can be edited

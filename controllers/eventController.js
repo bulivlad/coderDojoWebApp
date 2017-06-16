@@ -582,7 +582,7 @@ function extractRegisteredUsersListFromEvent(event){
 
 //Method for confirming or removing a user from an event
 module.exports.confirmOrRemoveUserFromEvent = function(req, res){
-    logger.debug(`Entering ${keys.confirmOrRemoveUserFromEventRoute}`);
+    logger.debug(`Entering ${keys.confirmOrRemoveUserFromEventRoute} for ${helper.getUser(req)}`);
     let user = req.user;
     let dojoId = req.body.dojoId;
     let eventId = req.body.eventId;
@@ -663,10 +663,122 @@ function addNotificationToUserConfirmedOrRemovedFromAnEvent(event, data){
     });
 }
 
+module.exports.deleteEvent = function(req, res){
+    logger.debug(`Entering ${keys.deleteEventRoute} for ${helper.getUser(req)}`);
+    let user = req.user;
+    let eventId = req.body.eventId;
+    let dojoId = req.body.dojoId;
+    Dojo.getDojoForChampionAuthentification(dojoId, function(err, dojo){
+        if(err){
+            logger.error(`Error getting dojo for for ${helper.getUser(req)}, for authenticating him/her for ` +
+                `deleting the event(_id=${eventId}):` + err);
+            return res.sendStatus(500);
+        }
+        if(helper.isUserAdmin(user) || helper.isUserChampionInDojo(dojo, user._id)){
+            Event.deleteEvent(eventId, function(err){
+                if(err){
+                    logger.error(`Error deleting event (_id=${eventId}) for ${helper.getUser(req)}: `  + err);
+                    return res.sendStatus(500);
+                }
+                res.json({success:true});
+            })
+
+        } else {
+            logger.error(`User ${helper.getUser(req)} tried to delete event (_id=${eventId}) while not authorized to do so)`);
+            res.json({errors: keys.notAuthorizedError});
+        }
+    })
+};
+
+module.exports.getEventForEditing = function(req, res){
+    logger.debug(`Entering ${keys.getEventForEditingRoute} for ${helper.getUser(req)}`);
+    let eventId = req.body.eventId;
+    Event.getEvent(eventId, function(err, event){
+        if(err){
+            logger.error(`Error getting event eventId(${eventId}) for ${helper.getUser(req)} for event editing` + err);
+            return res.sendStatus(500);
+        }
+        res.json({event: helper.removeRegisteredUserFromDataBaseEvent(event)});
+    })
+};
+
+module.exports.editEvent = function(req, res){
+    logger.debug(`Entering EventRoute: ${keys.editEvent} for ${helper.getUser(req)}`);
+    let user = req.user;
+    let event = req.body.event;
+    let sanitizedEvent = helper.sanitizeEvent(event);
+    if(helper.areEventsEqual(event, sanitizedEvent)){
+        Dojo.getDojoForChampionAuthentification(event.dojoId, function(err, dojo){
+            if(err){
+                logger.error(`Error getting dojo for ${helper.getUser(req)}, for authenticating him/her for ` +
+                    `editing a dojo event (_id=${event.dojoId}):` + err);
+                return res.sendStatus(500);
+            }
+            if(helper.isUserAdmin(user) || helper.isUserChampionInDojo(dojo, user._id)){
+                editEvent(sanitizedEvent, req, res);
+            } else {
+                logger.error(`User ${helper.getUser(req)} tried to edit an event (_id=${event._id}) of dojo ` +
+                    ` (_id=${event.dojoId}) while not authorized to do so)`);
+                res.json({errors: keys.notAuthorizedError});
+            }
+        })
+    } else {
+        //If the sanitization has modified the event, we inform the user
+        res.json({errors: keys.notSanitizedError, sanitizedEvent: sanitizedEvent});
+    }
+};
+
+function editEvent(event, req, res){
+    // Now we need to get the even as it is saved in the database now, and add the registered members from the
+    // saved event to the edited event we have here (the edited event does not have the registered members)
+    Event.getEvent(event._id, function(err, eventWithRegUsers){
+        if(err){
+            logger.error(`Error getting event for ${helper.getUser(req)}, for editing aa event (_id=${event.dojoId}) of `+
+                `dojo (${event.dojoId}) :` + err);
+            return res.sendStatus(500);
+        }
+        //First we need to convert the event to a unique event (its former form was that of a client event (with sessions))
+        let covertedEvent = helper.convertClientEventToUniqueEvent(event, event.dojoId.toString());
+        let mergedEvent = addRegisteredUsersToEvent(covertedEvent, eventWithRegUsers);
+        Event.editEvent(mergedEvent, function(err){
+            if(err){
+                logger.error(`Error saving event for ${helper.getUser(req)}, event=(${JSON.stringify(mergedEvent)})` + err);
+                return res.sendStatus(500);
+            }
+            res.json({success:true});
+        })
+    });
+}
+
+//Method for adding to an event being edited the registered members the even has saved in the database (if those tickets
+// containing the registered members are still part of the event)
+function addRegisteredUsersToEvent(event, eventWithRegUsers){
+    event.tickets.forEach(function(ticket){
+        let ticketWithRegUsers = getTicketFromTickets(ticket, eventWithRegUsers.tickets);
+        if(ticketWithRegUsers){
+            ticket.registeredMembers = ticketWithRegUsers.registeredMembers;
+        } else {
+            ticket.registeredMembers = [];
+        }
+    });
+    return event;
+}
+
+function getTicketFromTickets(ticket, tickets){
+    // If the ticket is an old ticket (the one with potential registered members, it has an id as it was saved in the
+    // database). Otherwise it is a new ticket just added, so no need to search any further for members.
+    if(ticket._id){
+        for(let i = 0; i < tickets.length; i++){
+            if(tickets[i]._id.toString() === ticket._id.toString()){
+                return tickets[i];
+            }
+        }
+    }
+}
 
 
 //Method for creating events from recurrent events for all dojos. If an event for that a particular dojo for the next
-//week has already been created in a previous run of the moethod, that recurrent event is skipped.
+//week has already been created in a previous run of the method, that recurrent event is skipped.
 module.exports.createEventsFromRecurrentEventsForAllDojos = function(){
     logger.debug('Entering createEventsFromRecurrentEventsForAllDojos');
     Dojo.findDojosWithRecurrentEvents(function(err, dojos){
@@ -716,7 +828,6 @@ function createEventFromRecurrentEvent(recurrentEvent, dojoId){
 
 function convertRecurrentEventToEvent(recurrentEvent, dojoId){
     logger.debug(`Entering convertRecurrentEventToEvent`);
-    logger.silly(`recurrentEvent=${JSON.stringify(recurrentEvent)}`);
     let event = {};
     event.name = recurrentEvent.name;
     event.description = recurrentEvent.description;
@@ -728,32 +839,8 @@ function convertRecurrentEventToEvent(recurrentEvent, dojoId){
     event.startTime = startEndTime.startDate;
     event.endTime = startEndTime.endDate;
     event.dojoId = dojoId;
-    event.tickets = convertEventSessionsToTickets(recurrentEvent.sessions);
+    event.tickets = helper.convertEventSessionsToTickets(recurrentEvent.sessions);
     return event;
-}
-
-//Method that converts a list of sessions from the recurrent event to a list of tickets for the actual events
-function convertEventSessionsToTickets(eventSessions){
-    let ret = [];
-    eventSessions.forEach(function(session){
-        logger.silly(`session=${session}`);
-        if(helper.isActive(session)){
-            session.tickets.forEach(function(ticket){
-                let cloneTicket = {};
-                cloneTicket.registeredMembers = [];
-                cloneTicket.workshop = session.workshop;
-                cloneTicket.sessionId = session._id;
-                cloneTicket.nameOfTicket = ticket.nameOfTicket;
-                cloneTicket.numOfTickets = ticket.numOfTickets;
-                cloneTicket.activeStatus = ticket.activeStatus;
-                cloneTicket.typeOfTicket = ticket.typeOfTicket;
-                ret.push(cloneTicket);
-            });
-
-        }
-    });
-    logger.silly(`ret=${JSON.stringify(ret)}`);
-    return ret;
 }
 
 //This method receives an hour, minutes and day, and returns a date when the event will occur next (less then a week)

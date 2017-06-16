@@ -52,6 +52,10 @@ let keyMap = {
     getUsersRegisteredForEventRoute: 'getUsersRegisteredForEvent',
     confirmOrRemoveUserFromEventRoute: 'confirmOrRemoveUserFromEvent',
     getNewNotificationsCountRoute: 'getNewNotificationsCount',
+    addEventToDojoRoute: 'addEventToDojo',
+    editEventOfDojoRoute: 'editEventOfDojo',
+    getEventForEditingRoute: 'getEventForEditing',
+    deleteEventRoute: 'deleteEvent',
 
     //View locations
     viewEventLocation: 'viewevent',
@@ -74,6 +78,7 @@ let keyMap = {
     userAlreadyJoinedDojoError: 'userAlreadyJoinedDojoError',
     userAlreadyRegisteredForEventError: 'userAlreadyRegisteredForEvent',
     userNoLongerPartOfDojo: 'userNoLongerPartOfDojo',
+    notSanitizedError: 'notSanitizedError',
 
     //Alerts
     childRegisterAlert: 'childRegisterAlert',
@@ -125,7 +130,7 @@ let keyMap = {
     viewDojo: 'viewDojo',
     editDojo: 'editDojo',
     viewMembers: 'viewMembers',
-    addEvent: 'addEvent',
+    addEventToDojo: 'addEventToDojo',
 
     //View keys for various views
     showBackButton: 'showBackButton',
@@ -162,8 +167,10 @@ let keyMap = {
 
     //Enums
     daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],
+    daysOfWeekShort: ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ'],
     typesOfTickets: ['voluntar', 'mentor', 'cursant'],
-    eventTypes: ['recurent', 'unic'],
+    eventTypesRecurrent: 'recurent',
+    eventTypesUnique: 'unic',
     eventStatus: ['Activ', 'Inactiv'],
     months: ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie' , 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'],
 
@@ -174,6 +181,7 @@ let keyMap = {
     eventStatus_userNotLoggedIn: 'Not logged in',
     eventConfirmUser: 'confirm',
     eventRemoveUser: 'remove',
+
 };
 
 module.exports = keyMap;

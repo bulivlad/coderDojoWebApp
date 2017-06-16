@@ -19,8 +19,12 @@ angular.module("coderDojoTimisoara")
                         if(callback){
                             callback();
                         }
+                    }else {
+                        //If we were not answered with the event, go to view dojo
+                        $scope.goToViewDojo();
                     }
                 })
+
                 .catch(function(err){
                     helperSvc.handlerCommunicationErrors(err, 'eventCtrl handleEvent(eventPromise)', $scope);
                 })
@@ -145,8 +149,30 @@ angular.module("coderDojoTimisoara")
                     $scope.goToViewDojo();
                 }
             } else if($scope.isCurrentView(keys.editEvent)){
-
+                $scope.initializeEvent();
             }
+        };
+
+        $scope.deleteEvent = function(){
+            var confirmed = confirm('Esti sigur va vrei sa stergi evenimentul ' + $scope.event.name + ' de la dojo-ul ' +
+                $scope.event.dojo.name + '?');
+            if(confirmed){
+                dataService.deleteEvent({eventId: $scope.event._id, dojoId: $scope.event.dojoId})
+                    .then(function(response){
+                        if(response.data.errors === keys.notAuthorizedError){
+                            $scope.showNotAuthorizedError();
+                        } else if(response.data.success){
+                            $scope.goToViewDojo();
+                        }
+                    })
+                    .catch(function(err){
+                        helperSvc.handlerCommunicationErrors(err, 'deleteEvent() from addOrEditEventCtrl', $scope);
+                    })
+            }
+        };
+
+        $scope.editEventAction = function(){
+          $scope.setView(keys.editEvent);
         };
 
         // Method to determine if the current view is thisView

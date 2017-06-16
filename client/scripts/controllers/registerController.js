@@ -10,7 +10,10 @@ angular.module("coderDojoTimisoara")
                 changeMonth: true,
                 changeYear: true,
                 maxDate: "0",
+                dayNamesMin:keys.daysOfWeekShort,
+                monthNamesShort:keys.months,
                 yearRange: "-90:+0" //90 year olds can make accounts
+
             });
         } );
 

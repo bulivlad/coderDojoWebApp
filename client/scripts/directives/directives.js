@@ -64,15 +64,15 @@ angular.module("coderDojoTimisoara")
             replace: true
         }
     })
-    .directive("eventCreateDirective", function(){
-        return {
-            templateUrl: "directives/create-or-edit-dojo-event-directive.html",
-            replace: true
-        }
-    })
     .directive("eventDirective", function(){
         return {
             templateUrl: "directives/event-directive.html",
+            replace: true
+        }
+    })
+    .directive("displayEventDirective", function(){
+        return {
+            templateUrl: "directives/display-event-directive.html",
             replace: true
         }
     })
@@ -82,16 +82,11 @@ angular.module("coderDojoTimisoara")
             replace: true
         }
     })
-    .directive("addEventDirective", function(){
+    .directive("addOrEditEventDirective", function(){
         return {
-            templateUrl: "directives/add-event-directive.html",
+            templateUrl: "directives/add-or-edit-event-directive.html",
             replace: true
         }
-    })
-    .directive("editEventDirective", function(){
-    return {
-        templateUrl: "directives/edit-event-directive.html",
-        replace: true
-    }
-});
+    });
+
 

@@ -390,7 +390,7 @@ angular.module('coderDojoTimisoara')
             } else {
                 ret = this.capitalizeFirstLetter(keys.daysOfWeek[startTime.getDay()]) + ' ' +  startTime.getDate() +
                     ' ' + keys.months[startTime.getMonth()] + ' de la ' + startTime.getHours() + ':'  + startTime.getHours() +
-                    endTime.getHours() + ':'  + endTime.getHours();
+                    ' - ' + endTime.getHours() + ':'  + endTime.getHours();
             }
             return ret;
         };
@@ -441,13 +441,30 @@ angular.module('coderDojoTimisoara')
             }
         };
 
-        //Method for validating events
+        //Method for generate objectId substitute for sessions
+        this.generateSessionId = function(){
+            return Date.now() + '' + Math.floor((Math.random() * 10000));
+        };
+
+        this.eventIsRecurrent = function(eventType){
+            return !this.eventIsUnique(eventType);
+        };
+
+        this.eventIsUnique = function(eventType){
+            return eventType === keys.eventTypesUnique;
+        };
+
+        this.generateSessionId = function(){
+            return Date.now() + '' + Math.floor((Math.random() * 10000000) + 1);
+        };
+
+        //Method for validating events, by adding the fields to the event itself
         this.validateEventFields = function(events){
             var hasErrors = false;
             for(var i = 0; i < events.length; i++){
                 var curEvent = events[i];
-                //Only check if the event is not empty
-                if(!this.eventIsEmpty(curEvent)){
+                //Only check if the event is not empty (or is an unique event)
+                if(!this.eventIsEmpty(curEvent) || this.eventIsUnique(curEvent.type)){
                     curEvent.error = {};
                     if(!curEvent.name || curEvent.name === ""){
                         hasErrors = true;
@@ -469,7 +486,36 @@ angular.module('coderDojoTimisoara')
                         if (curEvent.startHour > curEvent.endHour){
                             hasErrors = true;
                             curEvent.error.startTime = 'Ora de start trebuie sa fie înainte de ora de sfârșit';
+                        } else if (curEvent.startHour == curEvent.endHour){
+                            if(curEvent.startMinute >= curEvent.endMinute){
+                                hasErrors = true;
+                                curEvent.error.startTime = 'Evenimentul trebuie sa se termine dupa ce incepe';
+                            }
                         }
+                    }
+                    //If the event is unique we need to check that the date set is today or after today
+                    if(this.eventIsUnique(curEvent.type)){
+                        if(curEvent.day){
+                            var now = new Date();
+                            var setDate = new Date(curEvent.day);
+                            //If the set month is before the current month
+                            if(now.getMonth() > setDate.getMonth() ||
+                                    //If the months are the same but the set date is before the current date
+                                ((now.getMonth() == setDate.getMonth()) && (now.getDate() > setDate.getDate()))){
+                                hasErrors = true;
+                                curEvent.error.day = 'Ziua evenimentului trebuie nu poate sa fie inainte de azi.';
+                            } else if ((now.getMonth() == setDate.getMonth()) && (now.getDate() == setDate.getDate())){
+                                //If the event is the same day as today, we need to check the hours
+                                if(curEvent.endHour && curEvent.endHour < now.getHours()){
+                                    hasErrors = true;
+                                    curEvent.error.endTime = 'Evenimentul se termină inainte de prezent';
+                                }
+                            }
+                        } else {
+                            hasErrors = true;
+                            curEvent.error.day = 'Lipseste ziua evenimentului';
+                        }
+
                     }
 
                     if(!curEvent.description || curEvent.description === ""){
@@ -504,6 +550,85 @@ angular.module('coderDojoTimisoara')
             }
 
             return hasErrors;
+        };
+
+
+
+        // Method that compares the original event to the sanitized event, and if there are differences, add a flag
+        // to indicate as such. The sanitize flag is used to inform the user which fields were sanitized, for him/her
+        //to review the differences and consider if he/she wants them
+        this.addSanitizedFlagToEvent = function(event, sanitEvent){
+            if(event.startHour != sanitEvent.startHour){
+                sanitEvent.sanitStartHour = true;
+            }
+            if(event.endHour != sanitEvent.endHour){
+                sanitEvent.sanitEndHour = true;
+            }
+            if(event.startMinute != sanitEvent.startMinute){
+                sanitEvent.sanitStartMinute = true;
+            }
+            if(event.endMinute != sanitEvent.endMinute){
+                sanitEvent.sanitEndMinute = true;
+            }
+            //if(event.day != sanitEvent.day){
+            //    sanitEvent.sanitDay = true;
+            //}
+            if(event.name != sanitEvent.name){
+                sanitEvent.sanitName = true;
+            }
+            if(event.description != sanitEvent.description){
+                sanitEvent.sanitDescription = true;
+            }
+            if(event.activeStatus != sanitEvent.activeStatus){
+                sanitEvent.sanitActiveStatus = true;
+            }
+
+            for(var j = 0; j < event.sessions.length; j++){
+                var session = event.sessions[j];
+                var sanitSession = sanitEvent.sessions[j];
+                if(session.workshop != sanitSession.workshop){
+                    sanitSession.sanitWorkshop = true;
+                }
+
+                for(var k = 0; k < session.tickets.length; k++){
+                    var ticket = session.tickets[k];
+                    var sanitTicket = sanitSession.tickets[k];
+                    if(ticket.typeOfTicket != sanitTicket.typeOfTicket){
+                        sanitTicket.sanitTypeOfTicket = true;
+                    }
+                    if(ticket.nameOfTicket != sanitTicket.nameOfTicket){
+                        sanitTicket.sanitNameOfTicket = true;
+                    }
+                }
+            }
+
+        };
+
+        //This is used to prepare the event for sending to the server. Sanitized flags are used to inform the user
+        //that a field of the event has been sanitized by the server. Errors are used to show the user a field does
+        // not respect certain constrains imposed upon the fields).
+        this.removeSanitizedFlagsAndErrorsFromEvent = function(event){
+            event.sanitStartHour = undefined;
+            event.sanitEndHour = undefined;
+            event.sanitStartMinute = undefined;
+            event.sanitEndMinute = undefined;
+            event.sanitDay = undefined;
+            event.sanitName = undefined;
+            event.sanitDescription = undefined;
+            event.sanitActiveStatus = undefined;
+            event.error = undefined;
+
+            for(var i = 0; i < event.sessions.length; i++){
+                var session = event.sessions[i];
+                session.error = undefined;
+                session.sanitWorkshop = undefined;
+                for(var k = 0; k < session.tickets.length; k++){
+                    var ticket = session.tickets[k];
+                    ticket.sanitTypeOfTicket = undefined;
+                    ticket.sanitNameOfTicket = undefined;
+                }
+            }
+            return event;
         };
 
         this.eventIsEmpty = function(curEvent){

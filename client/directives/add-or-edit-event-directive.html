@@ -1,0 +1,32 @@
+<div class="add-or-edit-event" ng-controller="addOrEditEventCtrl">
+    <div class="pages-banner">
+        <h2>Adaugă eveniment</h2>
+    </div>
+    <div class="wrapper">
+        <div class="button-bar-add-event">
+            <button ng-click="goBackAction()">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i> Inapoi
+            </button>
+        </div>
+        <hr class="buttons-separator">
+        <div class="info-panel">
+                <span class="filter-row1-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+        </div>
+        <p class="sanitize-info" ng-if="hasBeenSanitized">
+            <i class="fa fa-window-close close-button" aria-hidden="true" ng-click="closeHasBeenSanitizedInfo()"></i>
+            Unele cîmpuri introduse au fost modificate deoarece nu se încadrează
+            în valorile acceptate (câmpurile sunt subliniate cu verde). Pentru mai multe informații despre
+            ce este permis, accesează informațiile.
+                <span class="filter-row1-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+        </p>
+        <display-event-directive></display-event-directive>
+        <button class="add-event-button" ng-click="editOrCreateEventAction()">{{getAddOrEditButton()}}</button>
+    </div>
+
+</div>
+
+

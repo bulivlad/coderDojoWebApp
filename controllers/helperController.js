@@ -16,12 +16,10 @@ module.exports.isActive = function(eventOrSession){
 module.exports.getUser = function(req){
     if(req.user){
         return `user=(email=${req.user.email}, alias=${req.user.alias}, _id=${req.user._id}, authorizationLevel=${req.user.authorizationLevel})`;
-    }
-};
-
-module.exports.printUser = function(user){
-    if(user){
-        return `user=(email=${user.email}, alias=${user.alias}, _id=${user._id}, authorizationLevel=${user.authorizationLevel})`;
+    } else {
+        //This is the case where the user is given directly, not as a field of the res object
+        return `user=(email=${req.email}, alias=${req.alias}, _id=${req._id}, ` +
+            `authorizationLevel=${req.authorizationLevel})`;
     }
 };
 
@@ -172,6 +170,19 @@ module.exports.makeInfoNotification = function(msg){
         msg: msg
     };
     return ret;
+};
+
+module.exports.makeEventInviteNotification = function(data, roleInEvent){
+    let ret = {};
+    ret.typeOfNot = keys.eventInviteNotification;
+    let msg = `Ai fost invitat in rolul de ${roleInEvent} la evenimentul ${data.eventName} de la dojo-ul ` +
+              ` ${data.dojoName} din ${data.eventDate}.`;
+    ret.data = {
+        msg: msg,
+        eventId: data.eventId
+    };
+    return ret;
+
 };
 
 //Returns the ticket the user is registered to

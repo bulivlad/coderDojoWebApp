@@ -86,7 +86,7 @@ angular.module("coderDojoTimisoara")
         //Starting the get new Notifications interval
         setInterval(function(){
             $scope.getNewNotificationsCount(null);
-        }, 10000);
+        }, 100000);
 
         $scope.setCorrectPathForWideNavigation = function(){
             var currentPath = $location.path();

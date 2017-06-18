@@ -10,12 +10,26 @@
             <button ng-if="event[keys.canEditEvent]" class="event-btn" ng-click="editEventAction()">
                 Editează<br>evenimentul
             </button>
+            <button ng-if="event[keys.canInviteUsersToEvent]" ng-click="showInviteUsersPanel()">
+                Invită<br>membrii
+            </button>
             <button class="event-btn back-button" ng-click="goBackAction()">
                 <i class="fa fa-arrow-left" aria-hidden="true"></i><br>
                 Inapoi
             </button>
         </div>
         <hr>
+    </div>
+
+    <div class="invite-users-to-event-container" ng-if="views[keys.showInviteUsersPanel]">
+        <invite-users-to-event-directive></invite-users-to-event-directive>
+        <button class="close-panel" ng-click="hideInviteUsersPanel()">Inchide</button>
+    </div>
+
+    <div class="event-info" ng-if="views.userInvitesSend">
+        <div class="event-info-tuple invites-sent-info">
+            <label class="">Invitațiile au fost trimise.</label>
+        </div>
     </div>
 
     <div class="event-info">

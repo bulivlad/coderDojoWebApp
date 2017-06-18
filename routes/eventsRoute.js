@@ -46,4 +46,11 @@ router.post('/' + keys.getEventForEditingRoute, authentification.ensureAuthentic
 //Method for editing an existing unique event
 router.post('/' + keys.editEventOfDojoRoute, authentification.ensureAuthenticated, eventController.editEvent);
 
+//Method for getting users already invited for a particular event
+router.post('/' + keys.getUsersInvitedToEventRoute, authentification.ensureAuthenticated, eventController.getUsersInvitedToEvent);
+
+//Method for getting users already invited for a particular event
+router.post('/' + keys.sendUserInvitesToEventRoute, authentification.ensureAuthenticated, eventController.sendUserInvitesToEvent);
+
+
 module.exports = router;

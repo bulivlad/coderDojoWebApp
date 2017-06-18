@@ -673,7 +673,7 @@ header {
       background-color: white;
       border-left: 3px solid #e3e3e3;
       display: none;
-      position: fixed;
+      position: absolute;
       margin: 0;
       list-style: none;
       padding: 10px 0 0 0;
@@ -1130,7 +1130,7 @@ My PROFILE
       width: 95%;
     }
 
-    .parent-invite {
+    .default-notification {
       font-size: 0.8em;
       //height: 42px;
 
@@ -1147,6 +1147,15 @@ My PROFILE
 
         img {
           height: 20px;
+        }
+      }
+    }//parent invite
+
+    div.event-invite {
+      a.go-to-event {
+        color: #447e9b;
+        &:hover {
+          cursor: pointer;
         }
       }
     }
@@ -2051,6 +2060,58 @@ EVENTS
     }
   }
 
+  div.invite-users-to-event-container {//THe panel for inviting users to the event
+    border: 1px solid $my_profile_color;
+    margin: 0 auto;
+    width: 80%;
+
+    button.close-panel {
+      display: block;
+      margin: 0 auto 8px auto;
+    }
+
+    div.info-panel{
+      text-align: right;
+      span.ro2-info-button {
+        display: inline-block;
+        margin: 3px;
+      }
+    }
+
+    div.invite-users-to-event {
+
+      div.invite-users-row1 {
+        border-bottom: 2px solid $my_profile_color;
+        border-top: 2px solid $my_profile_color;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        margin-bottom: 5px;
+        padding: 4px 0;
+
+        span {
+          color: $my_profile_color;
+          width: 30%;
+        }
+      }
+
+      div.invite-users-row2 {
+        button.send-invites-bttn {
+          display: block;
+          margin: 0 auto;
+        }
+
+      }
+
+      p.invites-already-sent{
+        font-size: .9em;
+        padding: 0 7px;
+        text-indent: 10px;
+      }
+    }
+
+  }//div.invite-users-to-event-container
+
   div.event-view-container {
     div.event-info {
       margin: 0 auto;
@@ -2067,6 +2128,10 @@ EVENTS
           padding-bottom: 5px;
           text-align: center;
         }
+      }
+
+      div.invites-sent-info {
+        background-color: rgba(57, 255, 71, 0.14);
       }
     }//div.event-info
 

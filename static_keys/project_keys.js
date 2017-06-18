@@ -56,6 +56,8 @@ let keyMap = {
     editEventOfDojoRoute: 'editEventOfDojo',
     getEventForEditingRoute: 'getEventForEditing',
     deleteEventRoute: 'deleteEvent',
+    getUsersInvitedToEventRoute: 'getUsersInvitedToEvent',
+    sendUserInvitesToEventRoute: 'sendUserInvitesToEvent',
 
     //View locations
     viewEventLocation: 'viewevent',
@@ -64,6 +66,7 @@ let keyMap = {
     parentInviteNotification: 'parentInviteNotification',
     infoNotification: 'infoNotification',
     newNotificationCount: 'newNotificationCount',
+    eventInviteNotification: 'eventInviteNotification',
 
     //Errors
     dbsUserCreationError: 'dbsUserCreationError',
@@ -158,10 +161,12 @@ let keyMap = {
         nameWritten: 'name-written'
     },
     viewFilterPanel: 'viewFilterPanel',
+    showInviteUsersPanel: 'showInviteUsersPanel',
 
     //Permissions for events
     canDeleteEvent: 'canDeleteEvent',
     canEditEvent: 'canEditEvent',
+    canInviteUsersToEvent:'canInviteUsersToEvent',
     canSeeJoinedEventUsers: 'canSeeJoinedUsers',
     canConfirmEventUsers: 'canConfirmUsers',
 

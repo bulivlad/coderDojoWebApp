@@ -99,7 +99,8 @@ let eventSchema = module.exports.eventSchema = new mongoose.Schema({
     isActualEvent: {//This exists to easily differentiate between recurrent event and events (it is never changed)
         type: Boolean,
         default: true
-    }
+    },
+    invitesAlreadySent: [String]
 });
 
 let recurrentEventSchema = module.exports.recurrentEventSchema = new mongoose.Schema({
@@ -123,7 +124,7 @@ let recurrentEventSchema = module.exports.recurrentEventSchema = new mongoose.Sc
     activeStatus: {
         type: String,
         enum: keys.eventStatus
-    },
+    }
 });
 
 // Here we export the DataBase interface to our other modules
@@ -219,4 +220,12 @@ module.exports.deleteEvent = function(eventId, callback){
 
 module.exports.editEvent = function(updatedEvent, callback){
     Event.findOneAndUpdate({_id: updatedEvent._id}, updatedEvent, callback);
+};
+
+module.exports.getUsersInvitedToEvent = function(eventId, callback){
+    Event.findOne({_id:eventId}, {invitesAlreadySent: true}, callback);
+};
+
+module.exports.addToUsersInvited = function(eventId, invitesToAdd, callback){
+  Event.findOneAndUpdate({_id:eventId}, {$addToSet: {invitesAlreadySent: {$each: invitesToAdd}}}, callback);
 };

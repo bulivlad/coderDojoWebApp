@@ -1,0 +1,37 @@
+<div class="invite-users-to-event"  ng-controller="inviteUsersToEventCtrl">
+    <div class="info-panel">
+        <span class="ro2-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+        </span>
+    </div>
+    <div class="invite-users-row1">
+        <span><input id="inp-attendee" type="checkbox" ng-model="sendInvitesTo.attendees" ng-change="selectOtherThanAll()">
+            <label for="inp-attendee">cursanți</label>
+        </span>
+        <span>
+            <input id="inp-mentors" type="checkbox" ng-model="sendInvitesTo.mentors" ng-change="selectOtherThanAll()">
+            <label for="inp-mentors">mentori</label>
+        </span>
+        <span>
+            <input id="inp-volunteers" type="checkbox" ng-model="sendInvitesTo.volunteers" ng-change="selectOtherThanAll()">
+            <label for="inp-volunteers">voluntari</label>
+        </span>
+        <span>
+            <input id="inp-parents" type="checkbox" ng-model="sendInvitesTo.parents" ng-change="selectOtherThanAll()">
+            <label for="inp-parents">părinți</label>
+        </span>
+        <span>
+            <input id="inp-champions"type="checkbox" ng-model="sendInvitesTo.champions" ng-change="selectOtherThanAll()">
+            <label for="inp-champions">campioni</label>
+        </span>
+        <span>
+            <input id="inp-all"type="checkbox" ng-model="sendInvitesTo.all" ng-change="selectAll()">
+            <label for="inp-all">toți</label>
+        </span>
+    </div>
+    <div class="invite-users-row2">
+        <button class="send-invites-bttn" ng-click="sendInvitations()">Trimite invitațiile</button>
+    </div>
+    <hr>
+    <p class="invites-already-sent" ng-if="invitesAlreadySent.length > 0">{{getUsersInvitedPreviously(invitesAlreadySent)}}</p>
+</div>

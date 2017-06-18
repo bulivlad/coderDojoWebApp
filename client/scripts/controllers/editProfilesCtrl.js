@@ -489,6 +489,11 @@ angular.module("coderDojoTimisoara")
             }
         };
 
+        $scope.goToEvent = function(eventId){
+            $scope.setEventView(eventId, keys.viewUserProfile);
+            $scope.goToViewEvent();
+        };
+
         //Method that returns a date with only year, month and day
         $scope.getPrettyDate = function(){
             if($scope.myProfile.user.birthDate){

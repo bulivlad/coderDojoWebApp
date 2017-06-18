@@ -399,10 +399,9 @@ function addUserPermissionsToEvent(preparedEvent, user, dojo, originalEvent){
         preparedEvent[keys.canEditEvent] = true;
         preparedEvent[keys.canDeleteEvent] = true;
         preparedEvent[keys.canSeeJoinedEventUsers] = true;
-        //preparedEvent[keys.canConfirmEventUsers] = true;
+        preparedEvent[keys.canInviteUsersToEvent] = true;
     } else if(helper.isUserMentorInEvent(originalEvent, user._id) || helper.isUserVolunteerInEvent(originalEvent, user._id)){
         preparedEvent[keys.canSeeJoinedEventUsers] = true;
-        //preparedEvent[keys.canConfirmEventUsers] = true;
     }
 }
 
@@ -775,6 +774,123 @@ function getTicketFromTickets(ticket, tickets){
         }
     }
 }
+
+//Module for retrieving the users already invited to an event
+module.exports.getUsersInvitedToEvent = function(req, res){
+    logger.debug(`Entering EventRoute: ${keys.getUsersInvitedToEventRoute} for ${helper.getUser(req)}`);
+    let user = req.user;
+    let eventId = req.body.eventId;
+    let dojoId = req.body.dojoId;
+    Dojo.getDojoForChampionAuthentification(dojoId, function(err, dojo){
+        if(err){
+            logger.error(`Error getting dojo for ${helper.getUser(req)}, for authenticating him/her for ` +
+                ` getting invites already sent for event (_id=${eventId}):` + err);
+            return res.sendStatus(500);
+        }
+        if(helper.isUserAdmin(user) || helper.isUserChampionInDojo(dojo, user._id)){
+            Event.getUsersInvitedToEvent(eventId, function(err, event){
+                if(err){
+                    logger.error(`Error getting invites already send to event (_id=${eventId}) for ${helper.getUser(req)}: ` + err);
+                    return res.sendStatus(500);
+                }
+                res.json({invitesAlreadySent: event.invitesAlreadySent});
+            })
+        } else {
+            logger.error(`User ${helper.getUser(req)} tried to get users already invited to an event (_id=${event._id}) ` +
+                ` while not authorized to do so)`);
+            res.json({errors: keys.notAuthorizedError});
+        }
+    })
+};
+
+//Module for retrieving the users already invited to an event
+module.exports.sendUserInvitesToEvent = function(req, res){
+    logger.debug(`Entering EventRoute: ${keys.sendUserInvitesToEventRoute} for ${helper.getUser(req)}`);
+    let user = req.user;
+    let eventId = req.body.eventId;
+    let eventName = req.body.eventName;
+    let dojoName = req.body.dojoName;
+    let dojoId = req.body.dojoId;
+    let sendInvitesTo = req.body.sendInvitesTo;
+    let eventDate = req.body.eventDate;
+    let data = {user: user, eventId: eventId, eventName: eventName, dojoId: dojoId, dojoName: dojoName,
+                sendInvitesTo: sendInvitesTo, eventDate: eventDate, startTime: Date.now()};
+    Dojo.getDojoForChampionAuthentification(dojoId, function(err, dojo){
+        if(err){
+            logger.error(`Error getting dojo for ${helper.getUser(req)}, for authenticating him/her for ` +
+                ` sending invites for event (_id=${eventId}):` + err);
+            return res.sendStatus(500);
+        }
+        if(helper.isUserAdmin(user) || helper.isUserChampionInDojo(dojo, user._id)){
+            sendInvitesForEventToDojoMembers(data);
+            res.json({success:true});
+        } else {
+            logger.error(`User ${helper.getUser(req)} tried to send invites to an event (_id=${event._id}) ` +
+                ` while not authorized to do so)`);
+            res.json({errors: keys.notAuthorizedError});
+        }
+    })
+};
+
+function sendInvitesForEventToDojoMembers(data){
+    //We go through every type of user that has been invited
+    for(let i = 0; i < data.sendInvitesTo.length; i++){
+        let dojoMembersToGet = {};
+        let roleInEvent = '';
+        let arrayName = '';
+        if (data.sendInvitesTo[i] === keys.mentor){
+            dojoMembersToGet.mentors = true;
+            arrayName = 'mentors';
+            roleInEvent = 'mentor';
+        } else if(data.sendInvitesTo[i] === keys.parent){
+            dojoMembersToGet.parents = true;
+            arrayName = 'parents';
+            roleInEvent = 'părinte';
+        } else if(data.sendInvitesTo[i] === keys.volunteer){
+            dojoMembersToGet.volunteers = true;
+            arrayName = 'volunteers';
+            roleInEvent = 'voluntar';
+        } else if(data.sendInvitesTo[i] === keys.champion){
+            dojoMembersToGet.champions = true;
+            arrayName = 'champions';
+            roleInEvent = 'campion';
+        } else if(data.sendInvitesTo[i] === keys.attendee){
+            dojoMembersToGet.attendees = true;
+            arrayName = 'attendees';
+            roleInEvent = 'cursant';
+        }
+
+        Dojo.getDojoMembersForInvitingToEvent(data.dojoId, dojoMembersToGet, function(err, dojo){
+            if(err){
+                logger.error(`Error getting dojo members (${roleInEvent}) for ${helper.getUser(data.user)}, for sending` +
+                    ` invite to event (_id=${data.eventId}):` + err);
+            }
+            let notification = helper.makeEventInviteNotification(data, roleInEvent);
+            let members = dojo[arrayName];
+            for(let j = 0; j < members.length; j++){
+                let member = members[j];
+                //TODO also add email notifications
+                User.addNotificationForUser(member, notification, function(err){
+                    if(err){
+                        logger.error(`Error adding notification ${JSON.stringify(notification)} user (_id=${member}) ` +
+                            ` to event (_id=${data.eventId}): ` + err );
+                    }
+                    if((j == (member.length - 1)) && (i == (data.sendInvitesTo.length - 1))){
+                        //If we have added the last notification
+                        logger.debug(`Time to add notifications to event for dojo members ${Date.now() - data.startTime}ms.`);
+                    }
+                })
+            }
+            //In the end we set some flags to indicate that invitations have already been sent
+            Event.addToUsersInvited(data.eventId, data.sendInvitesTo, function(err){
+                if(err){
+                    logger.error(`Error adding the invitation flags event (${data.eventId}) ` +
+                                `by ${helper.getUser(data.user)}:` + err );
+                }
+            });
+        })
+    }
+};
 
 
 //Method for creating events from recurrent events for all dojos. If an event for that a particular dojo for the next

@@ -22,6 +22,7 @@ angular.module("coderDojoTimisoara")
                     }else {
                         //If we were not answered with the event, go to view dojo
                         $scope.goToViewDojo();
+                        $scope.setAlert(keys.infoAlert, 'Evenimentul nu mai este activ.');
                     }
                 })
 
@@ -47,6 +48,18 @@ angular.module("coderDojoTimisoara")
             } else {
                 session[keys.viewFilterPanel] = true;
             }
+        };
+
+        $scope.showInviteUsersPanel = function(){
+          $scope.views[keys.showInviteUsersPanel] = true;
+        };
+
+        $scope.hideInviteUsersPanel= function(){
+            $scope.views[keys.showInviteUsersPanel] = false;
+        };
+
+        $scope.setUserInvitesSent = function(){
+          $scope.views.userInvitesSend = true;
         };
 
         $scope.selectRegisteredUsersFilter = function(filter){
@@ -147,6 +160,10 @@ angular.module("coderDojoTimisoara")
                 //If the previous view was viewing a dojo
                 if(eventView.previousLocation === keys.getDojoRoute){
                     $scope.goToViewDojo();
+                } else if (eventView.previousLocation === keys.viewUserProfile){
+                    $scope.goToViewUserProfile();
+                } else {
+                    $scope.goToDespre();
                 }
             } else if($scope.isCurrentView(keys.editEvent)){
                 $scope.initializeEvent();

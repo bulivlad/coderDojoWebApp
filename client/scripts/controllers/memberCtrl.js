@@ -120,10 +120,7 @@ angular.module("coderDojoTimisoara")
                         helperSvc.handlerCommunicationErrors(err, 'getUsersForMember - memberCtrl', $scope);
                     })
             }
-
-
-        }
-
+        };
 
         var initialize = function(){
             getUsersForMember('parents');

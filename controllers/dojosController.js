@@ -479,7 +479,7 @@ module.exports.acceptPendingMember = function(req, res){
                             User.getUsersAndHisChildren(userToAcceptId, function(err, addedUser){
                                 if(err){
                                     logger.error(`Error getting user and his children (_id=${userToAcceptId} by ` +
-                                        ` ${helper.printUser(user)} for adding user's children this just joined dojo (_id=${dojoId}`);
+                                        ` ${helper.getUser(user)} for adding user's children this just joined dojo (_id=${dojoId}`);
                                     return;
                                 }
                                 addUsersChildrenToDojo(addedUser, dojo);
@@ -559,7 +559,7 @@ let addUsersChildrenToDojo = module.exports.addUsersChildrenToDojo = function(us
         //The second argument is a flag to only search for children that are minors
         User.getUsersBirthdate(usersChildren, true, function(err, usersMinorChildren){
             if(err){
-                logger.error(`Problems retrieving users children under 18 by ${helper.printUser(user)} for adding his/her ` +
+                logger.error(`Problems retrieving users children under 18 by ${helper.getUser(user)} for adding his/her ` +
                     `children to his/her dojo _id=${dojoId}: ` + err);
             }
             if(usersMinorChildren.length > 0){
@@ -567,7 +567,7 @@ let addUsersChildrenToDojo = module.exports.addUsersChildrenToDojo = function(us
                 let childrenToAddToDojo = helper.getListOfFieldsFromListOfObjects(usersMinorChildren, '_id');
                 Dojo.addUsersChildrenToDojo(childrenToAddToDojo, dojoId, function(err){
                     if(err){
-                        logger.error(`Problems adding user's children to the dojo _id=${dojoId} by ${helper.printUser(user)}` +
+                        logger.error(`Problems adding user's children to the dojo _id=${dojoId} by ${helper.getUser(user)}` +
                             ` for adding his/her children to his/her dojos: ` + err);
                         return;
                     }
@@ -584,7 +584,7 @@ module.exports.addUsersChildUsersDojos = function(user, childId){
     if(usersChildren.length > 0){
         Dojo.getDojos(true, function(err, dojos){
             if (err){
-                logger.error(`Problems retrieving dojos by ${helper.printUser(user)} for adding his/her children` +
+                logger.error(`Problems retrieving dojos by ${helper.getUser(user)} for adding his/her children` +
                     ` to his/her dojos: ` + err);
             }
             //We filter the dojos so only the ones where the user is a member remain (or all if the user is admin).
@@ -592,10 +592,10 @@ module.exports.addUsersChildUsersDojos = function(user, childId){
             let listOfUsersDojosIds = helper.getListOfFieldsFromListOfObjects(userDojos, '_id');
             Dojo.addUsersChildUsersDojos(childId, listOfUsersDojosIds, function(err){
                 if(err){
-                    logger.error(`Problems adding user's child (id=${childId}) to user's  dojos by ${helper.printUser(user)}: ` + err);
+                    logger.error(`Problems adding user's child (id=${childId}) to user's  dojos by ${helper.getUser(user)}: ` + err);
                     return;
                 }
-                logger.silly(`Child (id=${childId})  of ${helper.printUser(user)} added to user's dojos`);
+                logger.silly(`Child (id=${childId})  of ${helper.getUser(user)} added to user's dojos`);
             })
 
         });

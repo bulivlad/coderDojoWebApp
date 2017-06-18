@@ -80,6 +80,8 @@ const keys = {
     editEventOfDojoRoute: 'editEventOfDojo',
     getEventForEditingRoute: 'getEventForEditing',
     deleteEventRoute: 'deleteEvent',
+    getUsersInvitedToEventRoute: 'getUsersInvitedToEvent',
+    sendUserInvitesToEventRoute: 'sendUserInvitesToEvent',
     //TODO change the communication routes to view locations (for getDojo for ex)
 
     //View locations
@@ -89,6 +91,7 @@ const keys = {
     parentInviteNotification: 'parentInviteNotification',
     infoNotification: 'infoNotification',
     newNotificationCount: 'newNotificationCount',
+    eventInviteNotification: 'eventInviteNotification',
 
     //Errors
     dbsUserCreationError: 'dbsUserCreationError',
@@ -184,10 +187,12 @@ const keys = {
         nameWritten: 'name-written'
     },
     viewFilterPanel: 'viewFilterPanel',
+    showInviteUsersPanel: 'showInviteUsersPanel',
 
     //Permissions for events
     canDeleteEvent: 'canDeleteEvent',
     canEditEvent: 'canEditEvent',
+    canInviteUsersToEvent:'canInviteUsersToEvent',
     canSeeJoinedEventUsers: 'canSeeJoinedUsers',
     canConfirmEventUsers: 'canConfirmUsers',
 

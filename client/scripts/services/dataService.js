@@ -398,4 +398,20 @@ angular.module('coderDojoTimisoara')
                 data: data
             });
         };
+
+        this.getUsersInvitedToEvent = function(data){
+            return $http({
+                url: '/events/' + keys.getUsersInvitedToEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.sendInvitesToEvent = function(data){
+            return $http({
+                url: '/events/' + keys.sendUserInvitesToEventRoute,
+                method: "POST",
+                data: data
+            });
+        };
     });

@@ -29,7 +29,7 @@
                         <div class="my-profile-child" ng-repeat="child in myProfile.user.children"
                              ng-click="viewChildAction(child)">
                             <!--<img src="{{child.userPhoto ? '../img/user_photos/' + child.userPhoto : '../img/poza_profil.png'}}"-->
-                                 <!--alt="Poza profil copil">-->
+                            <!--alt="Poza profil copil">-->
                             <div class="child-profile-img"
                                  style="{{child.userPhoto ? 'background-image:url(\'../img/user_photos/' + child.userPhoto + '\')': 'background-image:url(\'../img/poza_profil.png\')'}}"></div>
                             <p>{{child.firstName + " " + child.lastName}}</p>
@@ -62,7 +62,7 @@
                     <h3>Notificări</h3>
                     <hr>
                     <div class="my-profile-notification-container" ng-repeat="notification in myProfile.user.notifications">
-                        <div class="parent-invite" ng-if="notification.typeOfNot === keys.parentInviteNotification">
+                        <div class="default-notification" ng-if="notification.typeOfNot === keys.parentInviteNotification">
                             <button ng-click="cancelChildInvite(notification)"><img src="../img/reject.png"></button>
                             <button ng-click="acceptChildInvite(notification)"><img src="../img/approve.png"></button>
                             <span><strong>{{notification.data.firstName + " " + notification.data.lastName}}</strong>
@@ -73,11 +73,24 @@
                             </span>
 
                         </div>
-                        <div class="parent-invite" ng-if="notification.typeOfNot === keys.infoNotification">
+                        <div class="default-notification" ng-if="notification.typeOfNot === keys.infoNotification">
                             <button ng-click="dismissNotification(notification)"><img src="../img/reject.png"></button>
                            <span>
                                <strong>{{notification.data.msg}} </strong>
                             </span>
+
+                        </div>
+                        <div class="default-notification event-invite" ng-if="notification.typeOfNot === keys.eventInviteNotification">
+                            <button ng-click="dismissNotification(notification)"><img src="../img/reject.png"></button>
+                            <span>
+                               <strong>{{notification.data.msg}} </strong>
+                            </span>
+                            <br>
+                            <a class="go-to-event" ng-click="goToEvent(notification.data.eventId)">
+                                mergi la eveniment
+                                <i class="fa fa-caret-right" aria-hidden="true"></i>
+
+                            </a>
 
                         </div>
                     </div>

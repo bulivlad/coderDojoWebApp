@@ -196,3 +196,7 @@ module.exports.addUsersChildrenToDojo = function(usersChildren, dojoId, callback
 module.exports.addUsersChildUsersDojos = function(childId, dojos, callback){
     Dojo.update({_id: {$in:dojos}}, {$addToSet : {attendees : childId}}, callback);
 };
+
+module.exports.getDojoMembersForInvitingToEvent = function(dojoId, membersToGet, callback){
+    Dojo.findOne({_id: dojoId}, membersToGet, callback);
+};

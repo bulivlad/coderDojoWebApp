@@ -87,6 +87,12 @@ angular.module("coderDojoTimisoara")
             templateUrl: "directives/add-or-edit-event-directive.html",
             replace: true
         }
+    })
+    .directive("inviteUsersToEventDirective", function(){
+        return {
+            templateUrl: "directives/invite-users-to-event-directive.html",
+            replace: true
+        }
     });
 
 

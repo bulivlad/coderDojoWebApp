@@ -46,7 +46,7 @@ angular.module("coderDojoTimisoara")
             $('#navigation-narrow-full').removeClass('slide');
             $('#navigation-narrow-full-user').removeClass('slide');
             setTimeout(function(){
-                //When hidding the menu for the narrow view, we must hide the user as well (in case it is opened)
+                //When hiding the menu for the narrow view, we must hide the user as well (in case it is opened)
                 $('#navigation-narrow').hide();
                 $('#navigation-narrow-full-user').hide();
             }, 400);

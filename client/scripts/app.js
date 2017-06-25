@@ -20,8 +20,11 @@ angular.module("coderDojoTimisoara", [
             .when('/' + keys.getMyDojosRoute, {templateUrl:'../views/dojourile-mele.html'})
             .when('/' + keys.getDojoRoute, {templateUrl:'../views/view-dojo.html'})
             .when('/' + keys.addDojoRoute, {templateUrl:'../views/adauga-dojo.html'})
+            .when('/' + keys.addBadgeLocation, {templateUrl:'../views/adauga-badge.html'})
             .when('/' + keys.cautaUnDojo, {templateUrl:'../views/cauta-un-dojo.html'})
             .when('/' + keys.viewEventLocation, {templateUrl:'../views/view-event.html'})
+            .when('/' + keys.viewBadgesLocation, {templateUrl:'../views/vezi-toate-badgeurile.html'})
+            .when('/' + keys.viewBadgeLocation, {templateUrl:'../views/view-badge.html'})
             .otherwise({redirectTo: '/despre'})
     }]);
 
@@ -82,10 +85,20 @@ const keys = {
     deleteEventRoute: 'deleteEvent',
     getUsersInvitedToEventRoute: 'getUsersInvitedToEvent',
     sendUserInvitesToEventRoute: 'sendUserInvitesToEvent',
+    addBadgeRoute: 'addBadge',
+    editBadgeRoute: 'goToEditBadge',
+    getAllBadgesRoute: 'getAllBadges',
+    getAuthAllBadgesRoute: 'getAuthAllBadges',
+    getUsersBadgesRoute: 'getUsersBadges',
+    getUsersChildsBadgesRoute: 'getUsersChildsBadges',
+    uploadBadgePictureRoute: 'uploadBadgePicture',
     //TODO change the communication routes to view locations (for getDojo for ex)
 
     //View locations
     viewEventLocation: 'viewevent',
+    addBadgeLocation: 'addBadge',
+    viewBadgesLocation: 'viewBadgesLocation',
+    viewBadgeLocation: 'viewBadgeLocation',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
@@ -107,6 +120,7 @@ const keys = {
     userAlreadyRegisteredForEventError: 'userAlreadyRegisteredForEvent',
     userNoLongerPartOfDojo: 'userNoLongerPartOfDojo',
     notSanitizedError: 'notSanitizedError',
+    uploadPhotoError: 'uploadPhotoError',
 
     //Alerts
     childRegisterAlert: 'childRegisterAlert',
@@ -121,13 +135,21 @@ const keys = {
     user: 'user',
     admin: 'admin',
     mentor: 'mentor',
+    mentors: 'mentors',
     pendingMentor: 'pendingMentor',
+    pendingMentors: 'pendingMentors',
     volunteer: 'volunteer',
+    volunteers: 'volunteers',
     pendingVolunteer: 'pendingVolunteer',
+    pendingVolunteers: 'pendingVolunteers',
     champion: 'champion',
+    champions: 'champions',
     pendingChampion: 'pendingChampion',
+    pendingChampions: 'pendingChampions',
     parent: 'parent',
+    parents: 'parents',
     attendee: 'attendee',
+    attendees: 'attendees',
 
     //Profile type
     editUserOver14Profile: 'editUserOver14Profile',     //Editing by the user himself/herself
@@ -158,8 +180,15 @@ const keys = {
     viewDojo: 'viewDojo',
     editDojo: 'editDojo',
     addEventToDojo: 'addEventToDojo',
-
     viewMembers: 'viewMembers',
+    memberType: {parents:'Parinti', attendees:'Copii', mentors:'Mentori', pendingMentors:'Mentori in asteptare',
+        volunteers:'Voluntari', pendingVolunteers:'Voluntari  in asteptare', champions:'Campioni',
+        pendingChampions:'Campioni in asteptare'},
+    filterUsersValues: {
+        name: 'name', nameUp: 'name-up', nameDown: 'name-down',
+        nameWritten: 'name-written'
+    },
+    storedTypeOfUsers: 'storedTypeOfUsers',
 
     //View keys for various views
     showBackButton: 'showBackButton',
@@ -195,6 +224,16 @@ const keys = {
     canInviteUsersToEvent:'canInviteUsersToEvent',
     canSeeJoinedEventUsers: 'canSeeJoinedUsers',
     canConfirmEventUsers: 'canConfirmUsers',
+
+    //Views for badges
+    viewBadge: 'viewBadge',
+    goToEditBadge: 'goToEditBadge',
+    filterBadgesValues: {
+        name: 'name', nameUp: 'name-up', nameDown: 'name-down',
+        points: 'points', pointsUp: 'points-up', pointsDown:'points-down',
+        nameWritten: 'name-written'
+    },
+    badgeEdited: 'badgeEdited',
 
     //Enums
     daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],

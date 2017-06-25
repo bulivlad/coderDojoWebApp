@@ -296,6 +296,15 @@ angular.module('coderDojoTimisoara')
             });
         };
 
+        this.uploadBadgePhoto = function(data){
+            return $http({
+                url: '/badges/' + keys.uploadBadgePictureRoute,
+                method: "POST",
+                data: data,
+                headers: {'Content-Type': undefined}
+            });
+        };
+
         this.getCurrentDojoEvents = function(data){
             return $http({
                 url: '/events/' + keys.getCurrentDojoEventsRoute,
@@ -414,4 +423,36 @@ angular.module('coderDojoTimisoara')
                 data: data
             });
         };
+
+        this.addBadge = function(data){
+            return $http({
+                url: '/badges/' + keys.addBadgeRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.editBadge = function(data){
+            return $http({
+                url: '/badges/' + keys.editBadgeRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.getAuthAllBadges = function(){
+            return $http({
+                url: '/badges/' + keys.getAuthAllBadgesRoute,
+                method: "GET"
+            });
+        };
+
+        this.getAllBadges = function(){
+            return $http({
+                url: '/badges/' + keys.getAllBadgesRoute,
+                method: "GET"
+            });
+        };
+
+
     });

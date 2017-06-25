@@ -6,7 +6,6 @@ const keys = require('../static_keys/project_keys');
 const Dojo = require('../models/dojoModel');
 const User = require('../models/userModel');
 const Event = require('../models/eventModel');
-const UserController = require('../controllers/usersController')
 const logger = require('winston');
 const validator = require('validator');
 const helper  = require('./helperController');
@@ -142,7 +141,7 @@ module.exports.getMyChildsDojos = function(req, res){
     let user = req.user;
     let childId = req.body.childId;
     //First we check if the current user is a parent of the child
-    if(UserController.isUsersChild(user, {_id:childId})){
+    if(helper.isUsersChild(user, {_id:childId})){
         //Go to the database to get all dojos
         Dojo.getDojos(true, function(err, dojos){
             if (err){
@@ -297,13 +296,14 @@ module.exports.getUsersForMember = function(req, res){
         //We check that the user has credentials to make the request
         let isUserAuthorized = isUserAdmin(user);
 
-        if(typeOfUsers === 'parents' || typeOfUsers === 'attendees' || typeOfUsers === 'volunteers' ||
-            typeOfUsers === 'mentors' || typeOfUsers === 'champions'){
+        if(typeOfUsers === keys.parents || typeOfUsers === keys.attendees ||
+            typeOfUsers === keys.volunteers || typeOfUsers === keys.mentors ||
+            typeOfUsers === keys.champions){
             if(isUserMemberOfDojo(dojo, user._id)){
                 isUserAuthorized = true;
             }
-        } else if (typeOfUsers === 'pendingMentors' || typeOfUsers === 'pendingChampions' ||
-            typeOfUsers === 'pendingVolunteers'){
+        } else if (typeOfUsers === keys.pendingMentors|| typeOfUsers === keys.pendingChampions ||
+            typeOfUsers === keys.pendingVolunteers){
             if(isUserChampionInDojo(dojo, user._id)){
                 isUserAuthorized = true;
             }
@@ -818,28 +818,28 @@ function sanitizeDojo(dojo){
 
     //Sanitizing the name
     let sanitName = validator.trim(dojo.name);
-    sanitName = validator.whitelist(sanitName, eventWhiteListNames);
+    sanitName = validator.whitelist(sanitName, helper.eventWhiteListNames);
     ret.name = sanitName;
 
     //Sanitizing the adress
     let sanitAdress = validator.trim(dojo.address);
-    sanitAdress = validator.whitelist(sanitAdress, eventWhiteListNames);
+    sanitAdress = validator.whitelist(sanitAdress, helper.eventWhiteListNames);
     ret.address = sanitAdress;
 
     //Sanitizing the email
     let sanitEmail = validator.trim(dojo.email);
-    sanitEmail = validator.whitelist(sanitEmail, eventWhiteListNames);
+    sanitEmail = validator.whitelist(sanitEmail, helper.eventWhiteListNames);
     ret.email = sanitEmail;
 
     //Sanitizing the statuses
     let sanitStatuses = ret.statuses.map(function(status){
-        return validator.whitelist(status, eventWhiteListNames);
+        return validator.whitelist(status, helper.eventWhiteListNames);
     });
     ret.statuses = sanitStatuses;
 
     //Sanitizing the requirements
     let sanitRequirements = ret.requirements.map(function(requirement){
-        return validator.whitelist(requirement, eventWhiteListNames);
+        return validator.whitelist(requirement, helper.eventWhiteListNames);
     });
     ret.requirements = sanitRequirements;
 

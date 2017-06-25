@@ -1,0 +1,53 @@
+<div class="add-or-edit-badge" ng-controller="addOrEditBadgeCtrl">
+    <div class="buttons-bar-add-badge" ng-if="showBackButton()">
+        <button ng-click="goBackAction()">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i> Inapoi
+        </button>
+    </div>
+    <div class="badge-edited" ng-if="views[keys.badgeEdited]">
+        <p>Badge editat cu success</p>
+    </div>
+    <div class="info-panel">
+                <span title="Afisează info" class="filter-row1-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+    </div>
+    <p class="sanitize-info" ng-if="hasBeenSanitized">
+        <i class="fa fa-window-close close-button" aria-hidden="true" ng-click="closeHasBeenSanitizedInfo()"></i>
+        Unele cîmpuri introduse au fost modificate deoarece nu se încadrează
+        în valorile acceptate (câmpurile sunt subliniate cu verde). Pentru mai multe informații despre
+        ce este permis, accesează informațiile.
+                <span class="filter-row1-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+    </p>
+    <div class="badge-content">
+        <div class="badge-group">
+            <label for="badge-name" class="badge-label">Nume badge</label>
+            <input class="badge-input" type="text" id="badge-name" ng-model="localBadge.name"
+                   ng-focus="errors.name = undefined" ng-class="{'sanitized': localBadge.sanitizedName}">
+            <p class="badge-error" ng-if="errors.name" >{{errors.name}}</p>
+        </div>
+        <div class="badge-group">
+            <label for="badge-points" class="badge-label">Puncte</label>
+            <input class="badge-input badge-points" type="number" id="badge-points" ng-model="localBadge.points"
+                   ng-focus="errors.points = undefined" ng-class="{'sanitized': localBadge.sanitizedPoints}">
+            <p class="badge-error" ng-if="errors.points" >{{errors.points}}</p>
+        </div>
+        <div class="badge-group">
+            <label for="badge-description" class="badge-label">Descriere</label>
+            <textarea class="badge-input" id="badge-description" ng-model="localBadge.description"
+                      ng-focus="errors.description = undefined" ng-class="{'sanitized': localBadge.sanitizedDescription}"></textarea>
+            <p class="badge-error" ng-if="errors.description" >{{errors.description}}</p>
+        </div>
+    </div>
+    <div class="badge-image" ng-if="isEditBadgeView()">
+            <div class="badge-image-div" title="Schimba poza" style="{{localBadge.badgePhoto ? 'background-image:url(\'../img/badges/' + localBadge.badgePhoto + '\')': 'background-image:url(\'../img/badges/default-badge.png\')'}}">
+                <input class="always-hide" id="badge-photo-input" type="file" name="badge-picture">
+                <label class="edit-user-image"><i class="fa fa-upload" aria-hidden="true" ng-click="loadPicture()"></i></label>
+            </div>
+    </div>
+    <div class="bottom-bttns">
+        <button ng-click="saveOrEditBadgeAction()">{{getSaveButtonText()}}</button>
+    </div>
+</div>

@@ -93,6 +93,18 @@ angular.module("coderDojoTimisoara")
             templateUrl: "directives/invite-users-to-event-directive.html",
             replace: true
         }
+    })
+    .directive("addOrEditBadgeDirective", function(){
+        return {
+            templateUrl: "directives/add-or-edit-badge-directive.html",
+            replace: true
+        }
+    })
+    .directive("viewBadgesDirective", function(){
+        return {
+            templateUrl: "directives/view-badges-directive.html",
+            replace: true
+        }
     });
 
 

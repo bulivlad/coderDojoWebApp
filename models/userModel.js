@@ -160,7 +160,9 @@ module.exports.getUsersForMember = function(userIds, callback){
 
 let fieldsToGetForUsersForMember = {
     firstName: true,
-    lastName: true
+    lastName: true,
+    email:true,
+    alias: true
 };
 
 //Method for adding a notification for a user

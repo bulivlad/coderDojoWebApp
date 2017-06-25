@@ -9,6 +9,9 @@ angular.module("coderDojoTimisoara")
     .controller("mainController", function($scope, $rootScope, $route,  $location, dataService, helperSvc){
         //Copying the keys to the scope for user in the view
         $scope.keys = keys;
+        //This flag is used to inform the error handler that is is the first load of the app (or when it is refreshed)
+        $scope.isFirstLoad = true;
+
         $scope.getUserFromServer = function(callback){
             dataService.getUserFromServer()
                 .then(function(response){
@@ -44,6 +47,12 @@ angular.module("coderDojoTimisoara")
 
         $scope.resetNewNotificationCount = function(){
             $scope.newNotificationCount = 0;
+        };
+
+        $scope.isUserAdmin = function(){
+            if($rootScope.user && ($rootScope.user.authorizationLevel === keys.admin)){
+                return true;
+            }
         };
 
         //Method for displaying a modal alert
@@ -146,6 +155,15 @@ angular.module("coderDojoTimisoara")
             }
         };
 
+        $scope.goToViewBadges = function(){
+            $location.path('/' + keys.viewBadgesLocation);
+        };
+
+        $scope.goToViewBadge = function(){
+            $location.path('/' + keys.viewBadgeLocation);
+        };
+
+
         //This sets the eventId for the event to be downloaded, and the location where the event was accessed,
         // to be used when going back.
         $scope.setEventView = function(eventId, previousLocation){
@@ -154,6 +172,16 @@ angular.module("coderDojoTimisoara")
 
         $scope.getEventView = function(){
             return $scope.eventView;
+        };
+
+        //This sets the badge for viewing (no need to download it again) and the location from where the badge was accessed
+        // to be used when going back.
+        $scope.setBadgeView = function(badge, previousLocation){
+            $scope.badgeView = {badge: badge, previousLocation: previousLocation};
+        };
+
+        $scope.getBadgeView = function(){
+            return $scope.badgeView;
         };
 
         $scope.resetAlerts = function(){

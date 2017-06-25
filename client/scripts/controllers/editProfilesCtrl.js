@@ -202,10 +202,12 @@ angular.module("coderDojoTimisoara")
         //Method for opening dialog for adding user picture
         $scope.loadPicture = function(){
             var $fileInput = $('#user-photo-input');
+            //This is so the listener is only added once
             if(!($scope.myProfile.initializations[keys.uploadPhotoListenerInitiated])){
                 $fileInput.on('change', function(event){
-                    //$('#user-photo-upload-button').click();
+                    //This event triggers when the users selects a file
                     var $fileInput = $('#user-photo-input');
+                    //We build a formData from the hidden file input used
                     var formData = new FormData();
                     formData.append('userId', $scope.myProfile.user._id);
                     formData.append('user-photo', $fileInput[0].files[0]);
@@ -223,8 +225,10 @@ angular.module("coderDojoTimisoara")
                             console.log(err);
                         });
                 });
+                //We set the initialized flag to true, for the event listener to be activated only once
                 $scope.myProfile.initializations[keys.uploadPhotoListenerInitiated] = true;
             }
+            //We simulate a click on the hidden file input to open the dialog
             $fileInput.click();
         };
 

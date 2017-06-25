@@ -51,7 +51,7 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.showInviteUsersPanel = function(){
-          $scope.views[keys.showInviteUsersPanel] = true;
+            $scope.views[keys.showInviteUsersPanel] = true;
         };
 
         $scope.hideInviteUsersPanel= function(){
@@ -59,7 +59,7 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.setUserInvitesSent = function(){
-          $scope.views.userInvitesSend = true;
+            $scope.views.userInvitesSend = true;
         };
 
         $scope.selectRegisteredUsersFilter = function(filter){
@@ -189,7 +189,7 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.editEventAction = function(){
-          $scope.setView(keys.editEvent);
+            $scope.setView(keys.editEvent);
         };
 
         // Method to determine if the current view is thisView
@@ -409,46 +409,38 @@ angular.module("coderDojoTimisoara")
             var ret = [];
             var sessionRegUsers = session.sessionRegUsers;
             var filterName = session.filterName;
-            if(filterName){
-                var splitFilteredNames = filterName.split(' ');
-                var name1, name2;
-                if(splitFilteredNames.length === 1){
-                    name1 = helperSvc.addDiacriticsToSearch(splitFilteredNames[0]);
-                } else if (splitFilteredNames.length > 1){
-                    name1 = helperSvc.addDiacriticsToSearch(splitFilteredNames[0]);
-                    name2 = helperSvc.addDiacriticsToSearch(splitFilteredNames[1]);
-                }
-
-                //If there is nothing in the input field we clone the original array as we should display all users
-                if (!name1 && !name2){
-                    ret = angular.copy(sessionRegUsers);
-                } else {
-                    if(name1 && name2){
-                        let regExName1 = new RegExp(name1, 'i');
-                        let regExName2 = new RegExp(name2, 'i');
-                        for(var i = 0; i < sessionRegUsers.length; i++){
-                            var regUser = sessionRegUsers[i];
-                            if((regUser.firstName.match(regExName1) && regUser.lastName.match(regExName2)) ||
-                                (regUser.firstName.match(regExName2) && regUser.lastName.match(regExName1)) ||
-                                (regUser.firstName.match(regExName1) && regUser.lastName.match(regExName1)) ||
-                                (regUser.firstName.match(regExName2) && regUser.lastName.match(regExName2))){
-                                ret.push(regUser);
-                            }
-                        }
-                    } else {
-                        // there is only one word to filter by
-                        let regExName1 = new RegExp(name1, 'i');
-                        for(var i = 0; i < sessionRegUsers.length; i++) {
-                            var regUser = sessionRegUsers[i];
-                            if(regUser.firstName.match(regExName1) || regUser.lastName.match(regExName1)){
-                                ret.push(regUser);
-                            }
+            if(filterName && filterName !== ''){
+                var splitFilteredInput = filterName.split(' ');
+                for(var i = 0; i < sessionRegUsers.length; i++) {
+                    var regUser = sessionRegUsers[i];
+                    var numberOfNecessaryMatches = splitFilteredInput.length;
+                    var matches = 0;
+                    //We check that every word written in the input matches either the first or last naame. If there is
+                    // a match for every one, we add it to the filtered array.
+                    for(var j = 0; j < splitFilteredInput.length; j++){
+                        var inputWord = helperSvc.addDiacriticsToSearch(splitFilteredInput[j]);
+                        var regExInput = new RegExp(inputWord, 'i');
+                        if(regUser.firstName.match(regExInput)){
+                            matches++;
+                        } else if (regUser.lastName.match(regExInput)){
+                            matches++;
                         }
                     }
+                    if(matches === numberOfNecessaryMatches){
+                        ret.push(regUser);
+                    }
                 }
+
             } else {
-                //If the filtered name is not yet filled, return false
-                return false;
+                //If the filtered name is not yet filled, return the original array of users
+
+                if(sessionRegUsers.length === session.filteredSessionRegUsers.length){
+                    //We need to return the filtered list directly for it to skip sorting, and remain set to the previous
+                    //filter setting.
+                    return session.filteredSessionRegUsers;
+                } else {
+                    ret = angular.copy(sessionRegUsers);
+                }
             }
 
             //After filtering for the name, we sort A-Z
@@ -470,7 +462,7 @@ angular.module("coderDojoTimisoara")
                 if(whichAction === keys.eventRemoveUser){
                     //If the user is attempting to remove the user, we prompt for confirmation
                     var confirmed  = confirm('Sigur vrei să il scoți pe ' + regUser.firstName + ' ' +
-                            regUser.lastName +  ' de la eveniment?');
+                        regUser.lastName +  ' de la eveniment?');
                     if(!confirmed){
                         return;
                     }

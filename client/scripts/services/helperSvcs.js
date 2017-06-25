@@ -376,21 +376,24 @@ angular.module('coderDojoTimisoara')
         };
 
         //Method that constructs an event date
-        this.getEventDate = function(event){
+        this.getEventDate = function(event, forUniqueEvents){
             var ret = '';
             var startTime = new Date(event.startTime);
             var endTime = new Date(event.endTime);
             //This is a weekly event
-            if(event.copyOfRecurrentEvent){
+            if(event.copyOfRecurrentEvent && !forUniqueEvents){
                 ret = 'În fiecare ' + keys.daysOfWeek[startTime.getDay()] + ' ' +
                     startTime.getHours() + ':' +
-                    this.adjustOneNumberMinutes(startTime.getMinutes() + '') + ' - ' +
+                    this.adjustOneNumberMinutes(startTime.getMinutes()) + ' - ' +
                     endTime.getHours() + ':' +
-                    this.adjustOneNumberMinutes(endTime.getMinutes() + '');
+                    this.adjustOneNumberMinutes(endTime.getMinutes());
             } else {
                 ret = this.capitalizeFirstLetter(keys.daysOfWeek[startTime.getDay()]) + ' ' +  startTime.getDate() +
-                    ' ' + keys.months[startTime.getMonth()] + ' de la ' + startTime.getHours() + ':'  + startTime.getHours() +
-                    ' - ' + endTime.getHours() + ':'  + endTime.getHours();
+                    ' ' + keys.months[startTime.getMonth()] + ' de la ' +
+                    startTime.getHours() + ':'  +
+                    this.adjustOneNumberMinutes(startTime.getMinutes()) + ' - ' +
+                    endTime.getHours() + ':'  +
+                    this.adjustOneNumberMinutes(endTime.getMinutes());
             }
             return ret;
         };
@@ -411,7 +414,13 @@ angular.module('coderDojoTimisoara')
             if (err.status === 401){
                 console.log('Not authorized:' + err.statusText);
                 $rootScope.deleteUser(methodInfo);
-                $location.path('/' + keys.login);
+                //This only happens when the mainController loads for the first time, we do not need to go to login in
+                //this case
+                if(scope.isFirstLoad){
+                    scope.isFirstLoad = false;
+                } else {
+                    $location.path('/' + keys.login);
+                }
             } else if (err.status === 500){
                 //Display an alert notifying the user that the operation did not succeed
                 if(scope){
@@ -660,6 +669,7 @@ angular.module('coderDojoTimisoara')
 
         //Method for adding a 0 if the minutes are just one number (eg 2 to display 02)
         this.adjustOneNumberMinutes = function(number){
+            number = number + '';
             return number.length == 1 ? '0' + number : number;
         };
 
@@ -792,7 +802,60 @@ angular.module('coderDojoTimisoara')
                     return 0;
                 }
             }
+        };
 
+        //Method for sorting badge names in a-z
+        this.sortBadgeNameAsc = function(elem1, elem2){
+            // name compare
+            var nameVal = elem1.name.localeCompare(elem2.name);
+            if(nameVal < 0){
+                return -1;
+            }
+            else if (nameVal > 0){
+                return 1;
+            } else {
+                return 0;
+            }
+        };
+
+        //Method for sorting badge names in a-z
+        this.sortBadgeNameDesc = function(elem1, elem2){
+            // name compare
+            var nameVal = elem1.name.localeCompare(elem2.name);
+            if(nameVal < 0){
+                return 1;
+            }
+            else if (nameVal > 0){
+                return -1;
+            } else {
+                return 0;
+            }
+        };
+
+        //Method for sorting badge points from smaller to bigger
+        this.sortBadgePointsAsc = function(elem1, elem2){
+            // points compare
+            if(elem1.points < elem2.points){
+                return -1;
+            }
+            else if (elem1.points > elem2.points){
+                return 1;
+            } else {
+                return 0;
+            }
+        };
+
+        //Method for sorting badge names in a-z
+        this.sortBadgePointsDesc = function(elem1, elem2){
+            // points compare
+            if(elem1.points > elem2.points){
+                return -1;
+            }
+            else if (elem1.points < elem2.points){
+                return 1;
+            } else {
+                return 0;
+            }
         };
 
     })

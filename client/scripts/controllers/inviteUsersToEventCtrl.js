@@ -94,7 +94,7 @@ angular.module("coderDojoTimisoara")
                         dojoName: $scope.event.dojo.name,
                         dojoId: $scope.event.dojo._id,
                         sendInvitesTo: sendInvitesTo,
-                        eventDate: $scope.event.eventDate
+                        eventDate: helperSvc.getEventDate($scope.event, true)
                     })
                         .then(function(response){
                             if(response.data.errors === keys.notAuthorizedError){

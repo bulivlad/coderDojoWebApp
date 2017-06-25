@@ -58,9 +58,19 @@ let keyMap = {
     deleteEventRoute: 'deleteEvent',
     getUsersInvitedToEventRoute: 'getUsersInvitedToEvent',
     sendUserInvitesToEventRoute: 'sendUserInvitesToEvent',
+    addBadgeRoute: 'addBadge',
+    editBadgeRoute: 'goToEditBadge',
+    getAllBadgesRoute: 'getAllBadges',
+    getAuthAllBadgesRoute: 'getAuthAllBadges',
+    getUsersBadgesRoute: 'getUsersBadges',
+    getUsersChildsBadgesRoute: 'getUsersChildsBadges',
+    uploadBadgePictureRoute: 'uploadBadgePicture',
 
     //View locations
     viewEventLocation: 'viewevent',
+    addBadgeLocation: 'addBadge',
+    viewBadgesLocation: 'viewBadgesLocation',
+    viewBadgeLocation: 'viewBadgeLocation',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
@@ -82,6 +92,7 @@ let keyMap = {
     userAlreadyRegisteredForEventError: 'userAlreadyRegisteredForEvent',
     userNoLongerPartOfDojo: 'userNoLongerPartOfDojo',
     notSanitizedError: 'notSanitizedError',
+    uploadPhotoError: 'uploadPhotoError',
 
     //Alerts
     childRegisterAlert: 'childRegisterAlert',
@@ -96,13 +107,21 @@ let keyMap = {
     user: 'user',
     admin: 'admin',
     mentor: 'mentor',
+    mentors: 'mentors',
     pendingMentor: 'pendingMentor',
+    pendingMentors: 'pendingMentors',
     volunteer: 'volunteer',
+    volunteers: 'volunteers',
     pendingVolunteer: 'pendingVolunteer',
+    pendingVolunteers: 'pendingVolunteers',
     champion: 'champion',
+    champions: 'champions',
     pendingChampion: 'pendingChampion',
+    pendingChampions: 'pendingChampions',
     parent: 'parent',
+    parents: 'parents',
     attendee: 'attendee',
+    attendees: 'attendees',
 
     //Profile type
     editUserOver14Profile: 'editUserOver14Profile',     //Editing by the user himself/herself
@@ -134,6 +153,14 @@ let keyMap = {
     editDojo: 'editDojo',
     viewMembers: 'viewMembers',
     addEventToDojo: 'addEventToDojo',
+    memberType: {parents:'Parinti', attendees:'Copii', mentors:'Mentori', pendingMentors:'Mentori in asteptare',
+        volunteers:'Voluntari', pendingVolunteers:'Voluntari  in asteptare', champions:'Campioni',
+        pendingChampions:'Campioni in asteptare'},
+    filterUsersValues: {
+        name: 'name', nameUp: 'name-up', nameDown: 'name-down',
+        nameWritten: 'name-written'
+    },
+    storedTypeOfUsers: 'storedTypeOfUsers',
 
     //View keys for various views
     showBackButton: 'showBackButton',
@@ -169,6 +196,16 @@ let keyMap = {
     canInviteUsersToEvent:'canInviteUsersToEvent',
     canSeeJoinedEventUsers: 'canSeeJoinedUsers',
     canConfirmEventUsers: 'canConfirmUsers',
+
+    //Views for badges
+    viewBadge: 'viewBadge',
+    goToEditBadge: 'goToEditBadge',
+    filterBadgesValues: {
+        name: 'name', nameUp: 'name-up', nameDown: 'name-down',
+        points: 'points', pointsUp: 'points-up', pointsDown:'points-down',
+        nameWritten: 'name-written'
+    },
+    badgeEdited: 'badgeEdited',
 
     //Enums
     daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],

@@ -1,0 +1,40 @@
+<div class="view-or-edit-badge" ng-controller="viewBadgeCtrl">
+    <div class="edit-badge" ng-if="views[keys.goToEditBadge]">
+        <div class="pages-banner dojo-banner">
+            <h2>Editează badge</h2>
+        </div>
+        <add-or-edit-badge-directive></add-or-edit-badge-directive>
+    </div>
+    <div class="view-badge" ng-if="views[keys.viewBadge]">
+        <div class="view-badge-bttns-bar">
+            <button ng-click="goToEditBadge()" ng-if="isUserAdmin()">
+                Editează badge
+            </button>
+            <button class="back-button-badge" ng-click="goBackAction()">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i> Inapoi
+            </button>
+        </div>
+        <div class="badge-name">
+            <p>{{badge.name}}</p>
+        </div>
+
+        <div class="badge-body">
+            <div class="badge-image">
+                <img src="{{badge.badgePhoto ? '../img/badges/' + badge.badgePhoto : '../img/badges/default-badge.png'}}">
+            </div>
+            <div class="badge-points-and-earned">
+                <div class="badge-points">
+                    <p><span>{{badge.points}} </span> puncte</p>
+                </div>
+                <div class="badge-earned">
+
+                </div>
+            </div>
+            <div class="badge-description">
+                <h3>Despre badge:</h3>
+                <p>{{badge.description}}</p>
+            </div>
+        </div>
+
+    </div>
+</div>

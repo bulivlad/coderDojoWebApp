@@ -271,7 +271,7 @@ let areEventsEqual = module.exports.areEventsEqual = function(event, sanitEvent)
 
 //Sanitization values
 //Characters allowed for dojo events TODO find a place for this info
-const eventWhiteListNames =  'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!?\\-+ ';
+const eventWhiteListNames = module.exports.eventWhiteListNames =  'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!?\\-+ ';
 
 module.exports.sanitizeEvents = function(events){
     //cloning the events

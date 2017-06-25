@@ -26,7 +26,10 @@
                     <li><a href="#!myProfile" ng-click="hideMenuNarrow()">Profilul meu</a></li>
                     <li><a href="#!getMyDojos" ng-click="hideMenuNarrow()">Dojourile mele</a></li>
                     <li ng-show="user.authorizationLevel === keys.admin">
-                        <a href="#!addDojo" ng-click="hideMenuNarrow()">Adauga Dojo</a>
+                        <a href="#!addDojo" ng-click="hideMenuNarrow()">Adaugă Dojo</a>
+                    </li>
+                    <li ng-show="user.authorizationLevel === keys.admin">
+                        <a ng-href="{{'#!' + keys.addBadgeLocation}}" ng-click="hideMenuNarrow()">Adaugă badge</a>
                     </li>
                     <li><a href="">Evenimentele mele</a></li>
                     <li><a href="" ng-click="logoutUser()">Logout</a></li>

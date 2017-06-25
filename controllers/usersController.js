@@ -462,30 +462,32 @@ module.exports.getNewNotificationsCount = function(req, res){
 //Module for uploading user photos
 module.exports.uploadUserPicture = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${helper.getUser(req)}`);
-    upload(req, res, function(err){
-        let userToUpdatePhoto = req.body.userId;
-        let fileName = req.file.filename;
-        let user = req.user;
-        if (err){
-            logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
-            return res.sendStatus(500);
-        }
+    let userToUpdatePhoto = req.body.userId;
 
-        //If the user changing the photo is the logged in user or if the user changing photo is the
-        //logged in user's child
-        if(user._id == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
+    //If the user changing the photo is the logged in user or if the user changing photo is the
+    //logged in user's child
+    if(user._id == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
+        upload(req, res, function(err){
+            if (err){
+                logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
+                return res.sendStatus(500);
+            }
+            let fileName = req.file.filename;
+            let user = req.user;
             User.updatePhotoForUser(userToUpdatePhoto, fileName, function(err){
                 if(err){
                     logger.error(`Error updating user photo for for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
                     return res.sendStatus(500);
                 }
                 res.json({userPhoto:fileName, userId: userToUpdatePhoto});
+                //TODO delete the old photo of the user
             })
-        } else {
-            logger.error(` ${helper.getUser(req)} (children=${user.children}) tried to change photo for user _id=${userToUpdatePhoto} while not being the user or the users child`)
-            res.json({errors:keys.wrongUserError});
-        }
-    })
+        })
+    } else {
+        //TODO must check for authorization before saving the photo)
+        logger.error(` ${helper.getUser(req)} (children=${user.children}) tried to change photo for user _id=${userToUpdatePhoto} while not being the user or the users child`)
+        res.json({errors:keys.wrongUserError});
+    }
 };
 
 let storage = multer.diskStorage({
@@ -497,6 +499,7 @@ let storage = multer.diskStorage({
     }
 });
 
+//TODO must check for photo type
 upload =  multer({storage:storage}).single('user-photo');
 
 

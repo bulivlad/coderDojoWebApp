@@ -29,6 +29,7 @@
                 <li><a href="">Resurse</a></li>
                 <li><a href="">Parteneri</a></li>
                 <li><a href="">Evenimente</a></li>
+                <li><a href="{{'#!' + keys.viewBadgesLocation}}" ng-click="hideMenuNarrow()">Toate badge-urile</a></li>
                 <li><a href="">News</a></li>
                 <li><a href="">Blog</a></li>
                 <li><a href="">Contact</a></li>
@@ -47,7 +48,10 @@
                 <li><a href="#!myProfile" ng-click="hideMenuNarrow()">Profilul meu</a></li>
                 <li><a href="#!getMyDojos" ng-click="hideMenuNarrow()">Dojourile mele</a></li>
                 <li ng-show="user.authorizationLevel === keys.admin">
-                    <a href="#!addDojo" ng-click="hideMenuNarrow()">Adauga Dojo</a>
+                    <a href="#!addDojo" ng-click="hideMenuNarrow()">Adaugă Dojo</a>
+                </li>
+                <li ng-show="user.authorizationLevel === keys.admin">
+                    <a ng-href="{{'#!' + keys.addBadgeLocation}}" ng-click="hideMenuNarrow()">Adaugă Badge</a>
                 </li>
                 <li><a href="">Evenimentele mele</a></li>
                 <li><a href="" ng-click="logoutUser()">Logout</a></li>

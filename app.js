@@ -3,22 +3,23 @@
  */
 
 const express = require("express"),
-      path = require("path"),
-      templating = require("./templating/info.js"),
-      routes = require('./routes/index'),
-      usersRoute = require('./routes/usersRoute'),
-      dojosRoute = require('./routes/dojosRoute'),
-      eventsRoute = require('./routes/eventsRoute'),
-      bodyParser = require('body-parser'),
-      expressValidator = require("express-validator"),
-      mongoose = require('mongoose'),
-      expressSession = require('express-session'),
-      cookieParser = require('cookie-parser'),
-      passport = require('passport'),
-      //passportLocal =   require('passport-local'),
-      logger = require('./logger/logger'),
-      validator = require('./validator/validator'),
-      helper = require('./auxiliary/helper');
+    path = require("path"),
+    templating = require("./templating/info.js"),
+    routes = require('./routes/index'),
+    usersRoute = require('./routes/usersRoute'),
+    dojosRoute = require('./routes/dojosRoute'),
+    badgesRoute = require('./routes/badgesRoute'),
+    eventsRoute = require('./routes/eventsRoute'),
+    bodyParser = require('body-parser'),
+    expressValidator = require("express-validator"),
+    mongoose = require('mongoose'),
+    expressSession = require('express-session'),
+    cookieParser = require('cookie-parser'),
+    passport = require('passport'),
+//passportLocal =   require('passport-local'),
+    logger = require('./logger/logger'),
+    validator = require('./validator/validator'),
+    helper = require('./auxiliary/helper');
 
 
 
@@ -70,6 +71,7 @@ app.use("/", routes);
 app.use("/user", usersRoute);
 app.use("/dojos", dojosRoute);
 app.use("/events", eventsRoute);
+app.use("/badges", badgesRoute);
 
 
 

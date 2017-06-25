@@ -2,76 +2,125 @@
     <div class="pages-banner dojo-banner">
         <h2>{{dojo.name}} - Membrii dojo</h2>
     </div>
-    <button class="back-button" ng-click="goBackAction()" ng-if="views[keys.showBackButton]">Inapoi</button>
+    <div class="member-container-bttn-bar">
+        <span class="info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+        </span>
+
+        <button ng-click="goBackAction()" ng-if="views[keys.showBackButton]">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i> Inapoi
+        </button>
+    </div>
     <div class="container">
-        <label>Selecteaza utilizatorul:</label>
-        <select ng-model="typeOfUser" ng-change="selectUserAction()">
-            <option>Parinti</option>
-            <option>Copii</option>
-            <option>Mentori</option>
-            <option ng-if="dojo[keys.canAcceptMembers]">Mentori in asteptare</option>
-            <option>Voluntari</option>
-            <option ng-if="dojo[keys.canAcceptMembers]">Voluntari  in asteptare</option>
-            <option>Campioni</option>
-            <option ng-if="dojo[keys.canAcceptMembers]">Campioni in asteptare</option>
-        </select>
-        <hr>
-        <div ng-if="users && users.length > 0">
-            <div class="flex-container">
-                <span class="nr-crt flex-item">Nr.crt</span>
-                <span class="name flex-item">Nume</span>
-                <span class="expand-collapse flex-item">Expandează<br>Restrânge</span>
-                <span class="reject-approve-bttns flex-item" ng-if="showAcceptReject">Acceptă<br>Șterge</span>
+        <div class="select-users">
+            <div class="select-users-left-col">
+                <!--<label>Selecteaza utilizatorul:</label>-->
+                <select ng-model="typeOfUser" ng-change="selectUserAction()">
+                    <option>{{keys.memberType.parents}}</option>
+                    <option>{{keys.memberType.attendees}}</option>
+                    <option>{{keys.memberType.mentors}}</option>
+                    <option ng-if="dojo[keys.canAcceptMembers]">{{keys.memberType.pendingMentors}}</option>
+                    <option>{{keys.memberType.volunteers}}</option>
+                    <option ng-if="dojo[keys.canAcceptMembers]">{{keys.memberType.pendingVolunteers}}</option>
+                    <option>{{keys.memberType.champions}}</option>
+                    <option ng-if="dojo[keys.canAcceptMembers]">{{keys.memberType.pendingChampions}}</option>
+                </select>
             </div>
-            <hr>
-            <div ng-repeat="memberUser in users">
-                <div class="contracted-part">
-                    <div class="flex-container">
-                        <span class="nr-crt flex-item">{{memberUser.nrCrt}}</span>
-                        <div class="name flex-item">
-                            <div class="block-div">
-                                <strong>
-                                    {{memberUser.firstName + " " + memberUser.lastName}}
-                                </strong>
-                            </div>
-                        </div>
-                        <span class="expand-collapse flex-item">
-                             <button class="expand-contract" ng-click="memberUser.expand = true;getUserInfoForExpandedLook(memberUser)"
-                                     ng-if="!memberUser.expand">
-                                 <i class="fa fa-chevron-down" aria-hidden="true"></i>
-                             </button>
-                        </span>
-                        <span class="reject-approve-bttns flex-item" ng-if="showAcceptReject">
-                            <button ng-click="acceptPendingMemberForDojo(memberUser)"><img src="../img/approve.png"></button>
-                            <button ng-click="rejectPendingMemberForDojo(memberUser)"><img src="../img/reject.png"></button>
-                        </span>
-                    </div>
+            <p class="select-users-right-col">Total {{typeOfUser}}<br>
+                <span>{{users.length}}</span>
+            </p>
+        </div>  <!--<div class="select-users">-->
+
+        <div class="filter-users" ng-if="users && users.length > 0">
+            <div class="filter-exand-contract">
+                <a ng-click="toggleFilterMenu()">
+                    filtreaza
+                    <i class="fa fa-caret-right" aria-hidden="true" ng-if="!views.openFilterMenu"></i>
+                    <i class="fa fa-caret-down" aria-hidden="true" ng-if="views.openFilterMenu"></i>
+                </a>
+            </div>
+            <div class="user-filter-container" ng-if="views.openFilterMenu">
+                <label class="filter-name" ng-click="selectUsersFilter(keys.filterUsersValues.name)">
+                    Nume
+                    <i class="fa fa-caret-down" aria-hidden="true"
+                       ng-if="filterType === keys.filterUsersValues.nameDown"></i>
+                    <i class="fa fa-caret-up" aria-hidden="true"
+                       ng-if="filterType === keys.filterUsersValues.nameUp"></i>
+                </label>
+                <div class="filter-name-written">
+                    <label for="filter-users-member-view" class="label-search">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                    </label>
+                    <input id="filter-users-member-view" class="name-written" placeholder="Caută" title="Caută un utilizator dupa nume, email sau alias"
+                           ng-model="userFilterName.value" ng-change="selectUsersFilter(keys.filterUsersValues.nameWritten)"
+                           ng-focus="selectUsersFilter(keys.filterUsersValues.nameWritten)">
+                    <label for="filter-users-member-view" class="label-search">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                    </label>
                 </div>
-                <div class="expanded-part" ng-if="memberUser.expand">
-                    <p><strong>Data nasterii</strong>: {{memberUser.birthDate}}</p>
-                    <p><strong>Adresa</strong>: {{memberUser.address}}</p>
-                    <p ng-if="memberUser.email"><strong>Email</strong>: {{memberUser.email}}</p>
-                    <p ng-if="memberUser.alias"><strong>Alias</strong>: {{memberUser.alias}}</p>
-                    <p><strong>Telefon</strong>: {{memberUser.phone}}</p>
-                    <p ng-if="memberUser.facebook"><strong>Facebook</strong>:
+            </div>
+
+        </div><!--<div class="filter-users">-->
+
+        <div class="users-table" ng-if="users && users.length > 0">
+            <div class="users-header">
+                <span class="users-header-name">Nume</span>
+                <span class="users-header-alias-email">Alias & Email</span>
+                <span class="users-header-bttns">
+
+                </span>
+            </div>
+            <hr class="user-separator">
+            <div class="display-user" ng-repeat="memberUser in filteredUsers">
+                <div class="basic-info-and-bttns">
+                    <div class="basic-info">
+                        <p class="user-name">{{memberUser.firstName + ' ' + memberUser.lastName}}</p>
+                        <p class="user-alias-email">
+                            <span class="alias" ng-if="memberUser.alias">zis si <i>{{memberUser.alias}}</i></span>
+                            <br ng-if="memberUser.alias && memberUser.email">
+                            <span class="email"><code>{{memberUser.email}}</code></span>
+                        </p>
+                    </div>
+                    <div class="user-bttns">
+                        <button class="approve-user" ng-if="showAcceptReject" ng-click="acceptPendingMemberForDojo(memberUser)">
+                            <!--<img src="../img/approve.png">-->
+                            <i class="fa fa-check-circle" aria-hidden="true"></i>
+                        </button>
+                        <button class="reject-user" ng-if="showAcceptReject" ng-click="rejectPendingMemberForDojo(memberUser)">
+                            <!--<img src="../img/reject.png">-->
+                            <i class="fa fa-ban" aria-hidden="true"></i>
+                        </button>
+                        <button class="member-bttn" ng-if="showAddBadge()">Adauga Badge</button>
+                        <button class="member-bttn more-bttn" ng-click="expandContractUser(memberUser)">
+                            {{memberUser.expand ? 'Mai putin' : 'Mai mult'}}
+                        </button>
+                    </div>
+
+                </div>
+
+
+                <div class="expanded-info" ng-if="memberUser.expand">
+                    <p><strong>Data nasterii:</strong> {{memberUser.birthDate}}</p>
+                    <p><strong>Adresa:</strong> {{memberUser.address}}</p>
+                    <p ng-if="memberUser.email"><strong>Email:</strong>{{memberUser.email}}</p>
+                    <p ng-if="memberUser.alias"><strong>Alias:</strong><span class="cursive">{{memberUser.alias}}</span></p>
+                    <p><strong>Telefon:</strong> {{memberUser.phone}}</p>
+                    <p ng-if="memberUser.facebook"><strong>Facebook:</strong>
                         <a href="{{memberUser.facebook}}" target="_blank">{{memberUser.firstName + " " + memberUser.lastName}}</a>
                     </p>
-                    <p ng-if="memberUser.linkedin"><strong>LinkedIn</strong>: {{memberUser.linkedin}}</p>
-                    <p ng-if="memberUser.biography"><strong>Biografie</strong>: {{memberUser.biography}}</p>
-                    <p ng-if="memberUser.programmingLanguages"><strong>Limbaje de programare</strong>: {{memberUser.programmingLanguages}}</p>
-                    <p ng-if="memberUser.languagesSpoken"><strong>Limbi vorbite</strong>: {{memberUser.languagesSpoken}}</p>
-                    <p ng-if="memberUser.gender"><strong>Sexul</strong>: {{memberUser.gender == "male" ? "masculin" : "feminin"}}</p>
+                    <p ng-if="memberUser.linkedin"><strong>LinkedIn:</strong>{{memberUser.linkedin}}</p>
+                    <p ng-if="memberUser.biography"><strong>Biografie:</strong>{{memberUser.biography}}</p>
+                    <p ng-if="memberUser.programmingLanguages"><strong>Limbaje de programare:</strong> {{memberUser.programmingLanguages}}</p>
+                    <p ng-if="memberUser.languagesSpoken"><strong>Limbi vorbite:</strong>{{memberUser.languagesSpoken}}</p>
+                    <p ng-if="memberUser.gender"><strong>Sexul:</strong>{{memberUser.gender == "male" ? "masculin" : "feminin"}}</p>
                     <button class="expand-contract" ng-click="memberUser.expand = false">
-                        <i class="fa fa-chevron-up" aria-hidden="true"></i>
+                        Mai putin
                     </button>
                 </div>
-                <hr>
+                <hr class="user-separator">
             </div>
 
         </div>
-        <span ng-if="!users || users.length == 0">
-            Nu exista {{typeOfUser}} pentru dojo.
-        </span>
 
-    </div>
+    </div> <!--<div class="container">-->
 </div>

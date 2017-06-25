@@ -7,6 +7,25 @@ $my_dojo_color: #73449b;
 $coder_dojo_log: #bc36f2;
 $profile_banner_height: 70px;
 
+@mixin align-center-80-percent(){
+  margin: 0 auto;
+  width: 80%;
+}
+
+
+@mixin filter-input-styling(){
+  background: rgba(255,255,255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  color: $my_profile_color;
+  font-family: "Exo", sans-serif;
+  font-size: 1em;
+  padding: 3px;
+  text-align: center;
+  &:focus {
+    outline: rgba(66, 126, 255, 0.23);
+  }
+}
 /******************************
 GENERAL
 *******************************/
@@ -43,6 +62,10 @@ body {
 
 }
 
+.cursive {
+  font-family: 'Permanent Marker', cursive;
+}
+
 .stop-scrolling {
   height: 100%;
   overflow: hidden;
@@ -66,6 +89,10 @@ span.new-notification-info {
     background-color: white;
     color: tomato;
   }
+}
+
+p {
+  margin: 0;
 }
 
 button, a.a-button {
@@ -1649,14 +1676,11 @@ div.dojos-view-container {
         }
       }
     }
-
-
   }
 
   h3 {
     color: $my_profile_color;
     text-align: center;
-
   }
 
   div.dojo-events {
@@ -1764,79 +1788,221 @@ Dojo members
     width: 95%;
   }
 
-  select {
-    padding: 5px;
+  div.member-container-bttn-bar {
+    text-align: right;
+    padding-right: 10%;
+    margin-bottom: 10px;
+
+    span.info-button {
+      float: left;
+      font-size: 1.2em;
+      margin-left: 15%;
+    }
   }
 
-  button.expand-contract {
-    border: none;
-    display: block;
-    color: $my_profile_color;
-    float: right;
-    font-size: 0.9rem;
-    margin: 3px auto;
-    padding:3px 10px;
-    text-align: center;
-  }
-
-  .flex-container {
+  div.select-users {
+    border: 2px solid rgba(115, 68, 155, .11);
     display: flex;
-    //border-bottom: 1px solid #bfbfbf;
+    justify-content: space-around;
+    padding: 3px;
+    margin-bottom: 20px;
 
-    .flex-item {
-      display: inline-flex;
-    }
-
-    span {
-      font-size: 0.7em;
-    }
-
-    .nr-crt {
-      border-right: 1px solid #bfbfbf;
-      display: inline-block;
-      text-align: center;
-      width: 13%;
-    }
-
-    .name {
-      padding-left: 5px;
-      width: 42%;
-
-      .block-div {
-        display: block;
-        width: 100%;
-      }
-
-      strong {
-        color: $my_profile_color;
-      }
-
-    }
-
-    .expand-collapse, .reject-approve-bttns {
-      display: block;
-      text-align: center;
-    }
-
-    .expand-collapse {
-      width: 20%;
-    }
-
-    .reject-approve-bttns{
-      width: 25%;
-      white-space: nowrap;
-      button {
-        border: none;
-        padding: 0;
-        width: 50%;
-        img {
-          margin:2.5% 2.5%;
-          width: 45%;
+    div.select-users-left-col{
+      display: flex;
+      align-items: center;
+      select {
+        border: 2px solid rgba(115, 68, 155, .11);
+        color: rgba(92, 0, 131, 0.68);
+        font-weight: bold;
+        padding: 5px;
+        width: 85%;
+        option {
+          color: black;
         }
 
+        &:focus {
+          outline: none;
+        }
       }
     }
+    p.select-users-right-col {
+      color: darkviolet;
+      text-align: center;
+      span {
+        color: #4776ff;
+        font-family: 'Permanent Marker', cursive;
+        font-size: 1.3em;
+      }
+    }
+  }//div.select-users
+
+  div.filter-users {
+    border: 1px solid rgba(115, 68, 155, .11);
+    color: #59037e;
+    padding: 3px;
+    text-align: right;
+    a {
+      cursor: pointer;
+      font-style: italic;
+      text-decoration: none;
+    }
+
+    div.user-filter-container {
+      border: 1px solid rgba(115, 68, 155, .11);
+      display: flex;
+      justify-content: space-around;
+      margin: 0 auto;
+      padding: 2px;
+      text-align: left;
+      width: 95%;
+
+      label.filter-name {
+        padding: 5px;
+        width: 20%;
+      }
+
+      div.filter-name-written {
+        text-align: center;
+        width: 80%;
+
+
+        input.name-written {
+          @include filter-input-styling();
+        }
+      }
+    }
+
+
   }
+
+  div.users-table {
+    margin-top: 15px;
+    div.users-header {
+      display: flex;
+      justify-content: space-around;
+
+      span.users-header-name, span.users-header-alias-email {
+        color: rgba(92, 0, 131, 0.68);
+        font-weight: bold;
+      }
+
+      span.users-header-name {
+        width: 40%;
+      }
+      span.users-header-alias-email {
+        text-align: center;
+        width: 54%;
+      }
+
+      span.users-header-bttns {
+        display: none;//hidden in mobile view
+      }
+
+
+    }//div.users-header
+
+    div.display-user {
+
+      div.basic-info-and-bttns{
+        div.basic-info {
+          display: flex;
+          justify-content: space-around;
+
+          p {
+            padding: 5px 0;
+          }
+
+          p.user-name {
+            color: rgba(92, 0, 131, 1);
+            width: 40%;
+          }
+          p.user-alias-email {
+            font-size: .8em;
+            text-align: center;
+            width: 54%;
+            span.alias  {
+              i {
+                color: $my_profile_color;
+                font-family: 'Permanent Marker', cursive;
+              }
+            }
+          }
+
+
+        }//div.basic-info
+
+        div.user-bttns {
+          border-top: 1px solid rgba(115, 68, 155, .11);
+          display: flex;
+          justify-content: space-around;
+
+          button {
+            font-size: .7em;
+            margin-top: 4px;
+          }
+
+          button.member-bttn {
+            border: 2px solid #5c0083;
+            color: #5c0083;
+            padding: 4px;
+
+            &:hover {
+              background-color: #5c0083 !important;
+              color: white !important;
+            }
+          }
+
+          button.approve-user {
+            border: 2px solid green;
+            color: green;
+            padding: 4px;
+            &:hover {
+              background-color: green;
+              color: white;
+            }
+          }
+
+          button.reject-user {
+            border: 2px solid red;
+            color: red;
+            padding: 4px;
+            &:hover {
+              background-color: red;
+              color: white;
+            }
+          }
+        }
+
+      }//div.basic-info-and-bttns
+
+      div.expanded-info {
+        margin: 10px;
+        text-align: center;
+        p {
+          strong {
+            color: $my_profile_color;
+            margin-right: 5px;
+          }
+        }
+
+        button {
+          margin-top: 5px;
+        }
+      }
+
+    }//div.display-user
+
+    hr.user-separator {
+      border: 2px solid rgba(115, 68, 155, .11);
+    }
+
+  }//div.users-table
+
+
+
+
+
+
 
   .expanded-part {
     button {
@@ -1858,7 +2024,7 @@ Dojo members
     }
   }
 
-}
+}//.member-container {
 
 /*******************
 Add or create dojos
@@ -2715,6 +2881,336 @@ div.event-display {//This is part of the event directive, it is the actual event
   }
 }//div.event-display
 
+/******************************
+Add or edit badge
+*******************************/
+div.add-badge-view, div.edit-badge-view {
+
+}
+
+div.edit-badge-view {
+
+}
+
+div.add-or-edit-badge {//This is for the directive
+  margin: 0 auto;
+  width: 80%;
+
+  div.buttons-bar-add-badge {
+    text-align: right;
+    margin-bottom: 15px;
+    button {
+      margin-right: 10%;
+    }
+  }
+
+  div.badge-edited {
+    p {
+      background-color: rgba(159, 247, 159, 0.29);
+      color: darkgreen;
+      margin: 5px auto;
+      text-align: center;
+      width: 80%;
+    }
+  }
+
+  p.sanitize-info {
+    background-color: rgba(144, 238, 144, 0.1);
+    box-sizing: border-box;
+    font-size: 0.8em;
+    max-width: 80%;
+    margin: 5px auto;
+    padding: 5px;
+
+    i.fa-window-close {
+      cursor: pointer;
+      float: right;
+    }
+
+  }
+
+  div.badge-content {
+    div.badge-group {
+      border: 5px solid rgba(9, 38, 255, 0.04);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      padding: 5px;
+      label {
+        color: $my_profile_color;
+        display: block;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .badge-input {
+        border: 1px solid rgba(0, 72, 137, 0.45);
+        border-radius: 3px;
+        background-color: rgba(9, 38, 255, 0.04);
+        display: block;
+        margin: 0 auto;
+      }
+
+      input.badge-points {
+        width: 60px;
+      }
+
+      textarea.badge-input {
+        min-height: 90px;
+        width: 90%;
+      }
+
+      p.badge-error {
+        background-color: rgba(247, 232, 232, 0.4);
+        border-radius: 15px;
+        color: red;
+        font-size: 0.8em;
+        margin: 4px auto;
+        text-align: center;
+        width: 90%;
+      }
+
+      .sanitized {
+        background-color: rgba(144, 238, 144, 0.3) !important;
+      }
+
+    }//div.badge-group
+
+  }//div.badge-content
+
+  div.badge-image {
+    div.badge-image-div {
+      border: 2px solid white;
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+      height: 100px;
+      margin: 0 auto 10px auto;
+      width: 80px;
+
+      label {
+        cursor: pointer;
+        background-color: white;
+        border-radius: 50px;
+        color: $my_profile_color;
+        padding: 4px;
+        position: relative;
+        left:35%;
+        top: 50%;
+      }
+      &:hover {
+        border: 2px solid rgba(9, 38, 255, 0.04);
+        cursor: pointer;
+        label {
+          top: 46%;
+          transition: .3s;
+        }
+      }
+
+    }
+  }
+
+  div.bottom-bttns {
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+}//div.add-or-edit-badge
+
+
+/******************************
+VIEW ALL BADGES
+*******************************/
+div.all-badges {
+  div.badges-container {
+    @include align-center-80-percent();
+  }
+}
+
+
+/******************
+View badges directive
+
+*******************/
+div.view-badges-directive {
+  div.filter-badges {
+    border: 1px solid rgba(66, 126, 255, 0.23);
+    margin-bottom: 10px;
+    div.filter-name-and-points {
+      display: flex;
+      justify-content: space-around;
+
+      label {
+        color: $my_profile_color;
+        cursor: pointer;
+        margin-top: 4px;
+      }
+    }
+
+    div.filter-name-written {
+      display: flex;
+      justify-content: space-between;
+
+      label.label-search {
+        color: rgba(66, 126, 255, 0.23);
+        margin: 0 5px;
+      }
+
+      input.name-written {
+        @include filter-input-styling();
+      }
+    }// div.filter-name-written {
+  }
+
+  hr {
+    border: 1px solid rgba(66, 126, 255, 0.23);
+  }
+  div.badges-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    div.badge {
+      border: 1px solid rgba(66, 126, 255, 0.23);
+      cursor: pointer;
+      margin-bottom: 5px;
+      width: 40%;
+
+      div.image-div {
+
+        text-align: center;
+        img {
+          width: 80%;
+        }
+      }
+
+      div.name-div {
+        p.badge-name {
+          display: block;
+          background-color: rgba(0, 123, 0, 0.16);
+          color: $my_profile_color;
+          font-size: 0.8em;
+          min-height: 30px;
+          text-align: center;
+        }
+      }//div.name-div
+
+      div.points-div {
+        text-align: center;
+        p {
+          color: green;
+          font-family: 'Permanent Marker', cursive;
+          margin: 0.15em 0;
+          span {
+            color: tomato;
+            font-size: 1.3em;
+
+          }
+        }
+      }
+      &:hover {
+        background-color: lemonchiffon;
+      }
+    }//div.badge {
+
+    @media screen and (min-width: $transition_resolution) {
+      div.badge {
+        width: 23%;
+      }
+    }
+  }
+}
+
+
+/******************************
+VIEW BADGE
+*******************************/
+
+div.view-badge {
+  @include align-center-80-percent();
+  div.badge-name {
+    background-color: rgba(255, 255, 0, 0.33);
+    border: 5px solid tomato;
+    border-radius: 50px;
+    margin-top: 10px;
+    padding: 20px;
+    p {
+      color: rgba(255, 99, 71, 0.95);;
+      font-family: 'Permanent Marker', cursive;
+      font-size: 2.5em;
+      font-style: italic;
+      margin: 0;
+      text-align: center;
+    }
+    &:hover {
+      background-color: rgba(255, 255, 0, 0.27);
+      p {
+        color: tomato;
+      }
+    }
+
+  }//div.badge-name
+
+  div.view-badge-bttns-bar {
+    margin-top: 15px;
+    text-align: center;
+    button.back-button-badge {
+    }
+  }
+
+  div.badge-body {
+    div.badge-image {
+      height: 130px;
+      text-align: center;
+      @include align-center-80-percent();
+      margin-top: 10px;
+    }
+    img {
+      max-height: 130px;
+    }
+  }//div.badge-body
+
+  div.badge-points-and-earned {
+    div.badge-points {
+      p {
+        color: green;
+        font-family: 'Permanent Marker', cursive;
+        position: relative;
+        text-align: center;
+      }
+
+      span {
+        color: tomato;
+        font-size: 2em;
+        position: relative;
+        top:5px;
+      }
+    }
+
+  }//div.badge-points-and-earned
+
+  div.badge-description {
+    border: 2px solid tomato;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 0, 0.33);
+    font-family: 'Permanent Marker', cursive;
+    margin-bottom: 25px;
+
+    h3 {
+      color: green;
+      margin: .6em 0;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+
+    p {
+      color: tomato;
+      padding: 4px 10px;
+      margin: 0;
+      text-align: center;
+    }
+  }
+
+}
 
 /******************************
 FOOTER

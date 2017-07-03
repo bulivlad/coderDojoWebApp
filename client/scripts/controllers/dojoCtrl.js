@@ -66,6 +66,9 @@ angular.module("coderDojoTimisoara")
             var dojoSelector = $scope.getDojoSelector();
             if(dojoSelector === keys.getMyDojosRoute){
                 $location.path('/' + keys.getMyDojosRoute);
+                $scope.goToMyDojos();
+            } else if(dojoSelector === keys.myProfile){
+                $scope.goToViewUserProfile();
             } else {
                 $location.path('/' + keys.cautaUnDojo);
             }

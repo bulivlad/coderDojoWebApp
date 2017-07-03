@@ -105,6 +105,12 @@ angular.module("coderDojoTimisoara")
             templateUrl: "directives/view-badges-directive.html",
             replace: true
         }
-    });
+    })
+    .directive("addBadgesToUsersDirective", function(){
+    return {
+        templateUrl: "directives/add-badges-to-users-directive.html",
+        replace: true
+    }
+});
 
 

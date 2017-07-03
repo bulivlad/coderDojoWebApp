@@ -4,6 +4,14 @@
 
 angular.module('coderDojoTimisoara')
     .controller('viewBadgesCtrl', function($scope, $rootScope, $route,  $location, dataService, helperSvc){
+        //Controllers that have this controller as a sub controller must have the following methods:
+        // getBadges(callback) that gets badges from the server and saves then in their scope. This method must take a callback
+        //      that determines the filtereBadges and saves them to that controllers scope
+        // clickBadgeAction that deals with a badge being clickedOn
+        // setFilteredBadges(filteredBadges) a method that sets the filtered badges to their scope
+
+        //We initialy set the filter system to be active
+        $scope.showBadgesFilterMenu = {view: true};
 
         var filterBadges = function(badges){
             var ret = angular.copy(badges);
@@ -34,6 +42,14 @@ angular.module('coderDojoTimisoara')
                 ret.sort(helperSvc.sortBadgePointsAsc);
             }
             return ret;
+        };
+
+        $scope.toggleFilterMenu = function(){
+            if($scope.showBadgesFilterMenu.view){
+                $scope.showBadgesFilterMenu.view = false;
+            } else {
+                $scope.showBadgesFilterMenu.view = true;
+            }
         };
 
         var filterBadgesBasedOnWrittenName = function(badges){
@@ -157,31 +173,61 @@ angular.module('coderDojoTimisoara')
 
         var initializeViewBadgesCtrl = function(){
             initializeFiltering();
-            $scope.getBadges()
-                .then(function(response){
-                    if(response.data.badges){
-                        $scope.badges = response.data.badges;
-                        $scope.filteredBadges = filterBadges($scope.badges);
-                    }
-                })
-                .catch(function(err){
-                    helperSvc.handlerCommunicationErrors(err, 'initializeViewBadgesCtrl() viewBadgesCtrl', $scope);
-                })
+            if(!$scope.isEditProfilesCtrlParent){
+                //We only get the badges if the parent ctrl is not the editProfilesCtrl
+                $scope.getBadges(function(){
+                    $scope.setFilteredBadges(filterBadges($scope.badges));
+                });
+            } else {
+                //If this is editProfilesCtrl, we minimize the filter badges by default
+                $scope.showBadgesFilterMenu.view = false;
+            }
 
         };
-
         initializeViewBadgesCtrl();
 
     })
     .controller('viewAllBadgesCtrl',function($scope, $rootScope, $route,  $location, dataService, helperSvc){
 
-        //This is the method the viewBadgesCtrl will call when trying to display the badges. It returns a promise.
-        $scope.getBadges = function(){
-            if($scope.isUserLoggedIn()){
-                return dataService.getAuthAllBadges();
+        //This is the method the viewBadgesCtrl will call when trying to get the badges to display them.
+        $scope.getBadges = function(callback){
+            if(!$scope.isUserLoggedIn()){
+                getAllBadges(callback);
             } else {
-                return dataService.getAllBadges();
+                getAllAuthBadges(callback);
             }
+        };
+
+
+        var getAllBadges = function(callback){
+            dataService.getAllBadges()
+                .then(function(response){
+                    if(response.data.badges){
+                        $scope.badges = response.data.badges;
+                        if(callback){
+                            callback();
+                        }
+                    }
+                })
+                .catch(function(err){
+                    helperSvc.handlerCommunicationErrors(err, 'getBadges() viewAllBadgesCtrl', $scope);
+                })
+        };
+
+        var getAllAuthBadges = function(callback){
+            dataService.getAuthAllBadges()
+                .then(function(response){
+                    if(response.data.allBadges && response.data.userBadges){
+                        $scope.badges = helperSvc.mergeAllBadgesWithUserBadges(response.data.allBadges,
+                            response.data.userBadges);
+                        if(callback){
+                            callback();
+                        }
+                    }
+                })
+                .catch(function(err){
+                    helperSvc.handlerCommunicationErrors(err, 'getBadges() viewAllBadgesCtrl', $scope);
+                })
         };
 
         $scope.clickBadgeAction = function(badge){
@@ -189,19 +235,33 @@ angular.module('coderDojoTimisoara')
             $scope.goToViewBadge();
         };
 
+        $scope.setFilteredBadges = function(filteredBadges){
+            $scope.filteredBadges = filteredBadges;
+        }
+
 
     })
     .controller('viewBadgeCtrl',function($scope, $rootScope, $route,  $location, dataService, helperSvc){
+        $scope.viewReceivedBadges = {};
 
+        $scope.getPresentableDateForBadgeReceived = function(date){
+            //convert the string to a date
+            date = new Date(date);
+            return helperSvc.capitalizeFirstLetter(keys.daysOfWeek[date.getDay()]) + ' ' +  date.getDate() +
+                ' ' + keys.months[date.getMonth()] + ' ' + date.getFullYear() + '.';
 
-       $scope.goBackAction = function(){
-         var badgesView = $scope.getBadgeView();
-           if(badgesView.previousLocation === keys.viewBadgesLocation){
-               $scope.goToViewBadges()
-           }else {
-               $scope.goToViewUserProfile();
-           }
-       };
+        };
+
+        $scope.goBackAction = function(){
+            var badgesView = $scope.getBadgeView();
+            if(badgesView.previousLocation === keys.viewBadgesLocation){
+                $scope.goToViewBadges();
+            }else if(badgesView.previousLocation === keys.myProfile){
+                $scope.goToViewUserProfile();
+            } else {
+                $scope.goToViewUserProfile();
+            }
+        };
 
         $scope.goToEditBadge = function(){
             $scope.views = {};

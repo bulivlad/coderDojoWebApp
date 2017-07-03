@@ -43,29 +43,9 @@ let dojosFields = {
     longitude: true
 };
 
-let myDojosFields = {
-    name: true,
-    latitude: true,
-    longitude: true,
-    champions: true,
-    mentors: true,
-    parents: true,
-    attendees: true,
-    volunteers: true
-};
-
 //This are are basic dojo information, to show it on a map and a name for the dojo.
-module.exports.getDojos = function(isForMyDojos, callback){
-    let tempDojosFields = isForMyDojos ? myDojosFields : dojosFields;
-    Dojo.find({},
-        tempDojosFields, //Filter for dojo fields
-        function(err, dojos){
-        if(err){
-            callback(err);
-        } else {
-            callback(null, dojos);
-        }
-    });
+module.exports.getDojos = function(callback){
+    Dojo.find({}, callback);
 };
 
 let dojoFields = {
@@ -193,10 +173,22 @@ module.exports.addUsersChildrenToDojo = function(usersChildren, dojoId, callback
 };
 
 //Method for adding user's children to the user's dojos
-module.exports.addUsersChildUsersDojos = function(childId, dojos, callback){
-    Dojo.update({_id: {$in:dojos}}, {$addToSet : {attendees : childId}}, callback);
+module.exports.addUsersChildToUsersDojos = function(childId, dojos, callback){
+    Dojo.updateMany({_id: {$in:dojos}}, {$addToSet : {attendees : childId}}, callback);
 };
 
 module.exports.getDojoMembersForInvitingToEvent = function(dojoId, membersToGet, callback){
     Dojo.findOne({_id: dojoId}, membersToGet, callback);
+};
+
+
+let fieldsForUsersDojos = {name: true};
+module.exports.getUsersDojos = function(userId, callback){
+    Dojo.find({$or: [{mentors:userId}, {champions: userId}, {volunteers: userId}, {parents: userId}, {attendees: userId}]},
+        fieldsForUsersDojos, callback);
+};
+
+//THe userId is unnecessary, but we use it for allowing the this function to be swapped with the one above
+module.exports.getAdminsDojos = function(userId, callback){
+    Dojo.find({}, fieldsForUsersDojos, callback);
 };

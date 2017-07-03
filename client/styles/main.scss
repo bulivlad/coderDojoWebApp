@@ -12,7 +12,6 @@ $profile_banner_height: 70px;
   width: 80%;
 }
 
-
 @mixin filter-input-styling(){
   background: rgba(255,255,255, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -60,6 +59,10 @@ body {
     -webkit-transition-delay: 9999s;
   }
 
+}
+
+body.hide-scroll {
+  overflow: hidden;
 }
 
 .cursive {
@@ -319,6 +322,55 @@ INFORMATION
 
 }
 
+/***************
+SNACKBAR
+****************/
+#snackbar {
+  background-color: rgb(3, 112, 18);
+  bottom: 30px;
+  border-radius: 2px;
+  color: #fff;
+  font-size: 17px;
+  left: 50%;
+  min-width: 250px;
+  margin-left: -125px;
+  padding: 16px;
+  position: fixed;
+  text-align: center;
+  visibility: hidden;
+  z-index: 60;
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 4s;
+  animation: fadein 0.5s, fadeout 0.5s 4s;
+}
+
+#snackbar.error {
+  background-color: #ff3224;
+}
+
+
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
 
 /******************************
 HEADER
@@ -1044,7 +1096,7 @@ My PROFILE
         font-size: 0.65em;
         position: absolute;
         left: 38%;
-        top: -23px;
+        top: -13px;
       }
 
       #personal-data-gender {
@@ -1211,13 +1263,13 @@ My PROFILE
       width: 80%;
     }
 
-    p {
+    p.col1-paragr {
       //color: grey;
       font-size: 0.8em;
       margin: 3px 0 10px 0;
       text-align: center;
     }
-    label {
+    label.col1-label {
       color: $my_profile_color;
       display: block;
       font-size: 0.75em;
@@ -1229,6 +1281,15 @@ My PROFILE
       color: $my_profile_color;
       margin-bottom: -10px;
     }
+
+    div.badges-container-my-profile {
+      margin: auto;
+      width: 90%;
+    }
+  }
+
+  p.error {
+    top: -53px
   }
 
   @media screen and (min-width: $transition_resolution){
@@ -1263,11 +1324,11 @@ My PROFILE
           }
         }
       }
-      label {
+      label.col1-label {
         text-align: left;
       }
 
-      p {
+      p.col1-paragr {
         text-align: left;
       }
     }
@@ -1841,11 +1902,15 @@ Dojo members
     color: #59037e;
     padding: 3px;
     text-align: right;
-    a {
-      cursor: pointer;
-      font-style: italic;
-      text-decoration: none;
+    div.filter-expand-contract {
+      padding: 3px;
+      a {
+        cursor: pointer;
+        font-style: italic;
+        text-decoration: none;
+      }
     }
+
 
     div.user-filter-container {
       border: 1px solid rgba(115, 68, 155, .11);
@@ -3035,30 +3100,48 @@ div.view-badges-directive {
   div.filter-badges {
     border: 1px solid rgba(66, 126, 255, 0.23);
     margin-bottom: 10px;
-    div.filter-name-and-points {
-      display: flex;
-      justify-content: space-around;
-
-      label {
+    div.filter-expand-contract {
+      padding: 3px;
+      text-align: right;
+      a {
         color: $my_profile_color;
         cursor: pointer;
-        margin-top: 4px;
+        font-style: italic;
+        text-decoration: none;
       }
     }
 
-    div.filter-name-written {
-      display: flex;
-      justify-content: space-between;
+    div.filter-body {
+      border: 1px solid rgba(66, 126, 255, 0.23);
+      margin: 0 auto 3px auto;
+      width: 95%;
 
-      label.label-search {
-        color: rgba(66, 126, 255, 0.23);
-        margin: 0 5px;
+      div.filter-name-and-points {
+        display: flex;
+        justify-content: space-around;
+
+        label {
+          color: $my_profile_color;
+          cursor: pointer;
+          margin-top: 4px;
+        }
       }
 
-      input.name-written {
-        @include filter-input-styling();
-      }
-    }// div.filter-name-written {
+      div.filter-name-written {
+        display: flex;
+        justify-content: space-between;
+
+        label.label-search {
+          color: rgba(66, 126, 255, 0.23);
+          margin: 0 5px;
+        }
+
+        input.name-written {
+          @include filter-input-styling();
+        }
+      }// div.filter-name-written
+
+    }// div.filter-body
   }
 
   hr {
@@ -3066,21 +3149,24 @@ div.view-badges-directive {
   }
   div.badges-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     flex-wrap: wrap;
 
     div.badge {
       border: 1px solid rgba(66, 126, 255, 0.23);
       cursor: pointer;
       margin-bottom: 5px;
+      padding-bottom: 15px;
+      min-width: 100px;
       width: 40%;
 
       div.image-div {
-
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 60px;
         text-align: center;
-        img {
-          width: 80%;
-        }
+
       }
 
       div.name-div {
@@ -3107,14 +3193,46 @@ div.view-badges-directive {
           }
         }
       }
+
+      div.received {
+        p {
+          text-align: center;
+
+          span {
+            font-family: 'Permanent Marker', cursive;
+          }
+
+          span.multiply {
+            color: green;
+            font-size: 0.8em;
+          }
+
+          span.received-count {
+            color: red;
+            font-size: 1.15em;
+            position: relative;
+            top:3px;
+          }
+        }
+      }//div.received
+
       &:hover {
         background-color: lemonchiffon;
       }
-    }//div.badge {
+    }//div.badge
+    div.selected {
+      display: none;
+    }
+    div.hasreceived {
+      //This is used for when the badge has received bagdes array (and info) to not add padding because it looks
+      //uneven. It has this weird name because angular does not allow - in ng-class
+      padding-bottom: 0;
+    }
 
     @media screen and (min-width: $transition_resolution) {
       div.badge {
         width: 23%;
+
       }
     }
   }
@@ -3158,15 +3276,63 @@ div.view-badge {
   }
 
   div.badge-body {
+    position: relative;
+
     div.badge-image {
       height: 130px;
+      position: relative;
       text-align: center;
       @include align-center-80-percent();
       margin-top: 10px;
-    }
-    img {
-      max-height: 130px;
-    }
+
+      img {
+        max-height: 130px;
+      }
+
+      div.badges-received-brief {
+        background-color: rgba(255, 255, 255, 0.5);
+        border-radius: 50px;
+        padding-bottom: 5px;
+        position: absolute;
+        right: 1%;
+        top: 25px;
+        width: 50px;
+
+        span {
+          font-family: 'Permanent Marker', cursive;
+        }
+
+        span.multiply {
+          color: green;
+          font-size: 2em;
+        }
+
+        span.received-count {
+          color: red;
+          font-size: 3em;
+          position: relative;
+          top: 6px;
+        }
+
+        a.view-received-badges{
+          color: green;
+          position: static;
+          cursor: pointer;
+          display: inline-block;
+          font-family: 'Permanent Marker', cursive;
+          padding: 5px 0;
+          &:hover {
+            cursor: pointer;
+            color: tomato;
+            text-decoration: none;
+            transition: 1s;
+          }
+        }// a.view-received-badges
+
+      }//div.badges-received
+
+    }// div.badge-image
+
   }//div.badge-body
 
   div.badge-points-and-earned {
@@ -3188,13 +3354,8 @@ div.view-badge {
 
   }//div.badge-points-and-earned
 
-  div.badge-description {
-    border: 2px solid tomato;
-    border-radius: 3px;
-    background-color: rgba(255, 255, 0, 0.33);
-    font-family: 'Permanent Marker', cursive;
-    margin-bottom: 25px;
 
+  div.badges-received, div.badge-description {
     h3 {
       color: green;
       margin: .6em 0;
@@ -3210,7 +3371,266 @@ div.view-badge {
     }
   }
 
+  div.badges-received {
+    border: 2px solid tomato;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 0, 0.33);
+    font-family: 'Permanent Marker', cursive;
+    margin: 10px auto;
+    width: 80%;
+  }//div.badges-received
+
+  div.badge-description {
+    border: 2px solid tomato;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 0, 0.33);
+    font-family: 'Permanent Marker', cursive;
+    margin-bottom: 25px;
+
+
+  }
+
 }
+
+/******************************
+Add-badges-to-users
+*******************************/
+div.add-badges-to-users {
+  background-color: white;
+  left: 0;
+  height: 100%;
+  position: fixed;
+  overflow: auto;
+  top: 0;
+  width: 100%;
+  z-index: 5;
+
+  div.container {
+    margin: 0 auto;
+    width: auto;
+    overflow-y: auto;
+    max-width: 800px;
+
+    h3 {
+      border: 3px solid tomato;
+      border-radius: 60px;
+      background-color: palegoldenrod;
+      color: tomato;
+      font-family: 'Permanent Marker', cursive;
+      font-size: 30px;
+      margin: 30px 5% 10px 5%;
+      text-align: center;
+
+    }
+
+    div.add-badges-bttns-bar {
+      text-align: center;
+      button {
+        background-color: palegoldenrod;
+        border: 1px solid tomato;
+        color: tomato;
+        font-family: 'Permanent Marker', cursive;
+
+        &:hover {
+          background-color: tomato;
+          color: palegoldenrod;
+        }
+
+      }
+      button.disabled {
+        background-color: #e6e2e2;
+        &:hover {
+          background-color: #e6e2e2;
+          color: tomato;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    div.selected-users-for-adding-badges, div.selected-badges-for-adding-badges, div.select-users-for-adding-badges,
+    div.select-badges-for-adding-badges {
+      background-color: rgba(238, 232, 170, 0.24);
+      border: 2px solid rgba(255, 99, 71, 0.55);
+      border-radius: 3px;
+      margin: 10px auto;
+      width: 90%;
+      div.expand-contract {
+        cursor: pointer;
+        a {
+          float: right;
+          font-style: italic;
+          margin-right: 5%;
+          padding: 5px;
+          text-decoration: none;
+        }
+
+        p.title {
+          background-color: palegoldenrod;
+          color: tomato;
+          font-weight: bold;
+          padding: 5px;
+        }
+
+        hr {
+          border-bottom: none;
+          border-top: 1px solid rgba(255, 99, 71, 0.55);
+          margin: 0;
+        }
+      }
+    }//the four containers
+
+
+    div.selected-badges-for-adding-badges, div.selected-users-for-adding-badges {
+      div.content {
+        span.selected-badge, span.selected-user {
+          display: inline-block;
+          margin: 7px;
+          span.badge-name, span.user-name {
+            background-color: palegoldenrod;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            cursor: default;
+
+            padding: 2px 7px;
+            word-break: keep-all;
+
+            &:hover {
+              color: #301109;
+              background-color: darken(palegoldenrod, 3);
+            }
+
+          }
+
+          span.remove-selected-badge, span.remove-selected-user {
+            background-color: palegoldenrod;
+            cursor: pointer;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            padding: 2px 7px;
+            margin-left: -4px;
+            &:hover {
+              background-color: darken(palegoldenrod, 3);
+              color: tomato;
+            }
+          }
+        }
+      }
+
+    }//div.selected-badges-for-adding-badges
+
+    div.select-badges-for-adding-badges {
+      div.content {
+        padding: 5px;
+      }
+
+    }//div.select-badges-for-adding-badges
+
+
+    div.select-users-for-adding-badges {
+
+      div.content {
+
+        div.filter-select-users {
+          border: 1px solid rgba(255, 99, 71, 0.35);
+          margin: 4px;
+
+          div.filter-select-users-name {
+            display: flex;
+            justify-content: space-around;
+
+            label {
+              color: #a15c50;
+              margin-top:4px;
+              &:hover {
+                cursor: pointer;
+              }
+            }
+
+          }//div.filter-select-users-name
+
+          hr.filter-divider {
+            border-top: 1px solid rgba(255, 99, 71, 0.35);
+            border-bottom: none;
+          }
+
+          div.filter-select-users-written-name {
+            display: flex;
+            justify-content: space-around;
+            padding-bottom: 4px;
+
+            label {
+              color: tomato;
+              padding: 3px;
+            }
+
+            input#filter-users-add-badges-view {
+              background-color: transparent;
+              border: 1px solid rgba(255, 99, 71, 0.35);
+              border-radius: 4px;
+              padding: 3px 6px;
+
+              &:focus {
+                outline:none;
+              }
+            }
+
+            &:hover {
+              cursor:pointer;
+              label {
+                color: darken(tomato, 30);
+              }
+              input#filter-users-add-badges-view {
+                border: 1px solid rgba(255, 99, 71, 0.55);
+              }
+            }
+          }//div.filter-select-users-written-name
+
+        }//div.filter-select-users
+
+        div.users-container {
+
+          div.user{
+            border: 1px solid rgba(255, 99, 71, 0.35);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 5px;
+
+            div.user-name {
+              p {
+                color: #a27575;
+              }
+            }
+
+            div.user-alias-and-email {
+              span.cursive {
+                color: tomato;
+              }
+              span.email {
+                color: $my_profile_color;
+                margin-left: 5px;
+              }
+            }
+
+            &:hover {
+              border: 1px solid rgba(255, 99, 71, 0.95);
+              background-color: darken(#fbf9eb, 5);
+              cursor: pointer;
+            }
+
+          }//div.users
+
+          div.selected {//This has to come after user because it removes the user when he/she has been selected
+            display: none;
+          }
+
+        }//div.users-container
+
+      }//div.content
+
+    }//div.select-users-for-adding-badges
+  }
+}//div.add-badges-to-users
 
 /******************************
 FOOTER
@@ -3255,3 +3675,4 @@ footer {
     }
   }
 }
+

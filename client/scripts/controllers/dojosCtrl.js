@@ -8,6 +8,14 @@ angular.module("coderDojoTimisoara")
         var markers = [];
         $scope.dojoViewer = {views:{}, dojos:[]};
 
+        //This sets a dojo in the viewDojo panel
+        $scope.selectDojoAction = function(dojo, locationDojoCalledFrom){
+            //For the use of the back button
+            $scope.setDojoSelector(locationDojoCalledFrom);
+            $scope.setToBeViewedDojoId(dojo._id);
+            $scope.goToViewDojo();
+        };
+
        var getDojosFromServerAndCreateMap = function(){
            dataService.getDojos()
                .then(function(response){
@@ -106,14 +114,6 @@ angular.module("coderDojoTimisoara")
             }
         };
 
-        //This sets a dojo in the viewDojo panel
-        $scope.selectDojoAction = function(dojo){
-            //For the use of the back button
-            $scope.setDojoSelector(keys.cautaUnDojo);
-            $scope.setToBeViewedDojoId(dojo._id);
-            $location.path('/' + keys.getDojoRoute);
-        };
-
 
         // we need the delay because otherwise the element would not be drawn on time and an exception raised
         // because the map did not have an element to inject itself onto
@@ -129,8 +129,7 @@ angular.module("coderDojoTimisoara")
                 var dojo = $scope.dojoViewer.dojos[i];
                 if(dojo.name === dojoName){
                     //For the use of the back button
-                    $scope.setDojoSelector(keys.cautaUnDojo);
-                    $scope.selectDojoAction(dojo);
+                    $scope.selectDojoAction(dojo, keys.cautaUnDojo);
                     return;
                 }
             }
@@ -178,6 +177,8 @@ angular.module("coderDojoTimisoara")
     .controller('dojoBubbleCtrl', function($scope, $location, dataService, helperSvc){
         $scope.bubbleDojos = [];
 
+        //TODO get the dojos for the child, not the user
+
         //Method that retrieves a user's dojos from the server
         var getUsersDojosFromServer = function(){
             dataService.getMyDojos()
@@ -204,11 +205,13 @@ angular.module("coderDojoTimisoara")
             initializeDojoBubbleCtrl(userId);
         });
 
-
         //This sets a dojo in the viewDojo panel
-        $scope.selectDojoAction = function(dojo){
+        $scope.selectDojoAction = function(dojo, locationDojoCalledFrom){
+            //For the use of the back button
+            $scope.setDojoSelector(locationDojoCalledFrom);
             $scope.setToBeViewedDojoId(dojo._id);
-            $scope.setDojoSelector(keys.getMyDojosRoute);
-            $location.path('/' + keys.getDojoRoute);
+            $scope.goToViewDojo();
         };
+
+
     });

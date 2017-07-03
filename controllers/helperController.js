@@ -91,6 +91,10 @@ let isUserPendingChampionInDojo = module.exports.isUserPendingChampionInDojo = f
     }
 };
 
+module.exports.isUserBadgeGiverOfDojo = function(dojo, userId){
+    return isUserMentorInDojo(dojo, userId) || isUserChampionInDojo(dojo, userId) || isUserVolunteerInDojo(dojo, userId);
+};
+
 let isUserMemberOfDojo = module.exports.isUserMemberOfDojo = function(dojo, userId){
     return isUserAttendeeInDojo(dojo, userId) || isUserMentorInDojo(dojo, userId) ||
         isUserChampionInDojo(dojo, userId) || isUserParentInDojo(dojo, userId) || isUserVolunteerInDojo(dojo, userId);

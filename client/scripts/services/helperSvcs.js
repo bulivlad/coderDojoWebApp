@@ -62,7 +62,7 @@ angular.module('coderDojoTimisoara')
         };
 
         //This method helps filtering (too hard to put in english what it actually does, look to the name)
-        this.addDiacriticsToSearch = function(originalString){
+        var addDiacriticsToSearch = this.addDiacriticsToSearch = function(originalString){
             var ret = '';
             for(var i = 0; i < originalString.length; i++){
                 var strChar = originalString.charAt(i).toLowerCase();
@@ -396,6 +396,22 @@ angular.module('coderDojoTimisoara')
                     this.adjustOneNumberMinutes(endTime.getMinutes());
             }
             return ret;
+        };
+
+        // This method merges all badges with users badges, by adding the number and the actual moments when the
+        // user received a badge to the list of all badges, so that the users achievements can be listed on the
+        // list of badges (and later in the badge view)
+        this.mergeAllBadgesWithUserBadges = function(allBadges, usersBadges){
+            usersBadges.forEach(function(usersBadge){
+                for(var i = 0; i < allBadges.length; i++){
+                    var allBadge = allBadges[i];
+                    if(allBadge._id == usersBadge.typeOfBadge._id){
+                        allBadge.received = usersBadge.received;
+                        break;
+                    }
+                }
+            });
+            return allBadges;
         };
 
         //Method that constructs an event date
@@ -856,6 +872,88 @@ angular.module('coderDojoTimisoara')
             } else {
                 return 0;
             }
+        };
+
+        this.getIndexOfElementWithIdInArray = function(listOfBadges, badge){
+            var ret = -1;
+            for(var i = 0; i < listOfBadges.length; i++){
+                if(badge._id == listOfBadges[i]._id){
+                    ret = i;
+                    break;
+                }
+            }
+            return ret;
+        };
+
+        //This method is for getting an array of users, and filtering it based on the info in the filter section.
+        // It is used in many controllers.
+        this.filterUsers = function(users, filteredUsers, filterType, userFilterName){
+            var ret = angular.copy(users);
+            if(filterType === keys.filterUsersValues.nameWritten){
+                if(!userFilterName || userFilterName === ''){
+                    //This is the case when the user selects the filter by name, but no name exist input yet. This also
+                    //happens when the user deletes every character and we are left with an empty input
+                    if((filteredUsers) && (users.length === filteredUsers.length)){
+                        //This is the case where all the badges are in the filtered badges array (case when a user clicks
+                        //the select by name, and no input is yet available. In this case, we can add the old filtered badges
+                        ret = filteredUsers;
+                    } else {
+                        //This is the case where the the input has been deleted, but the last filter might have removed
+                        //some badges. In this case we default to name down
+                        ret.sort(this.sortNameAsc);
+                    }
+                } else {
+                    ret =  this.filterUsersBasedOnWrittenName(users, filteredUsers, userFilterName);
+                }
+            }
+            else if(filterType === keys.filterUsersValues.nameUp){
+                ret.sort(this.sortNameAsc);
+            } else if(filterType === keys.filterUsersValues.nameDown){
+                ret.sort(this.sortNameDesc);
+            }
+            return ret;
+        };
+
+        //This is a method that returns an array with filtered users based on a word entered in an input field.
+        this.filterUsersBasedOnWrittenName = function(users, filteredUsers, userFilterName){
+            var ret = [];
+
+            if(userFilterName && userFilterName !== ''){
+                var splitFilteredInput = userFilterName.split(' ');
+                users.forEach(function(user){
+                    var numberOfNecessaryMatches = splitFilteredInput.length;
+                    var matches = 0;
+                    for(var i = 0; i < splitFilteredInput.length; i++){
+                        var inputWord = addDiacriticsToSearch(splitFilteredInput[i]);
+                        var regExInput = new RegExp(inputWord, 'i');
+                        if(user.firstName.match(regExInput)){
+                            matches++;
+                        } else if (user.lastName.match(regExInput)){
+                            matches++;
+                        } else if(user.alias && user.alias.match(regExInput)){
+                            matches++;
+                        } else if(user.email && user.email.match(regExInput)){
+                            matches++;
+                        }
+                    }
+                    if(matches === numberOfNecessaryMatches){
+                        ret.push(user);
+                    }
+                });
+            } else {
+                //if no user filter name exists yet
+                //We check if the filtered by username is triggered while the filtered list has all de users, and if that
+                // is true (and since there is no filter name input yet) we return the filtered list. If the lists differ
+                // in size, we return the original users list, sorted alphabetically
+                if(filteredUsers.length == users.length){
+                    ret = filteredUsers;
+                }
+                else {
+                    ret = users;
+                }
+            }
+            ret.sort(this.sortNameAsc);
+            return ret;
         };
 
     })

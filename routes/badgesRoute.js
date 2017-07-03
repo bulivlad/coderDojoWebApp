@@ -25,4 +25,7 @@ router.get('/' + keys.getAuthAllBadgesRoute, authentification.ensureAuthenticate
 //Method for uploading a badges picture
 router.post('/' + keys.uploadBadgePictureRoute, authentification.ensureAuthenticated, badgesController.uploadBadgePicture);
 
+//Method for adding badges to users
+router.post('/' + keys.addBadgesToUsersRoute, authentification.ensureAuthenticated, badgesController.addBadgesToUsers);
+
 module.exports = router;

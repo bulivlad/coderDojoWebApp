@@ -20,32 +20,32 @@
             <label class="left-label" for="personal-data-lastname">Nume</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-lastname" ng-model="myProfile.user.lastName"
                    ng-click="myProfile.errors.lastName = undefined"> <br>
-            <p ng-show="myProfile.errors && myProfile.errors.lastName">{{myProfile.errors.lastName}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.lastName">{{myProfile.errors.lastName}}</p>
         </div>
         <div class="label-and-value">
             <label class="left-label" for="personal-data-firstname">Prenume</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-firstname" ng-model="myProfile.user.firstName"
                    ng-click="myProfile.errors.firstName = undefined"><br>
-            <p ng-show="myProfile.errors && myProfile.errors.firstName">{{myProfile.errors.firstName}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.firstName">{{myProfile.errors.firstName}}</p>
         </div>
         <div class="label-and-value" ng-show="myProfile.views.showAlias">
             <label class="left-label" for="personal-data-alias">Alias</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-alias" ng-model="myProfile.user.alias"
                    ng-click="myProfile.errors.alias = undefined"><br>
-            <p ng-show="myProfile.errors && myProfile.errors.alias">{{myProfile.errors.alias}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.alias">{{myProfile.errors.alias}}</p>
         </div>
         <div class="label-and-value">
             <label class="left-label" for="personal-data-birthdate">Data nașterii</label>
             <input class="dojo-simple-fields-input" type="date" id="personal-data-birthdate" ng-model="myProfile.user.birthDate"
                    ng-click="myProfile.errors.birthDate = undefined"><br>
-            <p ng-show="myProfile.errors && myProfile.errors.birthDate">{{myProfile.errors.birthDate}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.birthDate">{{myProfile.errors.birthDate}}</p>
         </div>
         <div class="label-and-value">
             <label class="left-label" for="personal-data-address">Adresa</label>
             <textarea type="text" id="personal-data-address" ng-model="myProfile.user.address"
                       ng-click="myProfile.errors.address = undefined">
             </textarea><br>
-            <p ng-show="myProfile.errors && myProfile.errors.address">{{myProfile.errors.address}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.address">{{myProfile.errors.address}}</p>
         </div>
         <br>
         <!--<button ng-click="saveAction()">Salveaza</button>TODO Adina liked it removed-->
@@ -64,7 +64,7 @@
             <label class="left-label" for="personal-data-phone">Telefon</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-phone"  placeholder="07xxxxx" ng-model="myProfile.user.phone"
                    ng-click="myProfile.errors.phone = undefined"><br>
-            <p ng-show="myProfile.errors && myProfile.errors.phone">{{myProfile.errors.phone}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.phone">{{myProfile.errors.phone}}</p>
         </div>
 
         <div class="label-and-value" ng-hide="isChildUnder14()">
@@ -118,13 +118,13 @@
             <label class="left-label" for="personal-data-password">Parola</label>
             <input class="dojo-simple-fields-input" type="password" placeholder="parola" id="personal-data-password" ng-model="myProfile.user.password"
                    ng-click="myProfile.errors.password = undefined"><br>
-            <p ng-show="myProfile.errors && myProfile.errors.password">{{myProfile.errors.password}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.password">{{myProfile.errors.password}}</p>
         </div>
         <div class="label-and-value" ng-show="myProfile.views[keys.showPasswords]">
             <label class="left-label" for="personal-data-password2">Confirmare parola</label>
             <input class="dojo-simple-fields-input" type="password" id="personal-data-password2" placeholder="confirmare parolă"  ng-model="myProfile.user.password2"
                    ng-click="myProfile.errors.password2 = undefined"><br>
-            <p ng-show="myProfile.errors && myProfile.errors.password2">{{myProfile.errors.password2}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.password2">{{myProfile.errors.password2}}</p>
         </div>
 
         <button class="save-profile" ng-click="saveAction()">Salvează</button>
@@ -144,7 +144,7 @@
             <label label class="left-label" for="personal-data-invite-parent">Invită</label>
             <input class="dojo-simple-fields-input" type="text" placeholder="Email parinte" id="personal-data-invite-parent"
                    ng-model="myProfile.emailParent" ng-click="myProfile.errors.inviteEmail = undefined"><br>
-            <p ng-show="myProfile.errors && myProfile.errors.inviteEmail">{{myProfile.errors.inviteEmail}}</p>
+            <p class="error" ng-show="myProfile.errors && myProfile.errors.inviteEmail">{{myProfile.errors.inviteEmail}}</p>
             <button class="save-profile" ng-click="inviteParent()">Invită părinte</button>
         </div>
 

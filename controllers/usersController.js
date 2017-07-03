@@ -4,6 +4,7 @@
 
 const keys = require('../static_keys/project_keys');
 const User = require('../models/userModel');
+const Dojo = require('../models/dojoModel');
 //const bcrypt = require('bcryptjs');
 const logger = require('winston');
 const validator = require('../validator/validator');
@@ -275,10 +276,11 @@ module.exports.getUsersChildsNotifications = function(req, res){
                 return res.sendStatus(500);
             }
             logger.debug(`Notifications for child (_id=${childId} are: ` + JSON.stringify(child.notifications));
+            let childNotifications = child.notifications ? child.notifications.notifications: [];
             res.json({
                 notificationObject: {
                     ownerOfNotifications: childId,
-                    notifications: child.notifications.notifications
+                    notifications: childNotifications
                 }
             })
         })
@@ -358,13 +360,13 @@ module.exports.deleteNotificationForUser = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.deleteNotificationForUserRoute} for ${helper.getUser(req)}`);
     let notificationId = req.body.notifId;
     User.deleteNotificationForUser(req.user._id, notificationId, function(err, user){
-            if (err){
-                logger.error(`Error deleting notification for ${helper.getUser(req)}:` + err);
-                return res.sendStatus(500);
-            }
-            logger.silly(`User after deleting notification ${JSON.stringify(user)}`);
-            res.json({success:true});
-        })
+        if (err){
+            logger.error(`Error deleting notification for ${helper.getUser(req)}:` + err);
+            return res.sendStatus(500);
+        }
+        logger.silly(`User after deleting notification ${JSON.stringify(user)}`);
+        res.json({success:true});
+    })
 };
 
 //Method for deleteing a single notification for a user's child
@@ -374,13 +376,13 @@ module.exports.deleteNotificationForUsersChild = function(req, res){
     let childId = req.body.childId;
     if(isUsersChild(req.user, {_id:childId})) {
         User.deleteNotificationForUser(childId, notificationId, function(err, childUser){
-                if (err){
-                    logger.error(`Error deleting notification for the child (_id=${childId}) of ${helper.getUser(req)}:` + err);
-                    return res.sendStatus(500);
-                }
-                logger.silly(`User after deleting notification ${JSON.stringify(childUser)}`);
-                res.json({success:true});
-            })
+            if (err){
+                logger.error(`Error deleting notification for the child (_id=${childId}) of ${helper.getUser(req)}:` + err);
+                return res.sendStatus(500);
+            }
+            logger.silly(`User after deleting notification ${JSON.stringify(childUser)}`);
+            res.json({success:true});
+        })
     } else {
         logger.debug(`User (email=${getUser(req)}) doesn't have a child (_id=${childId})`);
         let errors = [];
@@ -399,9 +401,9 @@ module.exports.acceptChildInvite = function(req, res){
             logger.error(`Error finding ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
-        let notification = getNotification(user.notifications, notificationId);
+        let notification = getNotificationFromNotifications(user.notifications.notifications, notificationId);
         if(!notification){
-            logger.debug(`Notification with id ${notificationId} does not exist for ${helper.getUser(req)}`);
+            logger.error(`Notification with id ${notificationId} does not exist for ${helper.getUser(req)}`);
             let errors = [];
             errors.push(createServerError('notification', 'Notification does not exist.'));
             res.json({errors:errors});
@@ -411,7 +413,7 @@ module.exports.acceptChildInvite = function(req, res){
             let childId = notification.data.childId;
 
             User.findOneAndUpdate({_id: req.user._id},
-                {$pull: {notifications: {_id: notificationId}}, $addToSet: {children: childId}},
+                {$pull: {'notifications.notifications': {_id: notificationId}}, $addToSet: {children: childId}},
                 {firstName: true, lastName:true},
                 function(err, user){
                     if (err){
@@ -425,14 +427,11 @@ module.exports.acceptChildInvite = function(req, res){
                                 Coder Dojo Timișoara`;
                     let childNotification = helper.makeInfoNotification(msg);
                     childNotification.typeOfNot = keys.infoNotification;
-                    childNotification.data = {
-
-                    };
 
                     //If we have been successful so far, we add the parent to the child, and a notification for the child
                     // that the parent has added it
                     User.findOneAndUpdate({_id: childId},
-                        {$addToSet: {parents: req.user._id, notifications: childNotification}},
+                        {$addToSet: {parents: req.user._id, 'notifications.notifications': childNotification}},
                         function(err, child){
                             if (err){
                                 logger.error(`Error adding the notification and adding the parent to the child (childId=${childId})
@@ -459,21 +458,50 @@ module.exports.getNewNotificationsCount = function(req, res){
     });
 };
 
+//Method for getting a users badges. It works for users getting badges for themselves, and for users getting badges
+//for their children. The difference is that when getting the users childrens badges, a childId parameter is sent.
+module.exports.getUsersBadges = function(req, res){
+    logger.debug(`Entering UsersRoute: ${keys.getUsersBadgesRoute} by ${helper.getUser(req)}`);
+    let childId = req.body.childId;
+    let user = req.user;
+    let authorized = true;
+    if(childId){
+        //We are getting the badges for a users child, and we check if the user is the parent of the child
+        if(!isUsersChild(user, {_id: childId})){
+            authorized = false;
+        }
+    }
+
+    if(authorized){
+        let userId = childId ? childId : user._id;
+        User.getBadgesOfUser(userId, function(err, userWithBadges){
+           if(err){
+               logger.error(`Error getting badges by ${helper.getUser(req)} for user (_id=${userId}: ` + err);
+               return res.sendStatus(500);
+           }
+           res.json({badges: userWithBadges.badges, ownerOfBadges: userId});
+        });
+    } else {
+        logger.error(`${helper.getUser(req)} tried get user's (_id:${childId}) badges while not authorized to do so.`);
+        res.json({errors: keys.notAuthorizedError});
+    }
+};
+
 //Module for uploading user photos
 module.exports.uploadUserPicture = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${helper.getUser(req)}`);
-    let userToUpdatePhoto = req.body.userId;
 
-    //If the user changing the photo is the logged in user or if the user changing photo is the
-    //logged in user's child
-    if(user._id == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
-        upload(req, res, function(err){
-            if (err){
-                logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
-                return res.sendStatus(500);
-            }
+    upload(req, res, function(err){
+        if (err){
+            logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
+            return res.sendStatus(500);
+        }
+        let userToUpdatePhoto = req.body.userId;
+        let user = req.user;
+        //If the user changing the photo is the logged in user or if the user changing photo is the
+        //logged in user's child
+        if(user._id.toString() == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
             let fileName = req.file.filename;
-            let user = req.user;
             User.updatePhotoForUser(userToUpdatePhoto, fileName, function(err){
                 if(err){
                     logger.error(`Error updating user photo for for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
@@ -482,12 +510,12 @@ module.exports.uploadUserPicture = function(req, res){
                 res.json({userPhoto:fileName, userId: userToUpdatePhoto});
                 //TODO delete the old photo of the user
             })
-        })
-    } else {
-        //TODO must check for authorization before saving the photo)
-        logger.error(` ${helper.getUser(req)} (children=${user.children}) tried to change photo for user _id=${userToUpdatePhoto} while not being the user or the users child`)
-        res.json({errors:keys.wrongUserError});
-    }
+        } else {
+            //TODO we must delete the uploaded photo if the user is not authorized
+            logger.error(` ${helper.getUser(req)} (children=${user.children}) tried to change photo for user _id=${userToUpdatePhoto} while not being the user or the users child`)
+            res.json({errors:keys.wrongUserError});
+        }
+    })
 };
 
 let storage = multer.diskStorage({
@@ -530,6 +558,7 @@ function saveChildToDbsAndRegisterWithParent(req, res, child){
                 } else {
                     logger.debug(`Parent updated, responded with success.`);
                     res.json({success:true});
+                    addChildToUsersDojos(parent._id.toString(), savedChild._id.toString());
                 }
             });
 
@@ -537,8 +566,25 @@ function saveChildToDbsAndRegisterWithParent(req, res, child){
     });
 }
 
+//Method that takes a parentId and a childId(as strings) and adds the child to all the dojos the the parent is a member
+//of as an attendee.
+function addChildToUsersDojos(parentId, childId){
+    Dojo.getUsersDojos(parentId, function(err, parentDojos){
+        if(err){
+            logger.error(`Error getting dojos by parent (id=${parentId}) for adding his child (id=${childId}) to his/her dojos`);
+        }
+        //We add the child to the dojos
+        Dojo.addUsersChildToUsersDojos(childId, parentDojos, function(err){
+            if(err){
+                logger.error(`Error adding child (id=${childId}) by parent (id=${parentId}) to parents dojos`);
+            }
+        });
+
+    })
+}
+
 //Method that returns the notification from an array of notificatios based on the id
-function getNotification(notifications, notificationId){
+function getNotificationFromNotifications(notifications, notificationId){
     if (notifications){
         for(let i = 0; i < notifications.length; i++){
             let notification = notifications[i];
@@ -698,7 +744,7 @@ function createServerError(errorType, errorMessage){
 
 //Function that determine if a child is a users child
 module.exports.isUsersChild = isUsersChild = function (user, child){
-  return helper.isUsersChild(user, child);
+    return helper.isUsersChild(user, child);
 };
 //This method is used to restrict the fields that are modified when a user edits his profile
 function selectUserFieldsForSaving(user){

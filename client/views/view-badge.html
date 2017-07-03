@@ -20,7 +20,14 @@
 
         <div class="badge-body">
             <div class="badge-image">
-                <img src="{{badge.badgePhoto ? '../img/badges/' + badge.badgePhoto : '../img/badges/default-badge.png'}}">
+                <img ng-src="{{badge.badgePhoto ? '../img/badges/' + badge.badgePhoto : '../img/badges/default-badge.png'}}">
+                <div class="badges-received-brief" ng-if="badge.received">
+                    <p>
+                        <span class="multiply">x</span> <span class="received-count">{{badge.received.length}}</span>
+                        <br>
+                        <a class="view-received-badges" ng-click="viewReceivedBadges.view = !viewReceivedBadges.view">când?</a>
+                    </p>
+                </div>
             </div>
             <div class="badge-points-and-earned">
                 <div class="badge-points">
@@ -29,6 +36,12 @@
                 <div class="badge-earned">
 
                 </div>
+            </div>
+            <div class="badges-received" ng-if="viewReceivedBadges.view" ng-class="{'badges-received-full' : viewReceivedBadges}">
+                <h3>Badge-uri primite</h3>
+                <p ng-repeat="badgeReceived in badge.received">
+                    {{getPresentableDateForBadgeReceived(badgeReceived)}}
+                </p>
             </div>
             <div class="badge-description">
                 <h3>Despre badge:</h3>

@@ -1,44 +1,56 @@
 <div class="view-badges-directive" ng-controller="viewBadgesCtrl">
     <div class="filter-badges">
-        <div class="filter-name-and-points">
-            <label class="filter-name" ng-click="selectBadgesFilter(keys.filterBadgesValues.name)">
-                Nume
-                <i class="fa fa-caret-down" aria-hidden="true"
-                   ng-if="badgeFilterType === keys.filterBadgesValues.nameDown"></i>
-                <i class="fa fa-caret-up" aria-hidden="true"
-                   ng-if="badgeFilterType === keys.filterBadgesValues.nameUp"></i>
-            </label>
-            <label class="filter-points" ng-click="selectBadgesFilter(keys.filterBadgesValues.points)">
-                Puncte
-                <i class="fa fa-caret-down" aria-hidden="true"
-                   ng-if="badgeFilterType === keys.filterBadgesValues.pointsDown"></i>
-                <i class="fa fa-caret-up" aria-hidden="true"
-                   ng-if="badgeFilterType === keys.filterBadgesValues.pointsUp"></i>
-            </label>
+        <div class="filter-expand-contract">
+            <a ng-click="toggleFilterMenu()">
+                filtreaza
+                <i class="fa fa-caret-right" aria-hidden="true" ng-if="!showBadgesFilterMenu.view"></i>
+                <i class="fa fa-caret-down" aria-hidden="true" ng-if="showBadgesFilterMenu.view"></i>
+            </a>
         </div>
-        <hr>
-        <div class="filter-name-written">
-            <label class="label-search">
-                <i class="fa fa-search" aria-hidden="true"></i>
-            </label>
-            <input class="name-written" placeholder="Caută un badge" ng-model="badgeFilterName"
-                   ng-change="selectBadgesFilter(keys.filterBadgesValues.nameWritten)"
-                   ng-focus="selectBadgesFilter(keys.filterBadgesValues.nameWritten)">
-            <label class="label-search">
-                <i class="fa fa-search" aria-hidden="true"></i>
-            </label>
-        </div>
+       <div class="filter-body" ng-if="showBadgesFilterMenu.view">
+           <div class="filter-name-and-points">
+               <label class="filter-name" ng-click="selectBadgesFilter(keys.filterBadgesValues.name)">
+                   Nume
+                   <i class="fa fa-caret-down" aria-hidden="true"
+                      ng-if="badgeFilterType === keys.filterBadgesValues.nameDown"></i>
+                   <i class="fa fa-caret-up" aria-hidden="true"
+                      ng-if="badgeFilterType === keys.filterBadgesValues.nameUp"></i>
+               </label>
+               <label class="filter-points" ng-click="selectBadgesFilter(keys.filterBadgesValues.points)">
+                   Puncte
+                   <i class="fa fa-caret-down" aria-hidden="true"
+                      ng-if="badgeFilterType === keys.filterBadgesValues.pointsDown"></i>
+                   <i class="fa fa-caret-up" aria-hidden="true"
+                      ng-if="badgeFilterType === keys.filterBadgesValues.pointsUp"></i>
+               </label>
+           </div>
+           <hr>
+           <div class="filter-name-written">
+               <label class="label-search">
+                   <i class="fa fa-search" aria-hidden="true"></i>
+               </label>
+               <input class="name-written" placeholder="Caută un badge" ng-model="badgeFilterName"
+                      ng-change="selectBadgesFilter(keys.filterBadgesValues.nameWritten)"
+                      ng-focus="selectBadgesFilter(keys.filterBadgesValues.nameWritten)">
+               <label class="label-search">
+                   <i class="fa fa-search" aria-hidden="true"></i>
+               </label>
+           </div>
+       </div>
     </div>
     <div class="badges-container">
-        <div class="badge" ng-repeat="badge in filteredBadges" ng-click="clickBadgeAction(badge)">
+        <div class="badge" ng-class="{selected: badge.selected, hasreceived: badge.received}"
+             ng-repeat="badge in filteredBadges" ng-click="clickBadgeAction(badge)">
             <div class="points-div">
                 <p><span>{{badge.points}} </span>{{getPoints(badge)}}</p>
             </div>
-            <div class="image-div">
-                <img src="{{badge.badgePhoto ? '../img/badges/' + badge.badgePhoto : '../img/badges/default-badge.png'}}">
+            <div class="image-div" style="{{getBackgroundUrlForPhoto(badge)}}">
             </div>
             <div class="name-div">
                 <p class="badge-name"><code>{{badge.name}}</code></p>
+            </div>
+            <div class="received" ng-if="badge.received">
+                <p><span class="multiply">x</span> <span class="received-count">{{badge.received.length}}</span></p>
             </div>
 
 

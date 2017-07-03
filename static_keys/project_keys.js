@@ -65,12 +65,16 @@ let keyMap = {
     getUsersBadgesRoute: 'getUsersBadges',
     getUsersChildsBadgesRoute: 'getUsersChildsBadges',
     uploadBadgePictureRoute: 'uploadBadgePicture',
+    addBadgesToUsersRoute: 'addBadgesToUsers',
+    getUsersBadgesRoute: 'getUsersBadges',
+    getMyEventsRoute: 'getMyEvents',
 
     //View locations
     viewEventLocation: 'viewevent',
     addBadgeLocation: 'addBadge',
     viewBadgesLocation: 'viewBadgesLocation',
     viewBadgeLocation: 'viewBadgeLocation',
+    myEventsLocation: 'myEventsLocation',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
@@ -161,6 +165,7 @@ let keyMap = {
         nameWritten: 'name-written'
     },
     storedTypeOfUsers: 'storedTypeOfUsers',
+    openAddBadgeMenu: 'openAddBadgeMenu',
 
     //View keys for various views
     showBackButton: 'showBackButton',

@@ -76,7 +76,7 @@ module.exports.editDojo = function(req, res){
     let modifiedDojo = req.body.dojo;
 
     let sanitizedDojo = sanitizeDojo(modifiedDojo);
-    if(helper.areDojosEqual(dojo, sanitizedDojo)){
+    if(helper.areDojosEqual(modifiedDojo, sanitizedDojo)){
         //We get the dojos from the database to check the user's credentials
         Dojo.getDojoForInternalAuthentication(modifiedDojo._id, function(err, dojo){
             if(err){
@@ -109,7 +109,7 @@ module.exports.editDojo = function(req, res){
 module.exports.getDojos = function(req, res){
     logger.debug(`Entering DojosRoute: ${keys.getDojosRoute}`);
     //Go to the database to get all dojos
-    Dojo.getDojos(false, function(err, dojos){
+    Dojo.getDojos(function(err, dojos){
         if (err){
             logger.error(`Problems retrieving dojos for ${keys.getDojosRoute} from database : ` + err);
             return res.sendStatus(500);
@@ -124,13 +124,18 @@ module.exports.getMyDojos = function(req, res){
     logger.debug(`Entering DojosRoute: ${keys.getMyDojosRoute}`);
     let user = req.user;
     //Go to the database to get all dojos
-    Dojo.getDojos(true, function(err, dojos){
+    let getMyDojos = Dojo.getUsersDojos;
+    if(helper.isUserAdmin(user)){
+        //If the user is admin he calls get admins dojos, withc return all the dojos
+        getMyDojos = Dojo.getAdminsDojos;
+    }
+
+    getMyDojos(user._id, function(err, dojos){
         if (err){
             logger.error(`Problems retrieving dojos by ${helper.getUser(req)} for ${keys.getMyDojosRoute} from database: ` + err);
             return res.sendStatus(500);
         }
         //We filter the dojos so only the ones where the user is a member remain (or all if the user is admin).
-        dojos = filterDojosForMyDojos(user, dojos);
         res.json({userId: user._id, dojos:dojos});
     });
 };
@@ -143,13 +148,11 @@ module.exports.getMyChildsDojos = function(req, res){
     //First we check if the current user is a parent of the child
     if(helper.isUsersChild(user, {_id:childId})){
         //Go to the database to get all dojos
-        Dojo.getDojos(true, function(err, dojos){
+        Dojo.getUsersDojos(childId, function(err, dojos){
             if (err){
                 logger.error(`Problems retrieving dojos by ${helper.getUser(req)}  for ${keys.getMyChildsDojosRoute} from database: ` + err);
                 return res.sendStatus(500);
             }
-            //We filter the dojos so only the childs dojo's are sent
-            dojos = filterDojosForMyDojos({_id:childId}, dojos);
             res.json({childId: childId, dojos:dojos});
         });
     } else {
@@ -281,7 +284,7 @@ module.exports.leaveDojo = function(req, res){
 
 };
 
-//Method that gets summary info about members for a dojo xxxxxxxx(aici am ramas)
+//Method that gets summary info about members for a dojo
 module.exports.getUsersForMember = function(req, res){
     logger.debug(`Entering DojosRoute: ${keys.getUsersForMember} for ${helper.getUser(req)}`);
     let user = req.user;
@@ -578,30 +581,30 @@ let addUsersChildrenToDojo = module.exports.addUsersChildrenToDojo = function(us
     }
 };
 
-//Method for adding user's children to the users dojos
-module.exports.addUsersChildUsersDojos = function(user, childId){
-    let usersChildren = user.children;
-    if(usersChildren.length > 0){
-        Dojo.getDojos(true, function(err, dojos){
-            if (err){
-                logger.error(`Problems retrieving dojos by ${helper.getUser(user)} for adding his/her children` +
-                    ` to his/her dojos: ` + err);
-            }
-            //We filter the dojos so only the ones where the user is a member remain (or all if the user is admin).
-            let userDojos = filterDojosForMyDojos(user, dojos);
-            let listOfUsersDojosIds = helper.getListOfFieldsFromListOfObjects(userDojos, '_id');
-            Dojo.addUsersChildUsersDojos(childId, listOfUsersDojosIds, function(err){
-                if(err){
-                    logger.error(`Problems adding user's child (id=${childId}) to user's  dojos by ${helper.getUser(user)}: ` + err);
-                    return;
-                }
-                logger.silly(`Child (id=${childId})  of ${helper.getUser(user)} added to user's dojos`);
-            })
+//TODO delete in this really proves unecessary as it seems now
 
-        });
-    }
-
-};
+////Method for adding user's children to the users dojos
+//module.exports.addUsersChildToUsersDojos = function(user, childId){
+//    let usersChildren = user.children;
+//    if(usersChildren.length > 0){
+//        Dojo.getUsersDojos(childId, function(err, dojos){
+//            if (err){
+//                logger.error(`Problems retrieving dojos by ${helper.getUser(user)} for adding his/her children` +
+//                    ` to his/her dojos: ` + err);
+//            }
+//            let listOfUsersDojosIds = helper.getListOfFieldsFromListOfObjects(dojos, '_id');
+//            Dojo.addUsersChildToUsersDojos(childId, listOfUsersDojosIds, function(err){
+//                if(err){
+//                    logger.error(`Problems adding user's child (id=${childId}) to user's  dojos by ${helper.getUser(user)}: ` + err);
+//                    return;
+//                }
+//                logger.silly(`Child (id=${childId})  of ${helper.getUser(user)} added to user's dojos`);
+//            })
+//
+//        });
+//    }
+//
+//};
 
 
 //Method for getting a dojo from a list of dojos

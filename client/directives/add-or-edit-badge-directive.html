@@ -42,7 +42,7 @@
         </div>
     </div>
     <div class="badge-image" ng-if="isEditBadgeView()">
-            <div class="badge-image-div" title="Schimba poza" style="{{localBadge.badgePhoto ? 'background-image:url(\'../img/badges/' + localBadge.badgePhoto + '\')': 'background-image:url(\'../img/badges/default-badge.png\')'}}">
+            <div class="badge-image-div" title="Schimba poza" style="{{getBackgroundUrlForPhoto(localBadge)}}">
                 <input class="always-hide" id="badge-photo-input" type="file" name="badge-picture">
                 <label class="edit-user-image"><i class="fa fa-upload" aria-hidden="true" ng-click="loadPicture()"></i></label>
             </div>

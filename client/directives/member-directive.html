@@ -2,11 +2,12 @@
     <div class="pages-banner dojo-banner">
         <h2>{{dojo.name}} - Membrii dojo</h2>
     </div>
+    <add-badges-to-users-directive ng-if="show[keys.openAddBadgeMenu]"></add-badges-to-users-directive>
     <div class="member-container-bttn-bar">
         <span class="info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
                     <i class="fa fa-info-circle" aria-hidden="true"></i>
         </span>
-
+        <button class="member-bttn" ng-click="addBadgeAction()" ng-if="showAddBadge()">Adauga Badge</button>
         <button ng-click="goBackAction()" ng-if="views[keys.showBackButton]">
             <i class="fa fa-arrow-left" aria-hidden="true"></i> Inapoi
         </button>
@@ -32,7 +33,7 @@
         </div>  <!--<div class="select-users">-->
 
         <div class="filter-users" ng-if="users && users.length > 0">
-            <div class="filter-exand-contract">
+            <div class="filter-expand-contract">
                 <a ng-click="toggleFilterMenu()">
                     filtreaza
                     <i class="fa fa-caret-right" aria-hidden="true" ng-if="!views.openFilterMenu"></i>
@@ -90,7 +91,7 @@
                             <!--<img src="../img/reject.png">-->
                             <i class="fa fa-ban" aria-hidden="true"></i>
                         </button>
-                        <button class="member-bttn" ng-if="showAddBadge()">Adauga Badge</button>
+                        <button class="member-bttn" ng-click="addBadgeAction(memberUser)" ng-if="showAddBadge()">Adauga Badge</button>
                         <button class="member-bttn more-bttn" ng-click="expandContractUser(memberUser)">
                             {{memberUser.expand ? 'Mai putin' : 'Mai mult'}}
                         </button>

@@ -73,6 +73,9 @@ router.post('/' + keys.uploadUserPictureRoute, authentification.ensureAuthentica
 //Method for getting the count of new notifications for a user
 router.get('/' + keys.getNewNotificationsCountRoute, authentification.ensureAuthenticated, userController.getNewNotificationsCount);
 
+//Method for getting a users badges
+router.post('/' + keys.getUsersBadgesRoute, authentification.ensureAuthenticated, userController.getUsersBadges);
+
 
 //This is the local strategy password uses to log in a user and save a session
 passport.use(new passportLocal.Strategy(

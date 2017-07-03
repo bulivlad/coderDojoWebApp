@@ -18,6 +18,11 @@ let notificationSchema = mongoose.Schema({
     }
 );
 
+let badgesSchema = mongoose.Schema({
+    typeOfBadge: {type: mongoose.Schema.Types.ObjectId, ref: 'Badge'},
+    received: [Date]
+});
+
 let UserSchema = mongoose.Schema({
     email: {
         type: String,
@@ -88,10 +93,7 @@ let UserSchema = mongoose.Schema({
     parents: {
         type: Array
     },
-    badges: {
-        type:Array,
-        select:false
-    },
+    badges:[badgesSchema],
     notifications: notificationSchema,
     userPhoto: {
         type: String
@@ -172,6 +174,12 @@ module.exports.addNotificationForUser = function(userId, notification, callback)
         {$push: {'notifications.notifications': notification}, $inc: {'notifications.newNotificationCount':1}}, callback);
 };
 
+//Method for adding a notifications for a user
+module.exports.addNotificationsForUser = function(userId, notifications, callback){
+    User.findOneAndUpdate({_id: userId},
+        {$push: {'notifications.notifications': {$each:notifications}},
+         $inc: {'notifications.newNotificationCount':notifications.length}}, callback);
+};
 
 module.exports.getDetailedUserForMember = function(userId, callback){
     console.log('getDetailedUserForMember called');
@@ -241,4 +249,17 @@ module.exports.getUserNotificationsAndResetNewNotifications = function(userId, c
 
 module.exports.deleteNotificationForUser = function(userId, notificationId, callback){
     User.findOneAndUpdate({_id: userId}, {$pull: {'notifications.notifications': {_id: notificationId}}}, callback);
+};
+
+module.exports.getBadgesOfUser = function(userId, callback){
+  User.findOne({_id: userId}, {badges: true}).populate('badges.typeOfBadge').exec(callback);
+};
+
+module.exports.setBadgesOfUser = function(userId, modifiedBadges, callback){
+    if(modifiedBadges){
+        User.findOneAndUpdate({_id: userId}, {$set: {badges: modifiedBadges}}, callback);
+    } else {
+        callback(Error('Badges are empty'));
+    }
+
 };

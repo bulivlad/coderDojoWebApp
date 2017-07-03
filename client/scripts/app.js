@@ -25,6 +25,7 @@ angular.module("coderDojoTimisoara", [
             .when('/' + keys.viewEventLocation, {templateUrl:'../views/view-event.html'})
             .when('/' + keys.viewBadgesLocation, {templateUrl:'../views/vezi-toate-badgeurile.html'})
             .when('/' + keys.viewBadgeLocation, {templateUrl:'../views/view-badge.html'})
+            .when('/' + keys.myEventsLocation, {templateUrl:'../views/evenimentele-mele.html'})
             .otherwise({redirectTo: '/despre'})
     }]);
 
@@ -92,6 +93,9 @@ const keys = {
     getUsersBadgesRoute: 'getUsersBadges',
     getUsersChildsBadgesRoute: 'getUsersChildsBadges',
     uploadBadgePictureRoute: 'uploadBadgePicture',
+    addBadgesToUsersRoute: 'addBadgesToUsers',
+    getUsersBadgesRoute: 'getUsersBadges',
+    getMyEventsRoute: 'getMyEvents',
     //TODO change the communication routes to view locations (for getDojo for ex)
 
     //View locations
@@ -99,6 +103,7 @@ const keys = {
     addBadgeLocation: 'addBadge',
     viewBadgesLocation: 'viewBadgesLocation',
     viewBadgeLocation: 'viewBadgeLocation',
+    myEventsLocation: 'myEventsLocation',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
@@ -189,6 +194,7 @@ const keys = {
         nameWritten: 'name-written'
     },
     storedTypeOfUsers: 'storedTypeOfUsers',
+    openAddBadgeMenu: 'openAddBadgeMenu',
 
     //View keys for various views
     showBackButton: 'showBackButton',

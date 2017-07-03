@@ -9,14 +9,14 @@
     <div class="page-content">
         <div class="col1-my-profile">
             <div class=".block-div">
-                <label>Data nașterii</label>
-                <p>{{ getPrettyDate() }}</p>
+                <label class="col1-label">Data nașterii</label>
+                <p class="col1-paragr">{{ getPrettyDate() }}</p>
 
-                <label>Sexul</label>
-                <p>{{myProfile.user.gender}}</p>
+                <label class="col1-label">Sexul</label>
+                <p class="col1-paragr">{{myProfile.user.gender}}</p>
 
-                <label>Adresa</label>
-                <p>{{myProfile.user.address}}</p>
+                <label class="col1-label">Adresa</label>
+                <p class="col1-paragr">{{myProfile.user.address}}</p>
 
             </div>
         </div>
@@ -36,11 +36,20 @@
                         </div>
                     </div>
                 </div>
+                <div ng-if="badges.length > 0">
+                    <h3>Badge-uri</h3>
+                    <hr>
+                    <div class="badges-container-my-profile">
+                        <view-badges-directive></view-badges-directive>
+                    </div>
+
+                </div>
                 <div >
                     <h3>Membru al dojo</h3>
                     <hr>
                     <div class="dojo-bubble-container" ng-controller="dojoBubbleCtrl">
-                        <div class="dojo-bubble" ng-repeat="dojo in myProfile.user.dojos" ng-click="selectDojoAction(dojo)">
+                        <div class="dojo-bubble" ng-repeat="dojo in myProfile.user.dojos"
+                             ng-click="selectDojoAction(dojo, keys.myProfile)">
                             <img src="../img/dojos/default-dojo-picture.png">
                             <p>{{dojo.name}}</p>
                         </div>

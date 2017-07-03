@@ -109,6 +109,15 @@ angular.module("coderDojoTimisoara")
         $scope.setCorrectPathForWideNavigation();
 
 
+        $scope.hideScrollForBody = function(){
+          $('body').addClass('hide-scroll');
+        };
+
+        $scope.showScrollForBody = function(){
+            $('body').removeClass('hide-scroll');
+        };
+
+
         $scope.goToLogin = function(){
             $location.path('/' + keys.login);
         };
@@ -163,6 +172,34 @@ angular.module("coderDojoTimisoara")
             $location.path('/' + keys.viewBadgeLocation);
         };
 
+        $scope.goToMyDojos = function(){
+            if($location.path() === '/'+ keys.getMyDojosRoute){
+                $route.reload();
+            } else {
+                $location.path('/' + keys.getMyDojosRoute);
+            }
+        };
+
+        $scope.getBackgroundUrlForPhoto = function(badge){
+            if(badge.badgePhoto){
+                return 'background-image:url(\'../img/badges/' + badge.badgePhoto + '\')';
+            } else {
+                return 'background-image:url(\'../img/badges/default-badge.png\')'
+            }
+        };
+
+        //This method sends a message to the user via the snackbar
+        $scope.setSnackBar = function(info, type){
+            var $snackBar = $('#snackbar');
+            $snackBar.text(info).addClass('show');
+            if(type === 'error'){
+                $snackBar.addClass('error');
+            }
+          setTimeout(function(){
+              $snackBar.removeClass('show').removeClass('error');
+          }, 4500);
+
+        };
 
         //This sets the eventId for the event to be downloaded, and the location where the event was accessed,
         // to be used when going back.

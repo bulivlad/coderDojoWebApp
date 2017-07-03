@@ -1,0 +1,127 @@
+<div class="add-badges-to-users" ng-controller="addBadgesToUsersCtrl">
+    <div class="container">
+        <h3>Adauga badge</h3>
+        <div class="add-badges-bttns-bar">
+            <button ng-click="addBadgesToUsers()" ng-class="{disabled: !communicationsPermitted}">
+                Adaugă
+            </button>
+            <button ng-click="closeAddBadgeModal()" ng-class="{disabled: !communicationsPermitted}">
+                Inchide
+            </button>
+        </div>
+
+        <div class="selected-users-for-adding-badges">
+            <div class="expand-contract" ng-click="show.showSelectedUsers = !show.showSelectedUsers"
+                title="Mărește/Micșorează">
+                <a>
+                    {{show.showSelectedUsers ? 'micșorează' : 'mărește'}}
+                    <i class="fa fa-caret-right" aria-hidden="true" ng-if="!show.showSelectedUsers"></i>
+                    <i class="fa fa-caret-down" aria-hidden="true" ng-if="show.showSelectedUsers"></i>
+                </a>
+                <p class="title">Utilizatori selectati</p>
+                <hr ng-if="show.showSelectedUsers" class="title-delimiter">
+            </div> <!--class="expand-contract"-->
+
+            <div class="content" ng-show="show.showSelectedBadges">
+              <span class="selected-user" ng-repeat="selectedUser in selectedUsers">
+                  <span class="user-name" title="{{getUserHoverInfo(selectedUser)}}">{{getUserName(selectedUser)}}</span>
+                  <span class="remove-selected-user" title="{{getRemoveUserHoverInfo(selectedUser)}}"
+                        ng-click="removeUserFromSelectedUsers(selectedUser)">
+                      &times
+                  </span>
+              </span>
+            </div> <!--class="selected-users-content"-->
+
+        </div> <!--class="selected-users-for-badges"-->
+
+        <div class="selected-badges-for-adding-badges">
+            <div class="expand-contract" title="Mărește/Micșorează" ng-click="show.showSelectedBadges = !show.showSelectedBadges">
+                <a>
+                    {{show.showSelectedBadges ? 'micșorează' : 'mărește'}}
+                    <i class="fa fa-caret-right" aria-hidden="true" ng-if="!show.showSelectedBadges"></i>
+                    <i class="fa fa-caret-down" aria-hidden="true" ng-if="show.showSelectedBadges"></i>
+                </a>
+                <p class="title">Badge-uri selectate</p>
+                <hr ng-if="show.showSelectedBadges" class="title-delimiter">
+            </div> <!--class="expand-contract"-->
+
+            <div class="content" ng-show="show.showSelectedBadges">
+              <span class="selected-badge" ng-repeat="selectedBadge in selectedBadges"  >
+                  <span class="badge-name" title="{{getBadgeHoverInfo(selectedBadge)}}">{{selectedBadge.name}}</span>
+                  <span class="remove-selected-badge" title="{{getRemoveBadgeHoverInfo(selectedBadge)}}"
+                        ng-click="removeBadgeFromSelectedBadges(selectedBadge)">
+                      &times
+                  </span>
+              </span>
+            </div> <!--class="content"-->
+        </div>
+        <div class="select-users-for-adding-badges">
+            <div class="expand-contract" title="Mărește/Micșorează" ng-click="show.showSelectUsers = !show.showSelectUsers">
+                <a>
+                    {{show.showSelectUsers ? 'micșorează' : 'mărește'}}
+                    <i class="fa fa-caret-right" aria-hidden="true" ng-if="!show.showSelectUsers"></i>
+                    <i class="fa fa-caret-down" aria-hidden="true" ng-if="show.showSelectUsers"></i>
+                </a>
+                <p class="title">Alege utilizatori</p>
+                <hr ng-if="show.showSelectUsers" class="title-delimiter">
+            </div> <!--class="expand-contract"-->
+
+            <div class="content" ng-show="show.showSelectUsers">
+                <div class="filter-select-users">
+                    <div class="filter-select-users-name">
+                        <label ng-click="selectUsersFilter(keys.filterUsersValues.nameDown)"
+                               ng-class="{selected: keys.filterUsersValues.nameDown === userFilterType}">
+                            Nume <i class="fa fa-caret-down" aria-hidden="true"></i>
+                        </label>
+                        <label ng-click="selectUsersFilter(keys.filterUsersValues.nameUp)"
+                               ng-class="{selected: keys.filterUsersValues.nameUp === userFilterType}">
+                            Nume <i class="fa fa-caret-up" aria-hidden="true"></i>
+                        </label>
+                    </div>
+                    <hr class="filter-divider">
+                    <div class="filter-select-users-written-name">
+                        <label for="filter-users-add-badges-view" class="label-search">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </label>
+                        <input id="filter-users-add-badges-view" class="name-written" placeholder="Caută" title="Caută un utilizator dupa nume, email sau alias"
+                               ng-model="userFilterName.value" ng-change="selectUsersFilter(keys.filterUsersValues.nameWritten)"
+                               ng-focus="selectUsersFilter(keys.filterUsersValues.nameWritten)">
+                        <label for="filter-users-add-badges-view" class="label-search">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </label>
+                    </div>
+                </div><!--class="filter-select-users"-->
+            <div class="users-container">
+                <div class="user" ng-repeat="user in addBadgesFilteredUsers" ng-click="clickUserAction(user)"
+                    ng-class="{selected: user.selected}">
+                    <div class="user-name">
+                        <p>{{getUserName(user)}}</p>
+                    </div>
+                    <div class="user-alias-and-email">
+                        <span class="alias" ng-if="user.alias">zis si <span class="cursive">{{user.alias}}</span></span>
+                        <span class="email" ng-if="user.email">email: <code>{{user.email}}</code></span>
+                    </div>
+                </div>
+
+            </div>
+
+            </div> <!--class="content"-->
+        </div>
+        <div class="select-badges-for-adding-badges">
+            <div class="expand-contract" title="Mărește/Micșorează"
+                 ng-click="show.showSelectBadges = !show.showSelectBadges">
+                <a>
+                    {{show.showSelectBadges ? 'micșorează' : 'mărește'}}
+                    <i class="fa fa-caret-right" aria-hidden="true" ng-if="!show.showSelectBadges"></i>
+                    <i class="fa fa-caret-down" aria-hidden="true" ng-if="show.showSelectBadges"></i>
+                </a>
+                <p class="title">Alege Badge-uri</p>
+                <hr ng-if="show.showSelectUsers" class="title-delimiter">
+            </div> <!--class="expand-contract"-->
+
+            <div class="content" ng-show="show.showSelectBadges">
+                <view-badges-directive></view-badges-directive>
+            </div>
+        </div>
+    </div>
+</div>

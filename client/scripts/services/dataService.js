@@ -454,5 +454,19 @@ angular.module('coderDojoTimisoara')
             });
         };
 
+        this.addBadgesToUsers = function(data){
+            return $http({
+                url: '/badges/' + keys.addBadgesToUsersRoute,
+                method: "POST",
+                data: data
+            });
+        };
 
+        this.getUsersBadges = function(data){
+            return $http({
+                url: '/user/' + keys.getUsersBadgesRoute,
+                method: "POST",
+                data: data
+            });
+        };
     });

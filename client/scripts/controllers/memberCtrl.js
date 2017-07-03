@@ -6,6 +6,7 @@ angular.module("coderDojoTimisoara")
     .controller("memberCtrl", function($scope, $rootScope, $location, dataService, helperSvc){
         $scope.userFilterName = {};
         $scope.openFilterMenu = false;
+        $scope.show = {};
         var getUsersForMember = function(typeOfUsers){
             dataService.getUsersForMember({typeOfUsers: typeOfUsers, dojoId: $scope.dojo._id})
                 .then(function(response){
@@ -56,73 +57,10 @@ angular.module("coderDojoTimisoara")
 
 
         var filterUsers = function(users){
-            var ret = angular.copy(users);
-            if($scope.filterType === keys.filterUsersValues.nameWritten){
-                if(!$scope.userFilterName.value || $scope.userFilterName.value === ''){
-                    //This is the case when the user selects the filter by name, but no name exist input yet. This also
-                    //happens when the user deletes every character and we are left with an empty input
-                    if(($scope.filteredUsers) && ($scope.users.length === $scope.filteredUsers.length)){
-                        //This is the case where all the badges are in the filtered badges array (case when a user clicks
-                        //the select by name, and no input is yet available. In this case, we can add the old filtered badges
-                        ret =  $scope.filteredUsers;
-                    } else {
-                        //This is the case where the the input has been deleted, but the last filter might have removed
-                        //some badges. In this case we default to name down
-                        ret.sort(helperSvc.sortNameAsc);
-                    }
-                } else if($scope.filterType === keys.filterUsersValues.nameWritten) {
-                    ret =  filterUsersBasedOnWrittenName(users);
-                }
-            }
-            else if($scope.filterType === keys.filterUsersValues.nameUp){
-                ret.sort(helperSvc.sortNameAsc);
-            } else if($scope.filterType === keys.filterUsersValues.nameDown){
-                ret.sort(helperSvc.sortNameDesc);
-            }
-            return ret;
+            return helperSvc.filterUsers(users, $scope.filteredUsers, $scope.filterType, $scope.userFilterName.value);
         };
 
-        var filterUsersBasedOnWrittenName = function(users){
-            var ret = [];
 
-            if($scope.userFilterName.value && $scope.userFilterName.value !== ''){
-                var splitFilteredInput = $scope.userFilterName.value.split(' ');
-                users.forEach(function(user){
-                    var numberOfNecessaryMatches = splitFilteredInput.length;
-                    var matches = 0;
-                    for(var i = 0; i < splitFilteredInput.length; i++){
-                        var inputWord = helperSvc.addDiacriticsToSearch(splitFilteredInput[i]);
-                        var regExInput = new RegExp(inputWord, 'i');
-                        if(user.firstName.match(regExInput)){
-                            matches++;
-                        } else if (user.lastName.match(regExInput)){
-                            matches++;
-                        } else if(user.alias && user.alias.match(regExInput)){
-                            matches++;
-                        } else if(user.email && user.email.match(regExInput)){
-                            matches++;
-                        }
-                    }
-                    if(matches === numberOfNecessaryMatches){
-                        ret.push(user);
-                    }
-                });
-            } else {
-                //if no user filter name exists yet
-                //We check if the filtered by username is triggered while the filtered list has all de users, and if that
-                // is true (and since there is no filter name input yet) we return the filtered list. If the lists differ
-                // in size, we return the original users list, sorted alphabetically
-                if($scope.filteredUsers.length == $scope.users.length){
-                    ret = $scope.filteredUsers;
-                }
-                else {
-                    users.sort(helperSvc.sortNameAsc);
-                    ret = users;
-                }
-            }
-            ret.sort(helperSvc.sortNameAsc);
-            return ret;
-        };
 
         $scope.toggleFilterMenu = function(){
             if($scope.views.openFilterMenu) {
@@ -279,6 +217,34 @@ angular.module("coderDojoTimisoara")
             } else {
                 return keys.attendees;
             }
+        };
+
+        //This method is used to inform children controllers of the parent controller
+        $scope.isCtrlMemberCtrl = function(){
+          return true;
+        };
+
+        //THis method is used to close the add badge modal. THis method is used from the
+        // addBadgesCtrl
+        $scope.closeAddBadgeModalFromMemberCtrl = function(){
+            $scope.show[keys.openAddBadgeMenu] = false;
+            //We need to show scroll for body as it was removed when opening the add badge modal
+            $scope.showScrollForBody();
+        };
+
+
+        $scope.resetUserToAddBadge = function(){
+            $scope.userToAddBadgeToFromMemberCtrl = undefined;
+        };
+
+        $scope.addBadgeAction = function(user){
+            if(user){
+                $scope.userToAddBadgeToFromMemberCtrl = user;
+                $scope.show[keys.openAddBadgeMenu] = true;
+            } else {
+                $scope.show[keys.openAddBadgeMenu] = true;
+            }
+            $scope.hideScrollForBody();
         };
 
         var initialize = function(){

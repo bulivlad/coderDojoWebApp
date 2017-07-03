@@ -15,8 +15,8 @@ angular.module("coderDojoTimisoara")
         $scope.initializeEditProfilesController = function(callback){
             $scope.getUserFromServer(function(err){
                 if (err){
-                   helperSvc.handlerCommunicationErrors(err, 'coderDojoTimisoara - initializeEditProfilesController',
-                                                        $scope);
+                    helperSvc.handlerCommunicationErrors(err, 'coderDojoTimisoara - initializeEditProfilesController',
+                        $scope);
                 } else {
                     if($rootScope.user){
                         var user = helperSvc.cloneUser($rootScope.user);
@@ -39,13 +39,23 @@ angular.module("coderDojoTimisoara")
                         //getting users dojos
                         getUsersDojosFromServer();
 
+                        //getting uses badges
+                        $scope.getBadges();
+
                         $scope.setView(keys.viewUserProfile, [keys.showDojoInUserProfile]);
+                        //Reset initializations
+
                         if(callback){
                             callback();
                         }
                     }
                 }
             });
+        };
+
+        //This method resets the flags so that the listeners for user photo changes can be activated.
+        var resetInitializations = function(){
+            $scope.myProfile.initializations = {};
         };
 
         //Getting the user and setting viewUserProfile view
@@ -191,10 +201,12 @@ angular.module("coderDojoTimisoara")
             //We reset errors that may remain
             $scope.resetErrors();
             if($scope.isCurrentView(keys.addChildUnder14Profile) || $scope.isCurrentView(keys.addChildOver14Profile) ||
-                        $scope.isCurrentView(keys.editUserProfile)){
+                $scope.isCurrentView(keys.editUserProfile)){
+                resetInitializations();
                 $scope.initializeEditProfilesController();
 
             } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
+                resetInitializations();
                 $scope.setView(keys.viewUsersChildProfile);//TODO need to ad refresh for this user as it could have been modified
             }
         };
@@ -290,11 +302,13 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.viewParentAction = function(parent){
+            resetBadges();
             //If the old profile is viewChildProfile
             if($scope.isCurrentView(keys.viewUsersChildProfile)){
                 //If the parent is the root user
                 if(isSameUser($rootScope.user, parent)){
                     $scope.initializeEditProfilesController();
+                    $scope.getBadges();
                 }
                 //If the parent is not the root user
                 else {
@@ -321,6 +335,8 @@ angular.module("coderDojoTimisoara")
 
         //Method for setting the view to viewChildProfile
         $scope.viewChildAction = function(child){
+            //Resetting badges
+            resetBadges();
             //If the old profile is viewUserProfile
             if($scope.myProfile.views[keys.viewUserProfile]){
                 //Setting the child as the current user
@@ -340,12 +356,18 @@ angular.module("coderDojoTimisoara")
 
                 //Getting dojos for child
                 getUsersChildsDojosFromServer(child._id);
+
+                //getting badges
+                $scope.getBadges();
             }
             //If the old profile is viewOtherParentProfile
             else if ($scope.myProfile.views[keys.viewOtherParentProfile]){
                 //If the child is the root user
                 if(isSameUser(child, $rootScope.user)){
                     $scope.initializeEditProfilesController();
+
+                    //getting badges
+                    $scope.getBadges();
                 }
                 else {
                     //Setting the child as the current user
@@ -360,6 +382,9 @@ angular.module("coderDojoTimisoara")
 
                     //Getting dojos for child
                     getUsersChildsDojosFromServer(child._id);
+
+                    //getting badges
+                    $scope.getBadges();
                 }
             }
         };
@@ -397,11 +422,11 @@ angular.module("coderDojoTimisoara")
         $scope.$on('viewChange', function(event, view){
             //This is for edit
             if(view === keys.editUserProfile || view === keys.editChildOver14Profile || view === keys.editChildUnder14Profile ||
-               view === keys.addChildOver14Profile ||  view === keys.addChildUnder14Profile){
-                    $scope.myProfile.views.viewProfile = false;
-                    $scope.myProfile.views.editProfile = true;
+                view === keys.addChildOver14Profile ||  view === keys.addChildUnder14Profile){
+                $scope.myProfile.views.viewProfile = false;
+                $scope.myProfile.views.editProfile = true;
             } else if (view === keys.viewUserProfile || view === keys.viewUsersChildProfile ||
-                       view === keys.viewOtherParentProfile){
+                view === keys.viewOtherParentProfile){
                 $scope.myProfile.views.editProfile = false;
                 $scope.myProfile.views.viewProfile = true;
             }
@@ -661,5 +686,60 @@ angular.module("coderDojoTimisoara")
             if(user1 && user2){
                 return user1._id === user2._id;
             }
-        }
+        };
+
+        $scope.isEditProfilesCtrlParent = function(){
+            return true;
+        };
+
+        //These methods are user by the viewBadgesCtrl
+        $scope.setFilteredBadges = function(filteredBadges) {
+            $scope.filteredBadges = filteredBadges;
+        };
+
+        $scope.clickBadgeAction = function(badge){
+            $scope.setBadgeView(badge, keys.myProfile);
+            $scope.goToViewBadge();
+        };
+
+        $scope.getBadges = function(callback){
+            var childId = undefined;
+            //We check if the user getting badges is the root user
+            if(!isSameUser($rootScope.user, $scope.myProfile.user)){
+                //The badges are for a users child
+                childId =  $scope.myProfile.user._id;
+            }
+
+            dataService.getUsersBadges({childId: childId})
+                .then(function(response){
+                    if(response.data.badges){
+                        if($scope.myProfile.user._id == response.data.ownerOfBadges){
+                            //Only show the badges if the person the badges were requested for is the current user
+                            //This is a precautionary measure if the request is slow to be answere for some reason.
+                            $scope.badges = convertBadgesToClientBadges(response.data.badges);
+                            if(callback){
+                                callback();
+                            } else {
+                                $scope.filteredBadges = angular.copy($scope.badges);
+                            }
+                        }
+
+                    }
+                })
+        };
+
+        var convertBadgesToClientBadges = function(serverBadges){
+            var ret = [];
+            serverBadges.forEach(function(serverBadge){
+                var convertedBadge = serverBadge.typeOfBadge;
+                convertedBadge.received = serverBadge.received;
+                ret.push(convertedBadge)
+            });
+            return ret;
+        };
+
+        var resetBadges = function(){
+            $scope.badges = undefined;
+            $scope.filteredBadges = undefined;
+        };
     });

@@ -494,6 +494,7 @@ module.exports.getUsersBadges = function(req, res){
 //Module for uploading user photos
 module.exports.uploadUserPicture = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${helper.getUser(req)}`);
+    let userToUpdatePhoto = req.body.userId;
 
     upload(req, res, function(err){
         if (err){
@@ -501,7 +502,6 @@ module.exports.uploadUserPicture = function(req, res){
             return res.sendStatus(500);
         }
         let fileName = req.file.filename;
-        let userToUpdatePhoto = req.body.userId;
         let user = req.user;
         //If the user changing the photo is the logged in user or if the user changing photo is the
         //logged in user's child

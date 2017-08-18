@@ -1215,11 +1215,12 @@ module.exports.uploadSpecialEventPhoto = function(req, res){
     let user = req.user;
     if(helper.isUserAdmin(user)){
         upload(req, res, function(err){
+            let specialEventId = req.body.specialEventId;
             if(err){
                 logger.error(`Error uploading special event photo specialEvent (_id=${specialEventId}) by ${helper.getUser(req)}:` + err);
                 return res.sendStatus(500);
             }
-            let specialEventId = req.body.specialEventId;
+
             let filename = req.file.filename;
             let specialEventsRelativePath = 'client/img/special_events/';
             helper.inspectUploadedImage(req.file, specialEventsRelativePath, function(err, fileInspect){

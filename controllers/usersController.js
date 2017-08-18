@@ -496,14 +496,13 @@ module.exports.uploadUserPicture = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${helper.getUser(req)}`);
 
     upload(req, res, function(err){
-        let fileName = req.file.filename;
-        let userToUpdatePhoto = req.body.userId;
-        let user = req.user;
         if (err){
             logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
-
+        let fileName = req.file.filename;
+        let userToUpdatePhoto = req.body.userId;
+        let user = req.user;
         //If the user changing the photo is the logged in user or if the user changing photo is the
         //logged in user's child
 

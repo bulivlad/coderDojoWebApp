@@ -120,11 +120,12 @@ module.exports.uploadBadgePicture = function(req, res){
     let user = req.user;
     if(helper.isUserAdmin(user)){
        upload(req, res, function(err){
-           let badgeId = req.body.badgeId;
            if(err){
                logger.error(`Error uploading badge photo for badge (_id=${badgeId}) by ${helper.getUser(req)}:` + err);
                return res.sendStatus(500);
            }
+           let badgeId = req.body.badgeId;
+
            let badgesRelativePath = 'client/img/badges/';
            helper.inspectUploadedImage(req.file, badgesRelativePath, function(err, fileInspect){
                if(err){

@@ -494,9 +494,10 @@ module.exports.getUsersBadges = function(req, res){
 //Module for uploading user photos
 module.exports.uploadUserPicture = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${helper.getUser(req)}`);
-    let userToUpdatePhoto = req.body.userId;
+
 
     upload(req, res, function(err){
+        let userToUpdatePhoto = req.body.userId;
         if (err){
             logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);

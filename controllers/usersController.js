@@ -507,6 +507,7 @@ module.exports.uploadUserPicture = function(req, res){
         //logged in user's child
 
         let userImagesRelativePath =  'client/img/user_photos/';
+        logger.debug(`userToUpdatePhoto=${userToUpdatePhoto}`);
 
         if(user._id.toString() == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
             helper.inspectUploadedImage(req.file, userImagesRelativePath, function(err, fileInspect){

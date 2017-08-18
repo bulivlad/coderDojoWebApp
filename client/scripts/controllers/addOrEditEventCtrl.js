@@ -2,20 +2,26 @@
  * Created by catap_000 on 6/11/2017.
  */
 angular.module("coderDojoTimisoara")
-    .controller('addOrEditEventCtrl', function($scope, $rootScope, $location, dataService, helperSvc){
+    .controller('addOrEditEventCtrl', function($scope, $rootScope, $timeout, $location, dataService, helperSvc){
 
-        var createDates = function(){
-            $( function() {
-                $( ".start-hour-unique-event" ).datepicker({
-                    changeMonth: true,
-                    changeYear: true,
-                    //minDate: "0",
-                    //yearRange: "0:+1",
-                    dayNamesMin:keys.daysOfWeekShort,
-                    monthNamesShort:keys.months
-                });
-            } );
+        var createDatesForUniqueEvent = function(day, callback){
+            $timeout(function(){
+                $( function() {
+                    $( ".start-hour-unique-event" ).datepicker({
+                        changeMonth: true,
+                        changeYear: true,
+                        dayNamesMin:keys.daysOfWeekShort,
+                        monthNamesShort:keys.months,
+                        dateFormat: 'd M yy'
+                    });
+                } );
+                if(callback){
+                    callback(day);
+                }
+            }, 500);
         };
+
+
 
         $scope.addSession = function(sessions){
             sessions.push({
@@ -23,13 +29,6 @@ angular.module("coderDojoTimisoara")
                 _id : helperSvc.generateSessionId()
             });
         };
-
-        //Creating the date selecting interface we use jquery. Unfortunately the Html object does not exist when
-        // the controller loads so we need to offset the creation of the datepicker.
-        setTimeout(function(){
-            createDates();
-        }, 1000);
-
 
         $scope.getAddOrEditButton = function(){
             if($scope.isCurrentView(keys.editEvent)){
@@ -66,13 +65,17 @@ angular.module("coderDojoTimisoara")
                             deserializeDayForEvent(sanitizedEvent);
                             $scope.localEvent = sanitizedEvent;
                             $scope.hasBeenSanitized = true;
+                            $scope.setSnackBar('Exista erori in unele campuri', 'error');
                         } else if(response.data.success){
                             $scope.goToViewDojo();
+                            $scope.setSnackBar('Evenimentul ' + $scope.localEvent.name + ' a fost creeat cu success', 'info');
                         }
                     })
                     .catch(function(err){
                         helperSvc.handlerCommunicationErrors(err, 'createEvent() from addOrEditEventCtrl', $scope);
                     })
+            } else {
+                $scope.setSnackBar('Exista erori in unele campuri', 'error');
             }
         };
 
@@ -91,14 +94,22 @@ angular.module("coderDojoTimisoara")
                             deserializeDayForEvent(sanitizedEvent);
                             $scope.localEvent = sanitizedEvent;
                             $scope.hasBeenSanitized = true;
+                            $scope.setSnackBar('Exista erori in unele campuri', 'error');
                         } else if(response.data.success){
                             $scope.goToViewEvent();
+                            $scope.setSnackBar('Evenimentul ' + $scope.localEvent.name + ' a fost modificat cu success', 'info');
                         }
                     })
                     .catch(function(err){
                         helperSvc.handlerCommunicationErrors(err, 'editEvent() from addOrEditEventCtrl', $scope);
                     })
+            } else {
+                $scope.setSnackBar('Exista erori in unele campuri', 'error');
             }
+        };
+
+        $scope.getTitle = function(){
+            return $scope.getAddOrEditButton();
         };
 
         //Method for closing the panel informing the user the dojo has suffered modifications when sanitizing
@@ -135,6 +146,14 @@ angular.module("coderDojoTimisoara")
                     if(event){
                         event = convertDataBaseEventToClientEvent(event);
                         $scope.localEvent = event;
+                        //This part is done so that the jquery datepicker shows the date in a nice format initially
+                        var tempDay = $scope.localEvent.day;
+                        $scope.localEvent.day = undefined;
+                        createDatesForUniqueEvent(tempDay, function(day){
+                            $('.start-hour-unique-event').datepicker("setDate", new Date(day) );
+                            $scope.localEvent.day = day;
+                        });
+
                     }else {
                         //If we were not answered with the event, go to view dojo
                         $scope.goToViewDojo();
@@ -158,6 +177,7 @@ angular.module("coderDojoTimisoara")
                     }],
                     type: keys.eventTypesUnique
                 };
+                createDatesForUniqueEvent();
             }
         };
         $scope.initializeEventCtrl();

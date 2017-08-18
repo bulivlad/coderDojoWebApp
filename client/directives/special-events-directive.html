@@ -1,0 +1,14 @@
+<div class="special-events-directive">
+    <div class="special-event" ng-repeat="specialEvent in specialEvents" ng-click="viewSpecialEventAction(specialEvent)">
+        <div class="special-event-image-container">
+            <div class="special-event-image" style="{{getBackgroundUrlForSpecialEventPhoto(specialEvent)}}"></div>
+        </div>
+        <h3 class="special-event-name"><code>{{specialEvent.name}}</code></h3>
+        <h4 class="event-date">{{getSpecialEventDate(specialEvent)}}</h4>
+        <div class="special-event-description">
+            <p class="description">{{specialEvent.description}}</p>
+            <p class="more">...</p>
+        </div>
+
+    </div>
+</div>

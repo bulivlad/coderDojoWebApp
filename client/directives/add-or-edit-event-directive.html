@@ -1,6 +1,6 @@
 <div class="add-or-edit-event" ng-controller="addOrEditEventCtrl">
     <div class="pages-banner">
-        <h2>Adaugă eveniment</h2>
+        <h2>{{getTitle()}}</h2>
     </div>
     <div class="wrapper">
         <div class="button-bar-add-event">
@@ -10,7 +10,7 @@
         </div>
         <hr class="buttons-separator">
         <div class="info-panel">
-                <span class="filter-row1-info-button info-button" ng-click="setInformation(keys.eventFilterRegisteredUsers)">
+                <span class="filter-row1-info-button info-button" ng-click="setInformation(keys.createdEventInfo)">
                     <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </span>
         </div>
@@ -23,7 +23,7 @@
                     <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </span>
         </p>
-        <display-event-directive></display-event-directive>
+        <display-editable-event-directive></display-editable-event-directive>
         <button class="add-event-button" ng-click="editOrCreateEventAction()">{{getAddOrEditButton()}}</button>
     </div>
 

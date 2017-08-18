@@ -1,0 +1,60 @@
+<div class="show-events-directive" ng-controller="showEventsCtrl">
+    <div class="filter-show-events">
+        <div class="filter-button">
+            <a ng-click="show.showFilterEvents = !show.showFilterEvents">
+                filtrează
+                <i class="fa fa-caret-right" aria-hidden="true" ng-if="!show.showFilterEvents"></i>
+                <i class="fa fa-caret-down" aria-hidden="true" ng-if="show.showFilterEvents"></i>
+            </a>
+        </div>
+        <div class="filter-options" ng-if="show.showFilterEvents">
+            <div class="filter-by-dojos">
+                <select id="event-dojo-filter" ng-options="dojoFilter for dojoFilter in filterByDojo"
+                        ng-model="filters.selectedFilterByDojo" ng-change="filterEvents()"></select>
+            </div>
+            <div class="filter-by-workshop">
+                <select id="event-workshop-filter" ng-options="workshopFilter for workshopFilter in filterByWorkshop"
+                        ng-model="filters.selectedFilterByWorkshop" ng-change="filterEvents()"></select>
+            </div>
+        </div>
+
+    </div>
+    <div class="show-events-events-container">
+        <div class="event" ng-repeat="localEvent in showEvents.filteredEvents">
+            <h3 class="event-name inner-white" ng-click="viewEventAction(localEvent)">{{localEvent.name}}</h3>
+            <div class="dojo-name inner-white" ng-click="viewDojoAction(localEvent)">
+                <p>la <strong>{{localEvent.dojoName}}</strong></p>
+            </div>
+            <div class="event-date inner-white">
+                <p class="recurrent-info" ng-if="!localEvent.dateInfo.isUniqueEvent">
+                     {{'Eveniment' + (localEvent.typeOfReccurentEvent ? localEvent.typeOfReccurentEvent : ' saptamanal')}}
+                </p>
+                <p class="date-info" >
+                    <span ng-if="!localEvent.dateInfo.isUniqueEvent">Următoarea dată:</span>
+                    <span>
+                        <b>{{localEvent.dateInfo.eventDay}} {{localEvent.dateInfo.eventDayOfMonth}}
+                        {{localEvent.dateInfo.eventMonth}}</b> {{getEventHours(localEvent)}}.
+                    </span>
+                </p>
+            </div>
+            <div class="workshops inner-white">
+                <h4 class="workshop-header">Ateliere:</h4>
+                <p ng-repeat="workshop in localEvent.workshops">
+                    <!--<i class="fa fa-arrow-right" aria-hidden="true"></i>-->
+                    <code>{{workshop}}</code>
+                </p>
+            </div>
+            <div class="event-bttns-bar">
+                <button ng-click="viewEventAction(localEvent)">Vezi detalii eveniment</button>
+                <button ng-click="viewDojoAction(localEvent)">Vezi detalii dojo</button>
+            </div>
+
+            <div class="registered-users" ng-if="localEvent.regUsers">
+                <p class="registered-user" ng-repeat="regUser in localEvent.regUsers">
+                    <code>{{regUser.firstName + ' ' + regUser.lastName}}</code> este {{regUser.status ? 'confirmat' : 'înregistrat'}} ca si
+                    <code>{{regUser.nameOfTicket}}</code> la atelierul de <code>{{regUser.workshop}}</code>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

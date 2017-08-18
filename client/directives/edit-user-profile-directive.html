@@ -4,48 +4,73 @@
         <!--<img class="edit-user-image" ng-click="loadPicture()" title="Schimba poza"-->
           <!--src="{{myProfile.user.userPhoto ? '../img/user_photos/' +  myProfile.user.userPhoto: '../img/poza_profil.png'}}">-->
         <div class="user-profile-img"
-             style="{{myProfile.user.userPhoto ? 'background-image:url(\'../img/user_photos/' + myProfile.user.userPhoto + '\')': 'background-image:url(\'../img/poza_profil.png\')'}}"></div>
+             style="{{getUserPictureURL()}}"></div>
         <label class="edit-user-image"><i class="fa fa-upload" aria-hidden="true" ng-click="loadPicture()"></i></label>
-        <form enctype="multipart/form-data" action="{{'user/' + keys.uploadUserPictureRoute}}" method="post">
-            <input class="always-hide" type="text" ng-model="myProfile.user._id">
-            <input class="always-hide" id="user-photo-input" type="file" name="user-picture">
-            <input class="always-hide" type="submit" id="user-photo-upload-button" value="Schimba poza">
-        </form>
+        <input class="always-hide" id="user-photo-input" type="file" name="user-picture">
         <p>{{myProfile.user.firstName}}</p>
     </div>
     <button class="edit-profile-button" ng-click="goBackAction()">Înapoi la profil</button>
+
     <div class="personal-data">
+
+        <!--sanitize info-->
+        <div class="label-and-value sanitized-label-and-value">
+            <p class="sanitize-info" ng-if="myProfile.sanitize.hasBeenSanitized">
+                <i class="fa fa-window-close close-button" aria-hidden="true" ng-click="closeHasBeenSanitizedInfo()"></i>
+                Unele cîmpuri introduse au fost modificate deoarece nu se încadrează
+                în valorile acceptate (câmpurile sunt subliniate cu verde).
+            </p>
+        </div>
+
         <h3>Date personale</h3>
+
+        <!--lastName-->
         <div class="label-and-value">
             <label class="left-label" for="personal-data-lastname">Nume</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-lastname" ng-model="myProfile.user.lastName"
-                   ng-click="myProfile.errors.lastName = undefined"> <br>
-            <p class="error" ng-show="myProfile.errors && myProfile.errors.lastName">{{myProfile.errors.lastName}}</p>
+                   ng-click="myProfile.errors.lastName = undefined" ng-focus="lastnameInfo = true" ng-blur="lastnameInfo = false"
+                    ng-class="{sanitized: myProfile.sanitize.lastName}"> <br>
+            <p class="error" >{{myProfile.errors.lastName}}</p>
+            <p class="info" ng-if="lastnameInfo">Numele este obligatoriu si trebuie sa contina doar litere.</p>
         </div>
+
+        <!--firstName-->
         <div class="label-and-value">
             <label class="left-label" for="personal-data-firstname">Prenume</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-firstname" ng-model="myProfile.user.firstName"
-                   ng-click="myProfile.errors.firstName = undefined"><br>
+                   ng-click="myProfile.errors.firstName = undefined" ng-focus="firstnameInfo = true" ng-blur="firstnameInfo = false"
+                   ng-class="{sanitized: myProfile.sanitize.firstName}"><br>
             <p class="error" ng-show="myProfile.errors && myProfile.errors.firstName">{{myProfile.errors.firstName}}</p>
+            <p class="info" ng-if="firstnameInfo">Prenumele este obligatoriu si trebuie sa contina doar litere.</p>
         </div>
-        <div class="label-and-value" ng-show="myProfile.views.showAlias">
+
+        <!--alias-->
+        <div class="label-and-value" ng-if="showAliasInEditing()">
             <label class="left-label" for="personal-data-alias">Alias</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-alias" ng-model="myProfile.user.alias"
-                   ng-click="myProfile.errors.alias = undefined"><br>
+                   ng-click="myProfile.errors.alias = undefined" ng-readonly="isAliasReadOnly()"><br>
             <p class="error" ng-show="myProfile.errors && myProfile.errors.alias">{{myProfile.errors.alias}}</p>
         </div>
+
+        <!--birth-date-->
         <div class="label-and-value">
             <label class="left-label" for="personal-data-birthdate">Data nașterii</label>
             <input class="dojo-simple-fields-input" type="date" id="personal-data-birthdate" ng-model="myProfile.user.birthDate"
-                   ng-click="myProfile.errors.birthDate = undefined"><br>
+                   ng-click="myProfile.errors.birthDate = undefined" ng-focus="birthdateInfo = true" ng-blur="birthdateInfo = false"
+                   ng-class="{sanitized: myProfile.sanitize.birthDate}"><br>
             <p class="error" ng-show="myProfile.errors && myProfile.errors.birthDate">{{myProfile.errors.birthDate}}</p>
+            <p class="info" ng-if="birthdateInfo">Ziua de nastere este obligatorie.</p>
         </div>
+
+        <!--address-->
         <div class="label-and-value">
             <label class="left-label" for="personal-data-address">Adresa</label>
             <textarea type="text" id="personal-data-address" ng-model="myProfile.user.address"
-                      ng-click="myProfile.errors.address = undefined">
+                      ng-click="myProfile.errors.address = undefined" ng-focus="addressInfo = true" ng-blur="addressInfo = false"
+                      ng-class="{sanitized: myProfile.sanitize.address}">
             </textarea><br>
             <p class="error" ng-show="myProfile.errors && myProfile.errors.address">{{myProfile.errors.address}}</p>
+            <p class="info" ng-if="addressInfo">Adresa este obligatorie.</p>
         </div>
         <br>
         <!--<button ng-click="saveAction()">Salveaza</button>TODO Adina liked it removed-->
@@ -54,26 +79,36 @@
 
     <div class="personal-data">
         <h3>Contact</h3>
-
-        <div class="label-and-value" ng-hide="isChildUnder14()">
+        <!--email-->
+        <div class="label-and-value" ng-if="showEmailInEditing()">
             <label class="left-label" for="personal-data-email">E-mail</label>
-            <input class="dojo-simple-fields-input" type="text" id="personal-data-email" ng-model="myProfile.user.email" readonly><br>
+            <input class="dojo-simple-fields-input" type="text" id="personal-data-email" ng-model="myProfile.user.email"
+                ng-readonly="isEmailReadOnly()"><br>
         </div>
 
+        <!--phone-->
         <div class="label-and-value">
             <label class="left-label" for="personal-data-phone">Telefon</label>
-            <input class="dojo-simple-fields-input" type="text" id="personal-data-phone"  placeholder="07xxxxx" ng-model="myProfile.user.phone"
-                   ng-click="myProfile.errors.phone = undefined"><br>
+            <input class="dojo-simple-fields-input" type="text" id="personal-data-phone"  placeholder="07xxxxx"
+                   ng-model="myProfile.user.phone" ng-click="myProfile.errors.phone = undefined"
+                   ng-focus="phoneInfo = true" ng-blur="phoneInfo = false" ng-class="{sanitized: myProfile.sanitize.phone}">
+            <br>
             <p class="error" ng-show="myProfile.errors && myProfile.errors.phone">{{myProfile.errors.phone}}</p>
+            <p class="info" ng-if="phoneInfo">Telefonul este obligatoriu si poate fi doar cifre.</p>
         </div>
 
-        <div class="label-and-value" ng-hide="isChildUnder14()">
+        <!--facebook-->
+        <div class="label-and-value" ng-if="showFacebookInEditing()">
             <label class="left-label" for="personal-data-facebook">Facebook</label>
-            <input class="dojo-simple-fields-input" type="text" id="personal-data-facebook"  placeholder="Cont Facebook" ng-model="myProfile.user.facebook"><br>
+            <input class="dojo-simple-fields-input" type="text" id="personal-data-facebook"  placeholder="Cont Facebook"
+                   ng-model="myProfile.user.facebook" ng-class="{sanitized: myProfile.sanitize.facebook}"><br>
         </div>
-        <div class="label-and-value" ng-hide="isChildUnder14()">
+
+        <!--linkedIn-->
+        <div class="label-and-value" ng-if="showLinkedInInEditing()">
             <label class="left-label" for="personal-data-Linkedin">Linkedin</label>
-            <input class="dojo-simple-fields-input" type="text" id="personal-data-Linkedin"  placeholder="Cont Linkedin" ng-model="myProfile.user.linkedin"><br>
+            <input class="dojo-simple-fields-input" type="text" id="personal-data-Linkedin"  placeholder="Cont Linkedin"
+                   ng-model="myProfile.user.linkedin" ng-class="{sanitized: myProfile.sanitize.linkedin}"><br>
         </div>
 
         <!--<button ng-click="saveAction()">Salveaza</button>TODO Adina liked it removed-->
@@ -83,26 +118,33 @@
 
     <div class="personal-data">
         <h3>Despre tine</h3>
+
+        <!--biography-->
         <div class="label-and-value biography-container">
             <label class="left-label" for="personal-data-biography">Bio</label>
-            <textarea type="text" id="personal-data-biography" placeholder="Scurtă descriere" ng-model="myProfile.user.biography"></textarea>
+            <textarea type="text" id="personal-data-biography" placeholder="Scurtă descriere" ng-model="myProfile.user.biography"
+                      ng-class="{sanitized: myProfile.sanitize.biography}"></textarea>
             <div class="clear-fix"></div>
         </div>
 
+        <!--programming languages-->
         <div class="label-and-value">
             <label class="left-label" for="personal-data-phone">Limbaje de programare</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-programmingLanguages"  placeholder="Ex: Java, Javascript, Python"
-                   ng-model="myProfile.user.programmingLanguages"><br>
+                   ng-model="myProfile.user.programmingLanguages" ng-class="{sanitized: myProfile.sanitize.programmingLanguages}"><br>
         </div>
 
+        <!--foreign languages-->
         <div class="label-and-value">
             <label class="left-label" for="personal-data-languagesSpoken">Limbi străine</label>
             <input class="dojo-simple-fields-input" type="text" id="personal-data-languagesSpoken"  placeholder="Ex: Engleză, Germană, Chineză"
-                   ng-model="myProfile.user.languagesSpoken"><br>
+                   ng-model="myProfile.user.languagesSpoken" ng-class="{sanitized: myProfile.sanitize.languagesSpoken}"><br>
         </div>
+
+        <!--gender-->
         <div class="label-and-value">
             <label class="left-label" for="personal-data-gender">Sexul</label>
-            <div id="personal-data-gender" ng-model="myProfile.user.gender">
+            <div id="personal-data-gender" ng-model="myProfile.user.gender" ng-class="{sanitized: myProfile.sanitize.gender}">
                 <label>
                     <input  type="radio" name="gender" ng-model="myProfile.user.gender" value="male"> Masculin
                 </label>
@@ -114,21 +156,43 @@
                 </label>
             </div>
         </div>
-        <div class="label-and-value" ng-show="myProfile.views[keys.showPasswords]">
-            <label class="left-label" for="personal-data-password">Parola</label>
+
+        <!--passwords-->
+        <div class="label-and-value" ng-if="myProfile.views[keys.showPasswords]">
+            <label class="left-label" for="personal-data-password"></label>
             <input class="dojo-simple-fields-input" type="password" placeholder="parola" id="personal-data-password" ng-model="myProfile.user.password"
                    ng-click="myProfile.errors.password = undefined"><br>
             <p class="error" ng-show="myProfile.errors && myProfile.errors.password">{{myProfile.errors.password}}</p>
         </div>
-        <div class="label-and-value" ng-show="myProfile.views[keys.showPasswords]">
+        <div class="label-and-value" ng-if="myProfile.views[keys.showPasswords]">
             <label class="left-label" for="personal-data-password2">Confirmare parola</label>
             <input class="dojo-simple-fields-input" type="password" id="personal-data-password2" placeholder="confirmare parolă"  ng-model="myProfile.user.password2"
                    ng-click="myProfile.errors.password2 = undefined"><br>
             <p class="error" ng-show="myProfile.errors && myProfile.errors.password2">{{myProfile.errors.password2}}</p>
         </div>
 
-        <button class="save-profile" ng-click="saveAction()">Salvează</button>
+
+        <div class="buttons-div">
+            <button ng-if="myProfile.views[keys.showChangeIdentification]" ng-click="changeUserIdentification()">
+                Schimba indentificare
+            </button>
+            <button ng-if="myProfile.views[keys.showChangePasswords]" ng-click="changeUserPasswords()">
+                Schimba parole
+            </button>
+            <button class="save-profile" ng-click="saveAction()">Salvează</button>
+        </div>
+
+        <div class="label-and-value change-important-information" ng-if="myProfile.views[keys.viewChangeIdentificationsPanel]">
+            <change-user-identification-directive></change-user-identification-directive>
+        </div>
+        <div class="label-and-value change-important-information" ng-if="myProfile.views[keys.viewChangePasswordsPanel]">
+            <change-user-passwords-directive></change-user-passwords-directive>
+        </div>
+
+
+
         <div class="clear-fix"></div>
+
 
         <div class="add-kids-panel" ng-show="myProfile.views[keys.showAddChildren]">
             <button ng-click="addChildUnder14Action()">Adaugă copil <br>sub 14 ani</button>
@@ -138,15 +202,22 @@
 
 
     </div>
+
+    <!--invite parents-->
     <div class="personal-data" ng-if="myProfile.views[keys.showInviteParent]">
         <h3>Parinți</h3>
-        <div class="label-and-value">
+        <div class="label-and-value invite-parent">
             <label label class="left-label" for="personal-data-invite-parent">Invită</label>
             <input class="dojo-simple-fields-input" type="text" placeholder="Email parinte" id="personal-data-invite-parent"
                    ng-model="myProfile.emailParent" ng-click="myProfile.errors.inviteEmail = undefined"><br>
             <p class="error" ng-show="myProfile.errors && myProfile.errors.inviteEmail">{{myProfile.errors.inviteEmail}}</p>
-            <button class="save-profile" ng-click="inviteParent()">Invită părinte</button>
+            <div class="invite-parent-btn">
+                <button class="save-profile" ng-click="inviteParent()">Invită părinte</button>
+            </div>
+
         </div>
 
     </div>
+
+
 </div>

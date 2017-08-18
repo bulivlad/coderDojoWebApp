@@ -10,9 +10,6 @@ const logger = require('winston');
 const validator = require('validator');
 const helper  = require('./helperController');
 
-
-
-
 //Method for adding a new dojo (only the admin can do that)
 module.exports.addDojo = function(req, res){
     logger.debug(`Entering DojosRoute: ${keys.addDojoRoute} by ${helper.getUser(req)}`);
@@ -71,7 +68,6 @@ module.exports.deleteDojo = function(req, res){
 
 //Route for editing an existing dojo (only the admin and champion can do that)
 module.exports.editDojo = function(req, res){
-    logger.debug(`Entering DojosRoute: ${keys.editDojoRoute} by ${helper.getUser(req)}`);
     let user = req.user;
     let modifiedDojo = req.body.dojo;
 
@@ -581,32 +577,6 @@ let addUsersChildrenToDojo = module.exports.addUsersChildrenToDojo = function(us
     }
 };
 
-//TODO delete in this really proves unecessary as it seems now
-
-////Method for adding user's children to the users dojos
-//module.exports.addUsersChildToUsersDojos = function(user, childId){
-//    let usersChildren = user.children;
-//    if(usersChildren.length > 0){
-//        Dojo.getUsersDojos(childId, function(err, dojos){
-//            if (err){
-//                logger.error(`Problems retrieving dojos by ${helper.getUser(user)} for adding his/her children` +
-//                    ` to his/her dojos: ` + err);
-//            }
-//            let listOfUsersDojosIds = helper.getListOfFieldsFromListOfObjects(dojos, '_id');
-//            Dojo.addUsersChildToUsersDojos(childId, listOfUsersDojosIds, function(err){
-//                if(err){
-//                    logger.error(`Problems adding user's child (id=${childId}) to user's  dojos by ${helper.getUser(user)}: ` + err);
-//                    return;
-//                }
-//                logger.silly(`Child (id=${childId})  of ${helper.getUser(user)} added to user's dojos`);
-//            })
-//
-//        });
-//    }
-//
-//};
-
-
 //Method for getting a dojo from a list of dojos
 function getDojoFromDojos(dojoId, dojos){
     for(var i = 0; i < dojos.length; i++){
@@ -821,11 +791,17 @@ function sanitizeDojo(dojo){
 
     //Sanitizing the name
     let sanitName = validator.trim(dojo.name);
+    if(sanitName.length > 50){
+        sanitName = sanitName.substring(0, 50);
+    }
     sanitName = validator.whitelist(sanitName, helper.eventWhiteListNames);
     ret.name = sanitName;
 
     //Sanitizing the adress
     let sanitAdress = validator.trim(dojo.address);
+    if(sanitAdress.length > 100){
+        sanitAdress = sanitAdress.substring(0, 100);
+    }
     sanitAdress = validator.whitelist(sanitAdress, helper.eventWhiteListNames);
     ret.address = sanitAdress;
 

@@ -3,7 +3,7 @@
  */
 
 angular.module("coderDojoTimisoara")
-    .controller('dojoCtrl', function($scope, $rootScope, $location, $compile, dataService, helperSvc){
+    .controller('dojoCtrl', function($scope, $rootScope, $location, $timeout, $compile, dataService, helperSvc){
         $scope.dojo = {};
         $scope.views = {};
 
@@ -55,7 +55,7 @@ angular.module("coderDojoTimisoara")
             } else if($scope.isCurrentView(keys.viewMembers) || // if Viewing members
                 $scope.isCurrentView(keys.editDojo)){     // or editing dojos
                 $scope.setView(keys.viewDojo, [keys.showBackButton]);
-                createMapWithSingleDojo();
+                createMapWithDojo($scope.dojo, 'dojo-map-single-dojo');
             } else if($scope.isCurrentView(keys.addEventToDojo)){
                 $scope.initializeDojoCtrl();
             }
@@ -69,7 +69,11 @@ angular.module("coderDojoTimisoara")
                 $scope.goToMyDojos();
             } else if(dojoSelector === keys.myProfile){
                 $scope.goToViewUserProfile();
-            } else {
+            } else if(dojoSelector === keys.myEventsLocation){
+                $scope.goToMyEvents();
+            } else if(dojoSelector === keys.eventsLocation){
+                $scope.goToEvents();
+            }else {
                 $location.path('/' + keys.cautaUnDojo);
             }
         };
@@ -125,9 +129,27 @@ angular.module("coderDojoTimisoara")
           $scope.setView(keys.addEventToDojo);
         };
 
+        var createDatesForRecurrentEvent = function(){
+            $( function() {
+                var $dateInput = $( ".start-day-recurrence-day" );
+                $dateInput.datepicker({
+                    changeMonth: true,
+                    changeYear: false,
+                    maxDate: 0,
+                    //minDate: '-1m',
+                    dayNamesMin:keys.daysOfWeekShort,
+                    monthNamesShort:keys.months,
+                    dateFormat: 'yy-mm-dd'
+                });
+            } );
+        };
+
         //Method for goin into edit dojo mode
         $scope.goToEditDojo = function(){
             $scope.setView(keys.editDojo);
+            $timeout(function(){
+                createDatesForRecurrentEvent();
+            }, 1000);
         };
 
         // Method to determine if the current view is thisView
@@ -312,12 +334,6 @@ angular.module("coderDojoTimisoara")
 
         };
 
-        var createMapWithSingleDojo = function(){
-            setTimeout(function(){
-                createMapWithDojo($scope.dojo, 'dojo-map-single-dojo');
-
-            }, 200);
-        };
 
         var getCurrentDojoEvents = function(){
             dataService.getCurrentDojoEvents({dojoId: $scope.dojo._id})

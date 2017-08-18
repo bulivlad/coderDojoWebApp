@@ -188,6 +188,22 @@ a {
   }
 }
 
+p.sanitize-info {
+  background-color: rgba(144, 238, 144, 0.1);
+  box-sizing: border-box;
+  font-size: 0.8em;
+  max-width: 80%;
+  margin: 5px auto;
+  padding: 5px;
+
+  i.fa-window-close {
+    cursor: pointer;
+    float: right;
+    margin-left: 5px;
+  }
+
+}
+
 
 /***************
 ALERTS
@@ -285,36 +301,40 @@ INFORMATION
   background-color: rgba(150, 150, 150, 0.8);
   height: 100%;
   left: 0;
-  overflow: hidden;
-  position: absolute;
+  position: fixed;
+  overflow: scroll;
   top: 0;
   width: 100%;
   z-index: 100;
   div.information-container {
     //background-color: #e9ebee;
     //border: 1px solid $my_profile_color;
-    margin: 23% 10% 0 10%;
-    position: fixed;
+    margin: 5% auto;
+    position: relative;
     width: 80%;
+    max-width: 800px;
 
     div.information-body {
       background-color: #e9ebee;
       border: 3px solid $my_profile_color;
       padding: 20px 10px;
-
       h3 {
         color: $my_profile_color;
         text-align: center;
       }
 
-      strong {
-        color: $my_dojo_color;
+      p {
+        strong {
+          color: $my_dojo_color;
+        }
       }
+
+
     }
 
     button.close-info-button {
       display: block;
-      margin: 0 auto;
+      margin: 15px auto 5px auto;
       width: 50px;
     }
   }
@@ -331,13 +351,12 @@ SNACKBAR
   border-radius: 2px;
   color: #fff;
   font-size: 17px;
-  left: 50%;
-  min-width: 250px;
-  margin-left: -125px;
+  left: 20%;
   padding: 16px;
   position: fixed;
   text-align: center;
   visibility: hidden;
+  width: 60%;
   z-index: 60;
 }
 
@@ -915,21 +934,48 @@ Login and Register
       }
     }
 
+    .sanitized {
+      background-color: rgba(129, 227, 129, 0.65);
+    }
+
+    div.sanitized-info-container {
+      background-color: rgba(90, 149, 90, 0.88);
+      box-sizing: border-box;
+      margin: 15px auto;
+      text-align: justify;
+      padding: 7px;
+      width: 90%;
+    }
+
+
     .input_and_error {
       position: relative;
       margin: 0 auto;
       width: 250px;
 
-      p {
-        background-color: rgba(255, 0, 0, 0.3);
+      p.info, p.error {
         border-radius: 3px;
+        padding:0 5px;
+        position: absolute;
+        width: 250px;
+      }
+
+      p.error {
+        background-color: rgba(255, 0, 0, 0.3);
         color: white;
         font-size: 0.6em;
-        position: absolute;
-        padding:0 5px;
         top: 25px;
-        width: 250px;
         z-index: 1;
+      }
+
+      p.info {
+        background-color: rgba(218, 218, 218, 0.93);
+        color: #545454;
+        font-size: 0.8em;
+        top: -25px;
+      }
+      p.email-info {
+        top: -40px;
       }
     }
   }
@@ -1089,14 +1135,25 @@ My PROFILE
         }
       }
 
-      p.error { //The error
+      p.error, p.info { //The error
         border-radius: 3px;
         color: red;
         display: inline-block;
         font-size: 0.65em;
         position: absolute;
-        left: 38%;
+        left: 33%;
         top: -13px;
+      }
+
+      p.info {
+        background-color: rgba(218, 218, 218, 0.93);
+        color: #545454;
+        font-size: .8em;
+        padding: 3px;
+        text-align: center;
+        min-height: 30px;
+        width: 63%;
+        top: -45px;
       }
 
       #personal-data-gender {
@@ -1124,11 +1181,28 @@ My PROFILE
       }
     }
 
+    .change-important-information {
+      height: auto;
+    }
 
-    button.save-profile { //The save profile buttons
+    .sanitized-label-and-value {
+      height: auto;
+    }
+
+
+    div.buttons-div {
+      display: flex;
+      justify-content: space-around;
+
+    }
+
+    div.invite-parent-btn {
       clear: both;
-      float: right;
       text-align: right;
+    }
+
+    div.invite-parent {
+      margin-bottom: 15px;
     }
 
     div.add-kids-panel {
@@ -1290,6 +1364,10 @@ My PROFILE
 
   p.error {
     top: -53px
+  }
+
+  .sanitized {
+    background-color: rgba(144, 238, 144, 0.3)
   }
 
   @media screen and (min-width: $transition_resolution){
@@ -2101,21 +2179,6 @@ Add or create dojos
     text-align: right;
   }
 
-  p.sanitize-info {
-    background-color: rgba(144, 238, 144, 0.1);
-    box-sizing: border-box;
-    float: right;
-    font-size: 0.8em;
-    max-width: 66%;
-    padding: 5px;
-
-    i.fa-window-close {
-      cursor: pointer;
-      float: right;
-    }
-
-  }
-
   label {
     color: $my_profile_color;
   }
@@ -2173,20 +2236,35 @@ Add or create dojos
 
   .personal-data div.weekly-event {
     height: auto;
+    margin: 10px;
+    position: relative;
+    text-align: center;
     width: 100%;
   }
 
   .label-and-value label.weekly-event-label { //Label weekly event mobile view
-    display: block;
     margin: 10px 0;
     width: auto;
     text-align: center;
   }
 
+  span.info-button {
+    position: absolute;
+    right: 0;
+  }
+
   div.weekly-event-body { //Event body weekly event mobile view
     float: none;
+    margin-top: 10px;
     max-width: none;
+    text-align: left;
     width: 100%;
+  }
+
+  button.save-profile {
+    clear: both;
+    display: block;
+    margin-left: 85%;
   }
 
   @media screen and (min-width: $transition_resolution) {
@@ -2675,19 +2753,6 @@ div.add-or-edit-event {
     text-align: right;
   }
 
-  p.sanitize-info {
-    background-color: rgba(144, 238, 144, 0.1);
-    box-sizing: border-box;
-    float: right;
-    font-size: 0.8em;
-    max-width: 66%;
-    padding: 5px;
-
-    i.fa-window-close {
-      cursor: pointer;
-      float: right;
-    }
-  }
   div.button-bar-add-event{
     display: flex;
     button {
@@ -2946,6 +3011,179 @@ div.event-display {//This is part of the event directive, it is the actual event
   }
 }//div.event-display
 
+
+/******************************
+MY EVENTS
+*******************************/
+
+div.my-events {
+
+}
+
+
+/***********
+Show events directive
+************/
+div.show-events-directive {
+    @include align-center-80-percent();
+
+  div.filter-show-events{
+    border: 1px solid #cdd0d2;
+    background-color: rgba(181, 190, 193, 0.22);
+    margin-bottom: 15px;
+
+    div.filter-button {
+      text-align: right;
+
+      a{
+        color: $my_profile_color;
+        cursor: pointer;
+        display: inline-block;
+        padding: 3px;
+        font-style: italic;
+        text-decoration: none;
+      }
+    }
+
+    div.filter-options {
+      border: 1px solid #cdd0d2;
+      display: flex;
+      justify-content: space-around;
+      margin:0 auto 3px auto;
+      flex-wrap: wrap;
+      padding: 5px;
+      width: 90%;
+
+      div.filter-by-dojos, div.filter-by-workshop {
+        color: $my_profile_color;
+
+        select {
+          background-color: white;
+          border: 1px solid #cdd0d2;
+          color: grey;
+          padding: 3px;
+          margin-bottom: 3px;
+          overflow:hidden;
+          text-overflow:ellipsis;
+          white-space:nowrap;
+          /*for firefox*/ // remove arrow
+          -moz-appearance: none;
+          /*for chrome*/
+          -webkit-appearance:none;
+
+          &:hover {
+            cursor: pointer;
+          }
+
+          &:focus {
+            background-color: white;
+            outline: none;
+          }
+
+          option {
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+          }
+        }
+      }
+
+
+    }
+
+  }//div.filter-show-events
+
+  div.show-events-events-container{
+    color: #0c3a54;
+    div.event {
+      border: 1px solid #cdd0d2;
+      background-color: rgba(181, 190, 193, 0.22);
+      overflow: auto;
+      margin: 35px 0;
+
+      .inner-white {
+        background-color: white;
+        margin: 10px;
+        text-align: center;
+      }
+
+      h3.event-name {
+        color: $my_profile_color;
+        font-size: 1.5em;
+        padding: 3px;
+        &:hover{
+          cursor: pointer;
+          background-color: rgba(255, 255, 255, 0.5);
+        }
+      }
+
+      div.dojo-name {
+        text-align: center;
+        p {
+          strong {
+            color: $my_profile_color;
+            font-size: 1.1em;
+          }
+        }
+        &:hover{
+          cursor: pointer;
+          background-color: rgba(255, 255, 255, 0.5);
+        }
+      }
+
+      div.event-date {
+        p.date-info {
+          b {
+            color: $my_profile_color;
+          }
+        }
+      }//div.event-date
+
+      div.workshops {
+        h4.workshop-header{
+          font-size: 1.2em;
+          margin:5px 0;
+        }
+
+      }//div.workshops
+
+      div.event-bttns-bar {
+        display: flex;
+        justify-content: space-around;
+        padding: 5px;
+      }
+
+      div.registered-users {
+        padding: 5px;
+        text-align: center;
+
+        p.registered-user {
+          //background-color: rgba(173, 216, 230, 0.22);
+          background-color: white;
+          color: $my_profile_color;
+          border-radius: 13px;
+
+          margin: 10px auto;
+          width: 90%;
+
+          code {
+            font-weight: bold;
+          }
+        }
+
+      }//div.registered-users
+
+    }
+
+    div.event:first-child {
+      margin-top: 0px;
+    }
+
+  }//div.show-events-events-container
+
+}//div.show-events-directive
+
+
 /******************************
 Add or edit badge
 *******************************/
@@ -2979,20 +3217,7 @@ div.add-or-edit-badge {//This is for the directive
     }
   }
 
-  p.sanitize-info {
-    background-color: rgba(144, 238, 144, 0.1);
-    box-sizing: border-box;
-    font-size: 0.8em;
-    max-width: 80%;
-    margin: 5px auto;
-    padding: 5px;
 
-    i.fa-window-close {
-      cursor: pointer;
-      float: right;
-    }
-
-  }
 
   div.badge-content {
     div.badge-group {
@@ -3378,6 +3603,17 @@ div.view-badge {
     font-family: 'Permanent Marker', cursive;
     margin: 10px auto;
     width: 80%;
+
+    p {
+      span.green {
+        color: green;
+        font-size: 1.2em;
+      }
+      span.blue {
+        color: $my_profile_color;
+      }
+    }
+
   }//div.badges-received
 
   div.badge-description {
@@ -3631,6 +3867,635 @@ div.add-badges-to-users {
     }//div.select-users-for-adding-badges
   }
 }//div.add-badges-to-users
+
+/******************************
+EVENIMENTE (events-view)
+*******************************/
+div.events-view {
+  div.events-navigation {
+    //background-color: $my_profile_color;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto 15px auto;
+    width: 90%;
+    div {
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      border: 3px solid $my_profile_color;
+      padding: 2px 5px;
+      text-align: center;
+      width: 28%;
+
+      p {
+        color: $my_profile_color;
+        font-size: 0.9em;
+        font-weight: bold;
+      }
+
+      &:hover {
+        background-color: $my_profile_color;
+        cursor: pointer;
+        p {
+          color: white;
+        }
+      }
+    }
+
+    div.selected {
+      background-color: $my_profile_color;
+
+      p {
+        color: white;
+      }
+      &:hover {
+        border: 3px solid $my_profile_color;
+        cursor: default;
+        p {
+          color: white;
+        }
+      }
+    }
+  }
+
+}//div.events-view
+
+
+/******************************
+ADD SPECIAL EVENT
+*******************************/
+div.add-special-event {
+  @include align-center-80-percent();
+
+  div.pages-banner {
+    margin-bottom: 5px;
+    width: 100%;
+  }
+}
+
+
+/*****************
+Add or edit special event directive
+******************/
+
+div.add-or-edit-special-event-directive {
+  p.sanitize-info {
+    background: rgba(8, 128, 5, 0.27);
+    color: #024302;
+    font-size: .9em;
+    padding: 5px;
+    margin: 15px;
+  }
+
+
+  div.special-event-image {
+    position: relative;
+    margin: 0 auto;
+    text-align: right;
+
+    div.image-div {
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      border: 4px solid $my_profile_color;
+      box-sizing: border-box;
+      display: block;
+      height: 200px;
+      margin: 0 auto;
+    }
+
+    button {
+      bottom: 25px;
+      height: 25px;
+      position: relative;
+    }
+  }//div.special-event-image
+
+  div.error-and-info {
+
+    p.info, p.error {
+      background-color: rgba(230, 230, 230, 0.85);
+      border-radius: 3px;
+      color: #535353;
+      font-size: .8em;
+      padding: 3px;
+      margin: 5px auto;
+      width: 80%;
+    }
+
+    p.error {
+      background-color: rgba(255, 209, 204, 0.26);
+      color: red;
+    }
+
+    p.info {
+      position: absolute;
+      left: 10%;
+      top: -25px;
+    }
+  }
+
+  div.special-event-name, div.special-event-address, div.special-event-timeline, div.special-event-description {
+    background-color: rgba(240, 248, 255, 0.74);
+    padding: 15px 0;
+    margin-bottom: 15px;
+    position: relative;
+    text-align: center;
+
+    div.label-and-value {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+
+
+      label {
+        display: inline-block;
+        color: $my_profile_color;
+        margin-bottom: 5px;
+      }
+
+      input, textarea, select {
+        @include filter-input-styling();
+        border: 1px solid rgba(0, 72, 137, 0.24);
+        background-color: rgba(109, 179, 236, 0.1);
+      }
+
+      .sanitized {
+        background-color: rgba(8, 128, 5, 0.27);
+      }
+    }//div.label-and-value
+
+
+
+  }//div.special-event-name
+
+  div.special-event-address {
+    div.label-and-value {
+      textarea#special-event-address {
+        height: 60px;
+      }
+
+    }
+
+  }//div.special-event-address
+
+
+  div.special-event-description {
+    div.label-and-value {
+      textarea {
+        height: 120px;
+      }
+
+    }
+
+  }//div.special-event-special-event-description
+
+  div.special-event-timeline {
+    div.error-and-info {
+      p.info {
+        top: -45px;
+      }
+    }
+
+    div.label-and-value {
+
+      div.end-time, div.start-time {
+        div.start-end-time {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+        }
+      }
+      div.start-time {
+        margin-bottom: 35px;
+      }
+    }
+  }//div.special-event-timeline
+
+
+
+
+  div.bttn-div {
+    margin-bottom: 15px;
+    text-align: center;
+
+    button {
+      background-color: rgba(109, 179, 236, 0.1);
+      border: 1px solid rgba(0, 72, 137, 0.24);
+      color: $my_profile_color;
+      font-family: "Exo", sans-serif;
+      font-size: 1em;
+      padding: 5px 5px;
+
+      &:hover {
+        background-color: rgba(240, 248, 255, 0.74);
+      }
+    }
+  }
+}//div.add-or-edit-special-event-directive
+
+
+/****************
+View special events directive
+*****************/
+
+div.special-events-directive {
+  @include align-center-80-percent();
+  padding: 15px;
+
+
+  div.special-event {
+    border: 1px solid #e5e5e5;
+    box-shadow: 10px 10px 15px #888888;
+    cursor: pointer;
+    margin-bottom: 20px;
+
+    &:hover {
+      box-shadow: 12px 12px 15px #888888;
+      transition: .3s;
+    }
+
+    div.special-event-image-container {
+      padding: 10px;
+
+      div.special-event-image {
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 150px;
+      }
+    }//div.special-event-image-container
+
+    h3.special-event-name {
+      color: $my_profile_color;
+      margin: 8px 0;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    h4.event-date {
+      color: $my_profile_color;
+      margin: 5px;
+      text-align: center;
+    }
+
+    div.special-event-description {
+      background-color: rgba(128, 128, 128, 0.1);
+      margin: 5px auto;
+      width: 90%;
+
+      p.description {
+        border-radius: 5px;
+        font-size: 0.85em;
+        padding: 5px;
+        max-height: 60px;
+        overflow: hidden;
+        text-align: center;
+      }
+
+      p.more {
+        color: lightgray;
+        text-align: center;
+      }
+    }
+
+
+
+
+  }//div.special-event
+
+}//div.special-events-directive
+
+
+/****************
+View special event directive
+*****************/
+div.view-special-event-directive {
+
+  div.special-event {
+    div.special-event-image-container {
+
+
+      div.special-event-image {
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 300px;
+      }
+    }
+
+    div.bttns-bar {
+      padding: 5px;
+      text-align: right;
+
+      button {
+        margin-right: 15px;
+      }
+    }
+
+    div.wrapper {
+      @include align-center-80-percent();
+
+      h3.special-event-name {
+        background-color: rgba(170, 184, 214, 0.25);
+        color: $my_profile_color;
+        margin: 8px 0;
+        text-align: center;
+        letter-spacing: 1px;
+      }
+
+      h4.event-date {
+        background-color: rgba(170, 184, 214, 0.15);
+        color: $my_profile_color;
+        margin: 5px;
+        text-align: center;
+      }
+
+      p.description {
+        background-color: rgba(170, 184, 214, 0.07);;
+        font-size: .9em;
+        margin: 20px 0;
+        padding: 10px;
+        text-align: center;
+      }
+
+
+      div.special-event-map {
+        height: 300px;
+
+        div#special-event-map {
+          height:98%;
+          margin: 1%;
+          width:98%;
+        }
+      }
+
+
+    }//div.wrapper
+
+
+  }
+
+
+}//div.view-special-event-directive
+
+
+/********************
+Change-identification-directive
+*********************/
+
+div.change-user-identification-directive {
+  background-color: rgba(210, 217, 232, 0.22);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 15px auto;
+
+  div.close-windows {
+    display: flex;
+    justify-content: flex-end;
+
+    span {
+      display: block;
+      margin: -4px 10px  5px 0;
+      font-size: 1.3em;
+
+      &:hover {
+        cursor: pointer;
+        font-weight: bold;
+      }
+    }
+  }
+
+  div.email-section, div.alias-section {
+    div.old-value {
+      align-items: center;
+      background-color: rgba(103, 162, 223, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      padding: 15px 8px;
+
+
+      label {
+        color: $my_profile_color;
+        font-weight: bold;
+        margin-bottom: 3px;
+      }
+
+      p {
+        @include  filter-input-styling();
+        width: 90%;
+      }
+    }
+
+    div.new-value {
+      background-color: rgba(103, 162, 223, 0.12);
+      padding: 10px 5px 5px 5px;
+
+
+      div.label-and-value-change-identification {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        position: relative;
+
+        label {
+          color: $my_profile_color;
+          font-weight: bold;
+          margin-bottom: 3px;
+        }
+
+
+        div.input-error-and-info {
+          position: relative;
+          width: 90%;
+
+          input {
+            @include filter-input-styling();
+            margin-bottom: 10px;
+            width: 100%;
+          }
+
+          p.info-change {
+            background-color: rgba(218, 218, 218, 0.93);
+            border-radius: 3px;
+            color: #545454;
+            font-size: 0.8em;
+            padding:0 5px;
+            position: absolute;
+            top: -45px;
+            width: 90%;
+          }
+        }
+        button.change-info {
+          width: 70%;
+        }
+
+      }// div.label-and-value
+
+    }//div.new-value
+
+    @media screen and (min-width: $transition_resolution) {
+      div.old-value {
+        flex-direction: row;
+        justify-content: flex-start;
+        label {
+          width: 15%;
+        }
+
+        p {
+          width: 78%;
+        }
+      }//div.old-value
+
+      div.new-value {
+        div.label-and-value-change-identification {
+          align-items: baseline;
+          flex-direction: row;
+          justify-content: flex-start;
+
+          label {
+            width: 15%;
+          }
+
+          div.input-error-and-info {
+            width: 62%;
+
+            p.info-change {
+              left: 5%;
+            }
+          }
+
+          button.change-info {
+            padding: 9px 5px;
+            margin-left: 3%;
+            width: 15%;
+          }
+
+
+
+
+        }//div.label-and-value-change-identification
+      }//div.new-value
+
+    }
+
+
+  }
+
+div.email-section {
+  margin-bottom: 15px;
+}
+
+
+
+
+}//div.change-user-identification-directive
+
+
+/********************
+Change-passwords-directive
+*********************/
+
+div.change-user-passwords-directive {
+  background-color: rgba(210, 217, 232, 0.22);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 15px auto;
+
+  div.close-windows {
+    display: flex;
+    justify-content: flex-end;
+
+    span {
+      display: block;
+      margin: -4px 10px 5px 0;
+      font-size: 1.3em;
+
+      &:hover {
+        cursor: pointer;
+        font-weight: bold;
+      }
+    }
+  }
+
+  div.passwords-section {
+    background-color: rgba(103, 162, 223, 0.12);
+    padding: 5px;
+
+    div.password-group {
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: 8px auto;
+      position: relative;
+      text-align: center;
+
+      label {
+        color: $my_profile_color;
+        font-weight: bold;
+      }
+
+      div.input-info-error {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        input {
+          @include  filter-input-styling();
+          margin: auto;
+          width: 95%;
+
+        }
+
+        p.info-change {
+          background-color: rgba(218, 218, 218, 0.93);
+          border-radius: 3px;
+          color: #545454;
+          font-size: 0.8em;
+          padding:0 5px;
+          position: absolute;
+          top: -45px;
+          width: 90%;
+        }
+
+        p.pass-change-error {
+          color: white;
+          background-color: rgba(255, 35, 19, 0.74);
+          margin: 5px auto;
+          width: 90%;
+        }
+      }//div.input-info-error
+
+
+
+      @media screen and (min-width: $transition_resolution) {
+        flex-direction: row;
+
+        label {
+          width: 25%;
+          text-align: right;
+        }
+
+        div.input-info-error {
+          width: 45%;
+
+          p.info-change {
+            position: absolute;
+            top: -55px;
+            left: 5%;
+            width: 90%;
+          }
+        }
+      }
+    }//div.password-group
+  }
+}
+
 
 /******************************
 FOOTER

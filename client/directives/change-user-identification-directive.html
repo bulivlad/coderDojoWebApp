@@ -1,0 +1,50 @@
+<div class="change-user-identification-directive" ng-controller="changeUserIdentificationCtrl">
+    <div class="close-windows"><span ng-click="closeChangeInfoWindows()">&times;</span></div>
+    <p class="sanitize-info" ng-if="sanitized.hasBeenSanitized">
+        <i class="fa fa-window-close close-button" aria-hidden="true" ng-click="closeHasBeenSanitizedInfo()"></i>
+        Unele cîmpuri introduse au fost modificate deoarece nu se încadrează
+        în valorile acceptate (câmpurile sunt subliniate cu verde). Pentru mai multe informații despre
+        ce este permis, accesează informațiile.
+    </p>
+    <div class="email-section" ng-if="showChangeEmail">
+        <div class="old-value" ng-if="oldEmail">
+            <label>Email vechi:</label>
+            <p>{{oldEmail}}</p>
+        </div>
+        <div class="new-value">
+            <div class="label-and-value-change-identification">
+                <label for="new-email-change">Email nou:</label>
+                <div class="input-error-and-info">
+                    <input id="new-email-change" ng-model="changeInfo.newEmail" ng-focus="info.newEmail = true; errors.newEmail = false"
+                           ng-blur="info.newEmail = false" ng-class="{sanitized: sanitized.newEmail}" maxlength="254">
+                    <p class="error" ng-if="errors.newEmail">{{errors.newEmail}}</p>
+                    <p class="info-change" ng-if="info.newEmail">Adresa de email este necesara, trebuie sa fie formatata corect, si trebuie
+                        sa fie unicata in sistem</p>
+                </div>
+                <button class="change-info" ng-click="changeUsersEmail()">{{changeOrAddEmailButton}}</button>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="alias-section">
+        <div class="old-value" ng-if="oldAlias">
+            <label>Alias vechi:</label>
+            <p>{{oldAlias}}</p>
+        </div>
+        <div class="new-value">
+            <div class="label-and-value-change-identification">
+                <label for="new-alias-change">Alias nou:</label>
+                <div class="input-error-and-info">
+                    <input id="new-alias-change" ng-model="changeInfo.newAlias" ng-focus="info.newAlias = true ; errors.newAlias = false"
+                           ng-blur="info.newAlias = false" ng-class="{sanitized: sanitized.newAlias}" maxlength="50">
+                    <p class="error" ng-if="errors.newAlias">{{errors.newAlias}}</p>
+                    <p class="info-change" ng-if="info.newAlias">Alias-ul este necesar, este doar litere, maxim 50 de caractere.</p>
+                </div>
+                <button class="change-info" ng-click="changeUsersAlias()">{{changeOrAddAliasButton}}</button>
+
+            </div>
+        </div>
+
+    </div>
+</div>

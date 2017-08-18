@@ -12,8 +12,8 @@
     <link href="styles/normalize.css" rel="stylesheet" type="text/css">
     <link href="styles/main.css" rel="stylesheet" type="text/css">
 </head>
-<body ng-app="coderDojoTimisoara" ng-controller="mainController">
-<header ng-controller="headerController">
+<body ng-app="coderDojoTimisoara" ng-controller="mainCtrl">
+<header ng-controller="headerCtrl">
     <header-directive></header-directive>
 </header>
 
@@ -55,7 +55,6 @@
         </div>
     </div>
 </footer>
-
     <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="vendor/angular.js" type="text/javascript"></script>
@@ -63,24 +62,31 @@
     <script src="scripts/app.js" type="text/javascript"></script>
     <script src="scripts/services/dataService.js" type="text/javascript"></script>
     <script src="scripts/services/helperSvcs.js" type="text/javascript"></script>
-    <script src="scripts/controllers/mainController.js" type="text/javascript"></script>
-    <script src="scripts/controllers/headerController.js" type="text/javascript"></script>
-    <script src="scripts/controllers/loginController.js" type="text/javascript"></script>
-    <script src="scripts/controllers/registerController.js" type="text/javascript"></script>
-    <script src="scripts/controllers/dojosCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/mainCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/headerCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/loginCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/registerCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/searchForDojosCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/dojoBubbleCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/dojoCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/eventCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/addOrEditDojoCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/addOrEditEventCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/addOrEditBadgeCtrl.js" type="text/javascript"></script>
-    <script src="scripts/controllers/editProfilesCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/addOrEditProfileCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/viewBadgesCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/viewBadgeCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/viewAllBadgesCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/memberCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/addBadgesToUsersCtrl.js" type="text/javascript"></script>
     <script src="scripts/controllers/inviteUsersToEventCtrl.js" type="text/javascript"></script>
-    <script src="scripts/controllers/howMayIHelp.js" type="text/javascript"></script>
+    <script src="scripts/controllers/showEventsCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/eventsViewCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/addOrEditSpecialEventCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/specialEventCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/changeUserIdentificationCtrl.js" type="text/javascript"></script>
+    <script src="scripts/controllers/changeUserPasswordCtrl.js" type="text/javascript"></script>
     <script src="scripts/directives/directives.js" type="text/javascript"></script>
-    <script src="scripts/directives/simpleDirectives.js" type="text/javascript"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBorK3k6zhKhPSHQo2lbUxR-UOQ2Sqqxoo&callback"></script>
 </body>
 </html>

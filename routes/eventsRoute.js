@@ -16,6 +16,15 @@ router.post('/' + keys.getCurrentDojoEventsRoute, eventController.getCurrentDojo
 //Route for getting events for a dojo for unauthenticated users
 router.post('/' + keys.getAuthCurrentDojoEventsRoute, authentification.ensureAuthenticated, eventController.getAuthCurrentDojoEvents);
 
+//Route for getting events the user (or his/her children) are registered for
+router.get('/' + keys.getMyEventsRoute, authentification.ensureAuthenticated, eventController.getMyEvents);
+
+//Route for getting current events for authenticated users
+router.get('/' + keys.getCurrentAuthEventsRoute, authentification.ensureAuthenticated, eventController.getCurrentAuthEvents);
+
+//Route for getting current events for unauthenticated users
+router.get('/' + keys.getCurrentEventsRoute,  eventController.getCurrentEvents);
+
 //method for getting an event for unauthenticated users
 router.post('/' + keys.getEventRoute, eventController.getEvent);
 
@@ -51,6 +60,22 @@ router.post('/' + keys.getUsersInvitedToEventRoute, authentification.ensureAuthe
 
 //Method for getting users already invited for a particular event
 router.post('/' + keys.sendUserInvitesToEventRoute, authentification.ensureAuthenticated, eventController.sendUserInvitesToEvent);
+
+//Method for adding special events
+router.post('/' + keys.addSpecialEventRoute, authentification.ensureAuthenticated, eventController.addSpecialEvent);
+
+//Method for editing special events
+router.post('/' + keys.editSpecialEventRoute, authentification.ensureAuthenticated, eventController.editSpecialEvent);
+
+//Method for getting current special events
+router.get('/' + keys.getCurrentSpecialEventsRoute, eventController.getCurrentSpecialEvents);
+
+//Method for getting special event
+router.post('/' + keys.getSpecialEventRoute, eventController.getSpecialEvent);
+
+//Method for uploading special event photo
+router.post('/' + keys.uploadSpecialEventPictureRoute, authentification.ensureAuthenticated, eventController.uploadSpecialEventPhoto);
+
 
 
 module.exports = router;

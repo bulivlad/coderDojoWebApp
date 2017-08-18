@@ -117,7 +117,6 @@ module.exports.getAuthAllBadges = function(req, res){
 };
 
 module.exports.uploadBadgePicture = function(req, res){
-    logger.debug(`Entering BadgesRoute: ${keys.uploadBadgePictureRoute} by ${helper.getUser(req)}`);
     let user = req.user;
     if(helper.isUserAdmin(user)){
        upload(req, res, function(err){
@@ -126,17 +125,37 @@ module.exports.uploadBadgePicture = function(req, res){
                logger.error(`Error uploading badge photo for badge (_id=${badgeId}) by ${helper.getUser(req)}:` + err);
                return res.sendStatus(500);
            }
-           let filename = req.file.filename;
-           Badge.updateBadgePhoto(badgeId, filename, function(err){
+           let badgesRelativePath = 'client/img/badges/';
+           helper.inspectUploadedImage(req.file, badgesRelativePath, function(err, fileInspect){
                if(err){
-                   logger.error(`Error updating badge photo for badge (_id=${badgeId}) by ${helper.getUser(req)}:` + err);
+                   logger.error(`Error inspecting photo (_id=${JSON.stringify(req.file)}) for adding badge photo for badge ` +
+                        ` (_id=${badgeId}) by ${helper.getUser(req)}: ` + err);
                    return res.sendStatus(500);
+                   helper.deletePhoto(badgesRelativePath +  filename);
                }
-               res.json({badgePhoto:filename});
-               //TODO delete the old photo of the badge
+               let filename = req.file.filename;
+               if(fileInspect.fileSize > 500000){
+                   //If the file is larger than 500Kb it is not acceptable
+                   res.json({errors:keys.uploadedPhotoTooLargeError});
+                   //We delete the photo after it has been uploaded
+                   helper.deletePhoto(badgesRelativePath +  filename);
+               } else if((fileInspect.mimeType != 'image/jpeg') && (fileInspect.mimeType != 'image/png')){
+                   //Not a correct type of file
+                   res.json({errors:keys.uploadedPhotoNotCorrectMimeTypeError});
+                   //We delete the photo after it has been uploaded
+                   helper.deletePhoto(badgesRelativePath +  filename);
+               } else {
+                   //If the file is the right size and the correct mime type, we save the file
+                   Badge.updateBadgePhoto(badgeId, filename, function(err, oldBadge){
+                       if(err){
+                           logger.error(`Error updating badge photo for badge (_id=${badgeId}) by ${helper.getUser(req)}:` + err);
+                           return res.sendStatus(500);
+                       }
+                       res.json({badgePhoto:filename});
+                       helper.deletePhoto(badgesRelativePath +  oldBadge.badgePhoto);
+                   });
+               }
            });
-
-
        })
     } else {
         logger.error(` ${helper.getUser(req)} tried to add a badge photo while now authorized to do so`);
@@ -157,7 +176,6 @@ let storage = multer.diskStorage({
 upload =  multer({storage:storage}).single('badge-photo');
 
 module.exports.addBadgesToUsers = function(req, res){
-    logger.debug(`Entering BadgesRoute: ${keys.addBadgesToUsersRoute} by ${helper.getUser(req)}`);
     let user = req.user;
     let dojoId = req.body.dojoId;
     let usersToAddBadgesTo = req.body.users;
@@ -179,7 +197,7 @@ module.exports.addBadgesToUsers = function(req, res){
                 if(i == (usersToAddBadgesTo.length - 1)){
                     tempStartTime = startTime;
                 }
-                addBadgesToUser(userToAdBadgeTo, badges, tempStartTime);
+                addBadgesToUser(userToAdBadgeTo, badges, tempStartTime, dojoId);
             }
         } else {
             logger.error(`${helper.getUser(req)} tried to add badges to users of dojo (_id=${dojoId})
@@ -189,13 +207,15 @@ module.exports.addBadgesToUsers = function(req, res){
     });
 };
 
-function addBadgesToUser(user, newBadges, startTime){
+function addBadgesToUser(user, newBadges, startTime, dojoId){
+    //We get the users existing badges
     User.getBadgesOfUser(user._id, function(err, userWithBadges){
         if(err){
             logger.error(`Error getting user's ${JSON.stringify(user)}, badges adding new badges to the user:` + err);
             return;
         }
-        let mergedBadges = mergeOldBadgesWithNewBadges(userWithBadges.badges, newBadges);
+        //We add the new badges
+        let mergedBadges = mergeOldBadgesWithNewBadges(userWithBadges.badges, newBadges, dojoId);
         //Now we save the badges
         User.setBadgesOfUser(user._id, mergedBadges, function(err){
             if(err){
@@ -233,19 +253,21 @@ function createNotificationsForNewBadges(newBadges){
 }
 
 //Method that adds the new badges to the old badges of a user.
-function mergeOldBadgesWithNewBadges(oldBadges, newBadges){
+function mergeOldBadgesWithNewBadges(oldBadges, newBadges, dojoId){
     let now = new Date();
     //We clone this object because objects received from the database are frozen
     oldBadges = JSON.parse(JSON.stringify(oldBadges));
-    logger.silly(`Old badges ${JSON.stringify(oldBadges)}`);
     for(let i = 0; i < newBadges.length; i++){
         let newBadge = newBadges[i];
-        let newBadgeAdded = addNewBadgeToOldBadgesListIfItAlreadyExists(newBadge, oldBadges, now);
+        let newBadgeAdded = addNewBadgeToOldBadgesListIfItAlreadyExists(newBadge, oldBadges, now, dojoId);
         if(!newBadgeAdded){
             //If the the new badge does not exist in the old badges list
             oldBadges.push({
                 typeOfBadge: new mongoose.mongo.ObjectId(newBadge._id),
-                received: [now]
+                received: [{
+                    dateReceived: now,
+                    receivedFromDojo: new mongoose.mongo.ObjectId(dojoId)
+                }]
             })
 
         }
@@ -254,13 +276,16 @@ function mergeOldBadgesWithNewBadges(oldBadges, newBadges){
 }
 
 //This method checks if the new badge exists in the list of old badges, and if it does, it adds another timestamp to mark
-// that anoher instance of the badge has been received.
-function addNewBadgeToOldBadgesListIfItAlreadyExists(newBadge, oldBadges, now){
+// that another instance of the badge has been received.
+function addNewBadgeToOldBadgesListIfItAlreadyExists(newBadge, oldBadges, now, dojoId){
     let ret = false;
     for(let i = 0; i < oldBadges.length; i++){
         if(oldBadges[i].typeOfBadge._id == newBadge._id){
-            //We add another instance of the date
-            oldBadges[i].received.push(now);
+            //We add another instance of the date and dojoId where the badge was received
+            oldBadges[i].received.push({
+                    dateReceived: now,
+                    receivedFromDojo: new mongoose.mongo.ObjectId(dojoId)
+            });
             ret = true;
             break;
         }

@@ -3,7 +3,7 @@
  */
 
 angular.module("coderDojoTimisoara")
-    .controller('loginController', function($scope, $rootScope, $location, dataService){
+    .controller('loginCtrl', function($scope, $rootScope, $location, dataService){
         $scope.login = {};
         $scope.login.email = undefined;
         $scope.login.password = undefined;

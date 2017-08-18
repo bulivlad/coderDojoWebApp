@@ -192,3 +192,8 @@ module.exports.getUsersDojos = function(userId, callback){
 module.exports.getAdminsDojos = function(userId, callback){
     Dojo.find({}, fieldsForUsersDojos, callback);
 };
+
+//Method for getting dojo names
+module.exports.getDojoNames = function(dojos, callback){
+    Dojo.find({_id: {$in:dojos}}, {name: true}, callback);
+};

@@ -119,8 +119,7 @@ angular.module('coderDojoTimisoara')
             }
 
             //Registering or editing a user by himself/herself
-            if(validationForWhat === keys.editUserOver14Profile ||
-                validationForWhat === keys.regUserOver14Profile){
+            if(validationForWhat === keys.regUserOver14Profile){
                 if (!user.email || user.email === ''){
                     errors.email = 'Email-ul este necesar';
                     hasErrors = true;
@@ -375,6 +374,11 @@ angular.module('coderDojoTimisoara')
             return string.charAt(0).toUpperCase() + string.slice(1);
         };
 
+        this.updateUserPhotoThumbnailWhenChangingPhoto = function(newPhotoUrl){
+            $('#header-wide-user-thumbnail').attr("src",'../img/user_photos/' + newPhotoUrl);
+            $('#header-narrow-user-thumbnail').attr("src",'../img/user_photos/' + newPhotoUrl);
+        };
+
         //Method that constructs an event date
         this.getEventDate = function(event, forUniqueEvents){
             var ret = '';
@@ -382,21 +386,36 @@ angular.module('coderDojoTimisoara')
             var endTime = new Date(event.endTime);
             //This is a weekly event
             if(event.copyOfRecurrentEvent && !forUniqueEvents){
-                ret = 'În fiecare ' + keys.daysOfWeek[startTime.getDay()] + ' ' +
-                    startTime.getHours() + ':' +
-                    this.adjustOneNumberMinutes(startTime.getMinutes()) + ' - ' +
-                    endTime.getHours() + ':' +
-                    this.adjustOneNumberMinutes(endTime.getMinutes());
+                if(event.eventRecurrenceType === keys.eventRecurrenceTypes[0]){//Weekly event
+                    ret = 'În fiecare ' + keys.daysOfWeek[startTime.getDay()] + ' ' +
+                        startTime.getHours() + ':' +
+                        this.adjustOneNumberMinutes(startTime.getMinutes()) + ' - ' +
+                        endTime.getHours() + ':' +
+                        this.adjustOneNumberMinutes(endTime.getMinutes());
+                } else {
+                    //For biMonthly or monthly events
+                    var messageStart = 'Eveniment bilunar.';//we default to biMonthly event
+                    if(event.eventRecurrenceType === keys.eventRecurrenceTypes[2]){//monthly event
+                        messageStart = 'Eveniment lunar.'
+                    }
+                    ret = messageStart + ' Urmatoarea data este ' + this.buildUniqueEventDate(startTime, endTime);
+                }
             } else {
-                ret = this.capitalizeFirstLetter(keys.daysOfWeek[startTime.getDay()]) + ' ' +  startTime.getDate() +
-                    ' ' + keys.months[startTime.getMonth()] + ' de la ' +
-                    startTime.getHours() + ':'  +
-                    this.adjustOneNumberMinutes(startTime.getMinutes()) + ' - ' +
-                    endTime.getHours() + ':'  +
-                    this.adjustOneNumberMinutes(endTime.getMinutes());
+                ret = this.buildUniqueEventDate(startTime, endTime);
             }
             return ret;
         };
+
+        this.buildUniqueEventDate = function(startTime, endTime){
+            return this.capitalizeFirstLetter(keys.daysOfWeek[startTime.getDay()]) + ' ' +  startTime.getDate() +
+                ' ' + keys.months[startTime.getMonth()] + ' de la ' +
+                startTime.getHours() + ':'  +
+                this.adjustOneNumberMinutes(startTime.getMinutes()) + ' - ' +
+                endTime.getHours() + ':'  +
+                this.adjustOneNumberMinutes(endTime.getMinutes());
+        };
+
+
 
         // This method merges all badges with users badges, by adding the number and the actual moments when the
         // user received a badge to the list of all badges, so that the users achievements can be listed on the
@@ -447,6 +466,9 @@ angular.module('coderDojoTimisoara')
             }  else {
                 console.log('Unexpected error for method (' + methodInfo + '): errData= '+ err.data + ', errStatusText=' +
                     err.statusText + ', errStatus=' + err.status + ', err=' + err);
+                if(err.stack){
+                    console.log(err.stack);
+                }
                 $location.path('/' + keys.despre);
             }
             if(callback){
@@ -541,6 +563,15 @@ angular.module('coderDojoTimisoara')
                             curEvent.error.day = 'Lipseste ziua evenimentului';
                         }
 
+                    } else {
+                        //If the event is recurrent, we need to check that the eventRecurrence also has a start date set
+                        if(curEvent.eventRecurrenceType != keys.eventRecurrenceTypes[0]){
+                            //Event is not weekly
+                            if(!curEvent.recurrenceDay || !this.isDate(curEvent.recurrenceDay)){
+                                hasErrors = true;
+                                curEvent.error.recurrenceDay = 'Lipseste ziua de start pentru evenimentul bilunar sau lunar.';
+                            }
+                        }
                     }
 
                     if(!curEvent.description || curEvent.description === ""){
@@ -577,7 +608,9 @@ angular.module('coderDojoTimisoara')
             return hasErrors;
         };
 
-
+        this.isDate = function(dateToBeTested){
+            return !isNaN(Date.parse(dateToBeTested));
+        };
 
         // Method that compares the original event to the sanitized event, and if there are differences, add a flag
         // to indicate as such. The sanitize flag is used to inform the user which fields were sanitized, for him/her
@@ -595,9 +628,6 @@ angular.module('coderDojoTimisoara')
             if(event.endMinute != sanitEvent.endMinute){
                 sanitEvent.sanitEndMinute = true;
             }
-            //if(event.day != sanitEvent.day){
-            //    sanitEvent.sanitDay = true;
-            //}
             if(event.name != sanitEvent.name){
                 sanitEvent.sanitName = true;
             }
@@ -638,6 +668,7 @@ angular.module('coderDojoTimisoara')
             event.sanitStartMinute = undefined;
             event.sanitEndMinute = undefined;
             event.sanitDay = undefined;
+            event.sanitEventReccurenceType = undefined;
             event.sanitName = undefined;
             event.sanitDescription = undefined;
             event.sanitActiveStatus = undefined;
@@ -955,6 +986,15 @@ angular.module('coderDojoTimisoara')
             ret.sort(this.sortNameAsc);
             return ret;
         };
+
+
+        this.getBackgroundUrlForSpecialEventPhoto = function(specialEvent){
+            if(specialEvent.photo){
+                return 'background-image:url(\'../img/special_events/' + specialEvent.photo + '\')';
+            } else {
+                return 'background-image:url(\'../img/special_events/special_event_default_photo.jpg\')'
+            }
+        }
 
     })
     .service('dojosService', function(){

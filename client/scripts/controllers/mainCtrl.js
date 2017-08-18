@@ -6,7 +6,7 @@
 
 
 angular.module("coderDojoTimisoara")
-    .controller("mainController", function($scope, $rootScope, $route,  $location, dataService, helperSvc){
+    .controller("mainCtrl", function($scope, $rootScope, $route,  $location, dataService, helperSvc){
         //Copying the keys to the scope for user in the view
         $scope.keys = keys;
         //This flag is used to inform the error handler that is is the first load of the app (or when it is refreshed)
@@ -66,10 +66,12 @@ angular.module("coderDojoTimisoara")
         $scope.setInformation = function(infoType){
             $scope.resetInformation();
             $rootScope.information = infoType;
+            $scope.hideScrollForBody();
         };
 
         $scope.resetInformation = function(){
             $rootScope.information = undefined;
+            $scope.showScrollForBody();
         };
 
         $scope.getPrettyDate = function(date){
@@ -123,10 +125,10 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.goToViewUserProfile = function(){
-            if($location.path() === '/'+ keys.myProfile){
+            if($location.path() === '/'+ keys.userProfileLocation){
                 $route.reload();
             } else {
-                $location.path('/' + keys.myProfile);
+                $location.path('/' + keys.userProfileLocation);
             }
         };
 
@@ -180,6 +182,38 @@ angular.module("coderDojoTimisoara")
             }
         };
 
+        $scope.goToMyEvents = function(){
+            if($location.path() === '/'+ keys.myEventsLocation){
+                $route.reload();
+            } else {
+                $location.path('/' + keys.myEventsLocation);
+            }
+        };
+
+        $scope.goToEvents = function(){
+            if($location.path() === '/'+ keys.eventsLocation){
+                $route.reload();
+            } else {
+                $location.path('/' + keys.eventsLocation);
+            }
+        };
+
+        $scope.goToAddSpecialEvent = function(){
+            if($location.path() === '/'+ keys.addSpecialEventLocation){
+                $route.reload();
+            } else {
+                $location.path('/' + keys.addSpecialEventLocation);
+            }
+        };
+
+        $scope.goToViewSpecialEvent = function(){
+            if($location.path() === '/'+ keys.viewSpecialEventLocation){
+                $route.reload();
+            } else {
+                $location.path('/' + keys.viewSpecialEventLocation);
+            }
+        };
+
         $scope.getBackgroundUrlForPhoto = function(badge){
             if(badge.badgePhoto){
                 return 'background-image:url(\'../img/badges/' + badge.badgePhoto + '\')';
@@ -211,6 +245,16 @@ angular.module("coderDojoTimisoara")
             return $scope.eventView;
         };
 
+        //This sets the specialEventId for the specialEvent to be downloaded, and the location where the event was accessed,
+        // to be used when going back.
+        $scope.setSpecialEventView = function(specialEventId, previousLocation){
+            $scope.specialEventView = {specialEventId: specialEventId, previousLocation: previousLocation};
+        };
+
+        $scope.getSpecialEventView = function(){
+          return $scope.specialEventView;
+        };
+
         //This sets the badge for viewing (no need to download it again) and the location from where the badge was accessed
         // to be used when going back.
         $scope.setBadgeView = function(badge, previousLocation){
@@ -224,12 +268,6 @@ angular.module("coderDojoTimisoara")
         $scope.resetAlerts = function(){
                 $rootScope.alert = undefined;
                 $rootScope.alertMessage = undefined;
-        };
-
-        $scope.isUserLoggedIn = function(){
-            if($rootScope.user){
-                return true;
-            }
         };
 
         //Method for setting the dojo to be viewed
@@ -334,6 +372,17 @@ angular.module("coderDojoTimisoara")
             $location.path('/' + keys.despre);
             $scope.setAlert(keys.errorAlert, 'Nu esti autorizat pentru aceasta operatiune!');
         };
+
+        $scope.getUserThumbnailPhoto = function(){
+            if($rootScope.user.userPhoto){
+                return '../img/user_photos/' + $rootScope.user.userPhoto;
+            } else {
+                return '../img/poza_profil.png';
+            }
+
+
+
+        }
 
         $scope.initiateMainController();
     });

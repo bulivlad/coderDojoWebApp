@@ -86,6 +86,10 @@ let eventSchema = module.exports.eventSchema = new mongoose.Schema({
     copyOfRecurrentEvent: {
         type:String
     },
+    eventRecurrenceType: {
+        type:String,
+        enum: keys.eventRecurrenceTypes,
+    },
     activeStatus: {
         type: String,
         enum:keys.eventStatus,
@@ -113,6 +117,15 @@ let recurrentEventSchema = module.exports.recurrentEventSchema = new mongoose.Sc
         type: String,
         enum: keys.daysOfWeek
     },
+
+    eventRecurrenceType: {
+        type:String,
+        enum: keys.eventRecurrenceTypes,
+    },
+    recurrenceDay: {
+        type: Date
+    },
+
     name: {
         type: String
     },
@@ -127,7 +140,6 @@ let recurrentEventSchema = module.exports.recurrentEventSchema = new mongoose.Sc
     }
 });
 
-// Here we export the DataBase interface to our other modules
 let Event = mongoose.model("Event", eventSchema);
 
 //Method that returns all current events (event that end after the current date) that were created from recurrent event
@@ -138,9 +150,7 @@ module.exports.getCurrentEventsForADojoCreatedFromRecurrentEvents = function(doj
 
 //Method for saving events
 module.exports.createEvent = function(event, callback){
-    logger.silly(`entering createEvent event=${JSON.stringify(event)}`);
     let eventToSave = new Event(event);
-    logger.silly(`eventToSave=${JSON.stringify(event)}`);
     eventToSave.save(callback);
 };
 
@@ -152,7 +162,8 @@ let fieldsToGetForCurrentDojoEvents = {
     description: true,
     dojoId: true,
     tickets: true,
-    copyOfRecurrentEvent: true
+    copyOfRecurrentEvent: true,
+    eventRecurrenceType: true
 };
 
 module.exports.getCurrentDojoEvents = function(dojoId, callback){
@@ -167,10 +178,30 @@ let fieldsToGetForAuthCurrentDojoEvents = {
     dojoId: true,
     tickets: true,
     copyOfRecurrentEvent: true,
+    eventRecurrenceType: true
 };
 
 module.exports.getAuthCurrentDojoEvents = function(dojoId, callback){
     Event.find({dojoId:dojoId, endTime: {$gt: Date.now()}}, fieldsToGetForAuthCurrentDojoEvents, callback);
+};
+
+module.exports.getAuthCurrentEventsForAllDojos = function(callback){
+    Event.find({endTime: {$gt: Date.now()}}, fieldsToGetForAuthCurrentDojoEvents, callback);
+};
+
+let fieldsToGetForCurrentEventsForAllDojos = {
+    startTime: true,
+    endTime: true,
+    name: true,
+    description: true,
+    dojoId: true,
+    tickets: true,
+    copyOfRecurrentEvent: true,
+    typeOfReccurentEvent: true
+};
+
+module.exports.getCurrentEventsForAllDojos = function(callback){
+    Event.find({endTime: {$gt: Date.now()}}, fieldsToGetForCurrentEventsForAllDojos, callback);
 };
 
 module.exports.getEvent = function(eventId, callback){
@@ -219,7 +250,17 @@ module.exports.deleteEvent = function(eventId, callback){
 };
 
 module.exports.editEvent = function(updatedEvent, callback){
-    Event.findOneAndUpdate({_id: updatedEvent._id}, updatedEvent, callback);
+    Event.findOneAndUpdate({_id: updatedEvent._id},
+        {
+            $set: {
+                name:updatedEvent.name,
+                activeStatus: updatedEvent.activeStatus,
+                startTime: updatedEvent.startTime,
+                endTime: updatedEvent.endTime,
+                description: updatedEvent.description,
+                tickets: updatedEvent.tickets
+            }
+        }, callback);
 };
 
 module.exports.getUsersInvitedToEvent = function(eventId, callback){

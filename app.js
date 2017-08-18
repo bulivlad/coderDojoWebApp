@@ -19,7 +19,9 @@ const express = require("express"),
 //passportLocal =   require('passport-local'),
     logger = require('./logger/logger'),
     validator = require('./validator/validator'),
-    helper = require('./auxiliary/helper');
+    helper = require('./auxiliary/helper'),
+    morgan = require('morgan');
+    MongoStore = require('connect-mongo')(expressSession);
 
 
 
@@ -42,14 +44,18 @@ helper.initializeApp();
 
 let app = express();
 
+app.use(morgan('dev'));
+
 //Body parser middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
+//TODO store secret as an environmental variable
 app.use(expressSession({
     secret:'hj9g9897532u8904fsuig34534gggd',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: new MongoStore({mongooseConnection: mongoose.connection})
 }));
 
 //Setting the static directory where the client files(css, js) are kept

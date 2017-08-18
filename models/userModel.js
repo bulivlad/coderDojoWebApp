@@ -20,7 +20,14 @@ let notificationSchema = mongoose.Schema({
 
 let badgesSchema = mongoose.Schema({
     typeOfBadge: {type: mongoose.Schema.Types.ObjectId, ref: 'Badge'},
-    received: [Date]
+    received: [{
+        dateReceived: {
+            type: Date
+        },
+        receivedFromDojo: {
+            type: mongoose.Schema.Types.ObjectId, ref: 'Dojo'
+        }
+    }]
 });
 
 let UserSchema = mongoose.Schema({
@@ -252,7 +259,10 @@ module.exports.deleteNotificationForUser = function(userId, notificationId, call
 };
 
 module.exports.getBadgesOfUser = function(userId, callback){
-  User.findOne({_id: userId}, {badges: true}).populate('badges.typeOfBadge').exec(callback);
+  User.findOne({_id: userId}, {badges: true})
+      .populate('badges.typeOfBadge')
+      .populate('badges.received.receivedFromDojo', {name: true})
+      .exec(callback);
 };
 
 module.exports.setBadgesOfUser = function(userId, modifiedBadges, callback){
@@ -262,4 +272,40 @@ module.exports.setBadgesOfUser = function(userId, modifiedBadges, callback){
         callback(Error('Badges are empty'));
     }
 
+};
+
+module.exports.searchForUserByEmail = function(email, callback){
+    User.findOne({email: email}, {email:true}, callback);
+};
+
+module.exports.updateUser = function(user, fieldsToUpdate, callback){
+    User.findOneAndUpdate({_id: user._id}, {$set: fieldsToUpdate}, callback);
+};
+
+module.exports.getChangeUserIdentificationInfo = function(userId, callback){
+    User.findOne({_id:userId}, {alias:true, email:true, birthDate: true}, callback);
+};
+
+module.exports.checkIfAliasExists = function(alias, callback){
+    User.findOne({alias: alias}, {_id:true}, callback);
+};
+
+module.exports.changeUsersAlias = function(newAlias, userId, callback){
+    User.findOneAndUpdate({_id:userId}, {$set: {alias: newAlias}}, callback);
+};
+
+module.exports.checkIfEmailExists = function(email, callback){
+    User.findOne({email: email}, {_id:true}, callback);
+};
+
+module.exports.changeUsersEmail = function(newEmail, userId, callback){
+    User.findOneAndUpdate({_id:userId}, {$set: {email: newEmail}}, callback);
+};
+
+module.exports.getChangeUserPasswordInfo = function(userId, callback){
+    User.findOne({_id:userId}, {password:true, birthDate: true}, callback);
+};
+
+module.exports.changeUsersPassword = function(newPasswordHash, userId, callback){
+    User.findOneAndUpdate({_id:userId}, {$set: {password: newPasswordHash}}, callback);
 };

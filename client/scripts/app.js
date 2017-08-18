@@ -14,18 +14,20 @@ angular.module("coderDojoTimisoara", [
             .when('/' + keys.cumPotAjuta, {templateUrl:'../views/cum-pot-ajuta.html', controller: 'howMayIHelpController'})
             .when('/' + keys.login, {templateUrl:'../views/login.html'})
             .when('/' + keys.register, {templateUrl:'../views/register.html'})
-            .when('/' + keys.editProfiles, {templateUrl:'../views/edit-profiles.html'})
-            .when('/' + keys.myProfile, {templateUrl:'../views/my-profile.html'})
+            .when('/' + keys.userProfileLocation, {templateUrl:'../views/profil-utilizator.html'})
             .when('/' + keys.getDojosRoute, {templateUrl:'../views/inscrieri-saptamanale.html'})
             .when('/' + keys.getMyDojosRoute, {templateUrl:'../views/dojourile-mele.html'})
-            .when('/' + keys.getDojoRoute, {templateUrl:'../views/view-dojo.html'})
+            .when('/' + keys.getDojoRoute, {templateUrl:'../views/vezi-dojo.html'})
             .when('/' + keys.addDojoRoute, {templateUrl:'../views/adauga-dojo.html'})
             .when('/' + keys.addBadgeLocation, {templateUrl:'../views/adauga-badge.html'})
             .when('/' + keys.cautaUnDojo, {templateUrl:'../views/cauta-un-dojo.html'})
-            .when('/' + keys.viewEventLocation, {templateUrl:'../views/view-event.html'})
+            .when('/' + keys.viewEventLocation, {templateUrl:'../views/vezi-eveniment.html'})
             .when('/' + keys.viewBadgesLocation, {templateUrl:'../views/vezi-toate-badgeurile.html'})
-            .when('/' + keys.viewBadgeLocation, {templateUrl:'../views/view-badge.html'})
+            .when('/' + keys.viewBadgeLocation, {templateUrl:'../views/vezi-badge.html'})
             .when('/' + keys.myEventsLocation, {templateUrl:'../views/evenimentele-mele.html'})
+            .when('/' + keys.eventsLocation, {templateUrl:'../views/evenimente.html'})
+            .when('/' + keys.addSpecialEventLocation, {templateUrl:'../views/adauga-eveniment-special.html'})
+            .when('/' + keys.viewSpecialEventLocation, {templateUrl:'../views/vezi-eveniment-special.html'})
             .otherwise({redirectTo: '/despre'})
     }]);
 
@@ -40,7 +42,6 @@ const keys = {
     register: 'register',
     editUser: 'editUser',
     editUsersChild: 'editUsersChild',
-    myProfile: 'myProfile',
     editProfiles: 'editProfiles',
     getDojosRoute: 'getDojos',
     getMyDojosRoute: 'getMyDojos',
@@ -96,6 +97,19 @@ const keys = {
     addBadgesToUsersRoute: 'addBadgesToUsers',
     getUsersBadgesRoute: 'getUsersBadges',
     getMyEventsRoute: 'getMyEvents',
+    getCurrentAuthEventsRoute: 'getCurrentAuthEvents',
+    getCurrentEventsRoute: 'getCurrentEvents',
+    addSpecialEventRoute: 'addSpecialEvent',
+    editSpecialEventRoute: 'editSpecialEvent',
+    getSpecialEventRoute: 'getSpecialEvent',
+    uploadSpecialEventPictureRoute: 'uploadSpecialEventPicture',
+    getCurrentSpecialEventsRoute: 'getCurrentSpecialEvents',
+    getChangeUserIdentificationInfoFromServerRoute: 'getChangeUserIdentificationInfoFromServer',
+    changeUserEmailRoute: 'changeUserEmail',
+    changeUserAliasRoute: 'changeUserAlias',
+    getChangeUserPasswordsInfoRoute: 'getChangePasswordsInfo',
+    changeUserPasswordRoute: 'changeUserPassword',
+
     //TODO change the communication routes to view locations (for getDojo for ex)
 
     //View locations
@@ -104,6 +118,10 @@ const keys = {
     viewBadgesLocation: 'viewBadgesLocation',
     viewBadgeLocation: 'viewBadgeLocation',
     myEventsLocation: 'myEventsLocation',
+    eventsLocation: 'events',
+    addSpecialEventLocation: 'addSpecialEvent',
+    viewSpecialEventLocation: 'viewSpecialEvent',
+    userProfileLocation: 'userProfile',
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
@@ -126,6 +144,8 @@ const keys = {
     userNoLongerPartOfDojo: 'userNoLongerPartOfDojo',
     notSanitizedError: 'notSanitizedError',
     uploadPhotoError: 'uploadPhotoError',
+    uploadedPhotoTooLargeError: 'uploadedPhotoTooLargeError',
+    uploadedPhotoNotCorrectMimeTypeError: 'uploadedPhotoNotCorrectMimeTypeError',
 
     //Alerts
     childRegisterAlert: 'childRegisterAlert',
@@ -135,6 +155,9 @@ const keys = {
 
     //Information
     eventFilterRegisteredUsers: 'eventFilterRegisteredUsers',
+    recurrentEventInfo: 'recurrentEventInfo',
+    createdEventInfo: 'createdEvent',
+    inviteDojoMembersToEventInfo: 'inviteDojoMembersToEventInfo',
 
     //User roles
     user: 'user',
@@ -173,6 +196,10 @@ const keys = {
     addChildOver14Profile: 'addChildOver14Profile',
     showDojoInUserProfile: 'showDojoInUserProfile',
     showPasswords: 'showPasswords',
+    showChangePasswords: 'showChangePasswords',
+    viewChangePasswordsPanel: 'viewChangePasswordsPanel',
+    showChangeIdentification: 'showChangeIdentification',
+    viewChangeIdentificationsPanel: 'viewChangeIdentificationsPanel',
     showAlias: 'showAlias',
     showAddChildren: 'showAddChildren',
     showInviteParent: 'showInviteParent',
@@ -241,6 +268,10 @@ const keys = {
     },
     badgeEdited: 'badgeEdited',
 
+    //Views for special events
+    viewSpecialEvent: 'viewSpecialEvent',
+    editSpecialEvent: 'editSpecialEvent',
+
     //Enums
     daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],
     daysOfWeekShort: ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ'],
@@ -249,7 +280,8 @@ const keys = {
     eventTypesUnique: 'unic',
     eventStatus: ['Activ', 'Inactiv'],
     months: ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie' , 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'],
-
+    eventRecurrenceTypes: ['Săptămânal', 'Bilunar', 'Lunar'],
+    cities: ['Arad', 'Ciacova', 'București', 'Hades', 'Timișoara', 'Slatina'],
 
     //Key-values
     eventStatus_Confirmed:'Confirmat',

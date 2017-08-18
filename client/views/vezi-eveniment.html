@@ -1,4 +1,4 @@
 <div id="view-event" ng-controller="eventCtrl">
-    <event-directive ng-if="isCurrentView(keys.viewEvent)"></event-directive>
+    <view-event-directive ng-if="isCurrentView(keys.viewEvent)"></view-event-directive>
     <add-or-edit-event-directive ng-if="views[keys.editEvent]"></add-or-edit-event-directive>
 </div>

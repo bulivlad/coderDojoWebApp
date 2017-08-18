@@ -10,9 +10,9 @@
                 <a class="login-register-buttons" href="#!register" >Cont nou </a> |
                 <a class="login-register-buttons" href="#!login"> Intră în cont</a>
             </div>
-            <div class="user-menu" ng-show="user">
+            <div class="user-menu" ng-if="user">
                 <div id="user-menu-header" ng-click="showUserMenuDropDown($event)">
-                    <img src="../img/poza_profil.png" alt="Poza profil">
+                    <img id="header-wide-user-thumbnail" src="{{getUserThumbnailPhoto()}}" alt="Poza profil">
                     <span class="user-name">
                         {{user.firstName + ' ' + user.lastName}}
                         <span class="new-notification-info" ng-if="newNotificationCount" ng-click="viewNotificationsFromWide($event)">
@@ -23,15 +23,18 @@
                 </div>
 
                 <ul class="user-menu-dropdown">
-                    <li><a href="#!myProfile" ng-click="hideMenuNarrow()">Profilul meu</a></li>
+                    <li><a href="" ng-click="hideMenuNarrow();goToViewUserProfile()">Profilul meu</a></li>
                     <li><a href="#!getMyDojos" ng-click="hideMenuNarrow()">Dojourile mele</a></li>
                     <li ng-show="user.authorizationLevel === keys.admin">
-                        <a href="#!addDojo" ng-click="hideMenuNarrow()">Adaugă Dojo</a>
+                        <a href="#!addDojo">Adaugă Dojo</a>
                     </li>
                     <li ng-show="user.authorizationLevel === keys.admin">
-                        <a ng-href="{{'#!' + keys.addBadgeLocation}}" ng-click="hideMenuNarrow()">Adaugă badge</a>
+                        <a ng-href="{{'#!' + keys.addBadgeLocation}}" >Adaugă badge</a>
                     </li>
-                    <li><a href="">Evenimentele mele</a></li>
+                    <li ng-show="user.authorizationLevel === keys.admin">
+                        <a href="" ng-click="goToAddSpecialEvent()">Adaugă eveniment special</a>
+                    </li>
+                    <li><a href="" ng-click="goToMyEvents()">Evenimentele mele</a></li>
                     <li><a href="" ng-click="logoutUser()">Logout</a></li>
                 </ul>
 
@@ -39,6 +42,6 @@
         </div>
         <a id="menuNarrowButton" class="header-banner-item header-banner-col3" href="" ng-click="showMenuNarrow()">&#9776;</a>
     </div>
-    <header-narrow></header-narrow>
-    <header-wide></header-wide>
+    <header-narrow-directive></header-narrow-directive>
+    <header-wide-directive></header-wide-directive>
 </div>

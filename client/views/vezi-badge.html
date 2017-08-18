@@ -39,8 +39,10 @@
             </div>
             <div class="badges-received" ng-if="viewReceivedBadges.view" ng-class="{'badges-received-full' : viewReceivedBadges}">
                 <h3>Badge-uri primite</h3>
-                <p ng-repeat="badgeReceived in badge.received">
-                    {{getPresentableDateForBadgeReceived(badgeReceived)}}
+                <p ng-repeat="badgeReceived in badge.received" ng-init="presentableDate = getPresentableDateForBadgeReceived(badgeReceived)">
+                    {{presentableDate.month}} <span class="green">{{presentableDate.dayOfMonth}}</span> {{presentableDate.month}}
+                    <span class="green">{{presentableDate.year}}</span> de la dojo-ul
+                    <span class="blue">{{presentableDate.dojoName}}</span>
                 </p>
             </div>
             <div class="badge-description">

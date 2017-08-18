@@ -3,7 +3,7 @@
  */
 
 angular.module("coderDojoTimisoara")
-    .controller("headerController", function($scope, $rootScope, $location, dataService, helperSvc){
+    .controller("headerCtrl", function($scope, $rootScope, $location, dataService, helperSvc){
         //Method that logs out user
         $scope.logoutUser = function(){
             if($scope.isUserLoggedIn()){

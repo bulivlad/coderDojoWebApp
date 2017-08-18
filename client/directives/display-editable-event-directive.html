@@ -1,9 +1,11 @@
 <div class="event-display">
+
+
     <div class="event-name">
         <label class="event-name-label event-label">
             Nume eveniment <i class="fa fa-arrow-right" aria-hidden="true"></i>
         </label>
-        <input class="event-input event-name-input" type="text" ng-model="localEvent.name"
+        <input class="event-input event-name-input" type="text" ng-model="localEvent.name" maxlength="50"
                ng-focus="localEvent.error.name = undefined" ng-class="{sanitized: localEvent.sanitName}">
         <p class="event-error" ng-if="localEvent.error.name">{{localEvent.error.name}}</p>
 
@@ -15,10 +17,30 @@
                 ng-class="{sanitized: localEvent.sanitActiveStatus}">
         </select>
     </div>
+
+
     <div class="event-date-recurrent" ng-if="eventIsRecurrent(localEvent.type)">
-        <label  class="event-label">
-            Start <i class="fa fa-arrow-right" aria-hidden="true"></i>
-        </label>
+        <div>
+            <label  class="event-label">
+                Tip eveniment <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </label>
+            <select class="event-select day-event" ng-model="localEvent.eventRecurrenceType"
+                    ng-options="recurrenceType for recurrenceType in keys.eventRecurrenceTypes"
+                    ng-init="localEvent.eventRecurrenceType = localEvent.eventRecurrenceType || keys.eventRecurrenceTypes[0]">
+            </select>
+        </div>
+        <div ng-show="localEvent.eventRecurrenceType != keys.eventRecurrenceTypes[0]"><!--Only show if not weekly-->
+            <label  class="event-label">
+                Ziua start interval <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </label>
+            <input  type="text" class="event-input start-day-recurrence-day" title="Prima zi a evenimentului"
+                    placeholder="Prima zi" ng-model="localEvent.recurrenceDay"
+                    ng-focus="localEvent.error.recurrenceDay = undefined"
+                    ><br>
+            <p class="event-error" ng-if="localEvent.error.recurrenceDay">{{localEvent.error.recurrenceDay}}</p>
+        </div>
+
+        <label  class="event-label">Start <i class="fa fa-arrow-right" aria-hidden="true"></i></label>
         <input type="number" min="0" max="23" placeholder="ora" class="hour-event" ng-model="localEvent.startHour"
                ng-focus="localEvent.error.startTime = undefined" ng-class="{sanitized: localEvent.sanitStartHour}">:
         <input type="number" min="0" max="59" placeholder="min" class="min-event" ng-model="localEvent.startMinute"
@@ -32,15 +54,16 @@
                ng-focus="localEvent.error.endTime = undefined" ng-class="{sanitized: localEvent.sanitEndMinute}">
         <p class="event-error" ng-if="localEvent.error.endTime">{{localEvent.error.endTime}}</p>
 
-        <div>
+        <div ng-if="localEvent.eventRecurrenceType == keys.eventRecurrenceTypes[0]">
             <label  class="event-label">
                 Ziua <i class="fa fa-arrow-right" aria-hidden="true"></i>
             </label>
             <select class="event-select day-event" ng-model="localEvent.day" ng-options="day for day in keys.daysOfWeek"
-                    ng-init="localEvent.day = keys.daysOfWeek[6]" ng-class="{sanitized: localEvent.sanitDay}">
+                    ng-init="localEvent.day = localEvent.day || keys.daysOfWeek[6]">
             </select>
         </div>
     </div> <!--date recurrent-->
+
 
     <div class="event-date-unique" ng-if="eventIsUnique(localEvent.type)">
         <label  class="event-label">
@@ -70,21 +93,24 @@
 
     </div><!-- div class="event-date-unique"-->
 
+
     <div class="event-description">
         <label  class="event-label">
             Descriere <i class="fa fa-arrow-right" aria-hidden="true"></i>
         </label>
         <textarea class="event-textarea" ng-model="localEvent.description" ng-focus="localEvent.error.description = undefined"
-                  ng-class="{sanitized: localEvent.sanitDescription}"></textarea>
+                  ng-class="{sanitized: localEvent.sanitDescription}" maxlength="300"></textarea>
         <p class="event-error" ng-if="localEvent.error.description">{{localEvent.error.description}}</p>
     </div>
+
+
     <div class="event-session">
         <div class="individual-session" ng-repeat="session in localEvent.sessions">
             <h5>Sesiunea {{$index + 1}}</h5>
             <label  class="event-label event-name-label">
                 Atelier <i class="fa fa-arrow-right" aria-hidden="true"></i>
             </label>
-            <input type="text" placeholder="Atelierul (eg Scratch, Python..." ng-focus="session.error.workshop = undefined"
+            <input type="text" placeholder="Atelierul (eg Scratch, Python..." ng-focus="session.error.workshop = undefined" maxlength="100"
                    class="event-input workshop-event" ng-model="session.workshop" ng-class="{sanitized: session.sanitWorkshop}">
             <p class="event-error" ng-if="session.error.workshop">{{session.error.workshop}}</p>
             <div ng-show="eventIsRecurrent(localEvent.type)">
@@ -101,7 +127,7 @@
                     <div class="individual-ticket-narrow" ng-repeat="ticket in session.tickets">
                         <label class="event-label">Tip tichet</label>
                         <select class="event-select ticket-type-narrow" ng-model="ticket.typeOfTicket"
-                                ng-init="ticket.typeOfTicket = keys.typesOfTickets[0]"
+                                ng-init="ticket.typeOfTicket = ticket.typeOfTicket ? ticket.typeOfTicket : keys.typesOfTickets[0]"
                                 ng-change="ticket.nameOfTicket = ticket.typeOfTicket"
                                 ng-options="ticketType for ticketType in keys.typesOfTickets"
                                 ng-class="{sanitized: ticket.sanitTypeOfTicket}"></select>
@@ -110,12 +136,12 @@
                         <label class="event-label">Nume tichet</label>
                         <input class="event-input event-ticket-narrow-input" ng-model="ticket.nameOfTicket" ng-focus="session.error.ticketsError= undefined"
                                ng-init="ticket.nameOfTicket = ticket.nameOfTicket ? ticket.nameOfTicket : ticket.typeOfTicket"
-                               ng-class="{sanitized: ticket.sanitNameOfTicket}">
+                               ng-class="{sanitized: ticket.sanitNameOfTicket}" maxlength="50">
                         <br>
 
                         <label class="event-label">Număr tichete</label>
                         <input class="event-input event-ticket-narrow-input" type="number" class="ticket-number" min="1"
-                               ng-model="ticket.numOfTickets" ng-focus="session.error.ticketsError = undefined">
+                               ng-model="ticket.numOfTickets" ng-focus="session.error.ticketsError = undefined" max="150">
 
 
                         <div class="buttons-div">
@@ -143,7 +169,8 @@
                         </tr>
                         <tr ng-repeat="ticket in session.tickets">
                             <td>
-                                <select class="ticket-type-wide" ng-model="ticket.typeOfTicket" ng-init="ticket.typeOfTicket = keys.typesOfTickets[0]"
+                                <select class="ticket-type-wide" ng-model="ticket.typeOfTicket"
+                                        ng-init="ticket.typeOfTicket = ticket.typeOfTicket ? ticket.typeOfTicket : keys.typesOfTickets[0]"
                                         ng-change="ticket.nameOfTicket = ticket.typeOfTicket" ng-options="ticketType for ticketType in keys.typesOfTickets"></select>
                             </td>
                             <td>
@@ -178,4 +205,6 @@
             </div>
         </div> <!--session div-->
     </div>
+
+
 </div> <!--class="event-display-->

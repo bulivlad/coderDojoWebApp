@@ -5,6 +5,9 @@
 const keys = require('../static_keys/project_keys');
 const validator = require('validator');
 const logger = require('winston');
+const fs = require('fs');
+const mmm = require('mmmagic'),
+    Magic = mmm.Magic;
 
 module.exports.isActive = function(eventOrSession){
     if(eventOrSession.activeStatus === keys.eventStatus[0]){ //If the event is active
@@ -275,7 +278,10 @@ let areEventsEqual = module.exports.areEventsEqual = function(event, sanitEvent)
 
 //Sanitization values
 //Characters allowed for dojo events TODO find a place for this info
-const eventWhiteListNames = module.exports.eventWhiteListNames =  'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!?\\-+ ';
+const eventWhiteListNames = module.exports.eventWhiteListNames =  'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ1234567890.,@!/?\\-+: ';
+const phoneWhiteList = module.exports.phoneWhiteList = '+0123456789 ';
+const userNameWhitelist = module.exports.userNameWhitelist = 'aăâbcdefghiîjklmnopqrsștțuvwxyzAĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ';
+const linkWhiteList = module.exports.linkWhiteList = eventWhiteListNames + '=';
 
 module.exports.sanitizeEvents = function(events){
     //cloning the events
@@ -293,17 +299,27 @@ let sanitizeEvent = module.exports.sanitizeEvent = function(event){
     //Sanitizing the event name
     let eventName = event.name;
     let sanitEventName = validator.trim(eventName);
+    if(sanitEventName.length > 50){
+        sanitEventName = sanitEventName.substring(0, 50);
+    }
     sanitEventName = validator.whitelist(sanitEventName, eventWhiteListNames);
     event.name = sanitEventName;
+
     //Sanitizing the event description
     let eventDescr = event.description;
     let sanitEventDescr = validator.trim(eventDescr);
+    if(sanitEventDescr.length > 300){
+        sanitEventDescr = sanitEventDescr.substring(0, 300);
+    }
     event.description = validator.whitelist(sanitEventDescr, eventWhiteListNames);
     for(let j = 0; j < event.sessions.length; j++){
         let session = event.sessions[j];
         //Sanitizing session workshop
         let sessionWorkshop = session.workshop;
         let sanitWorkshop = validator.trim(sessionWorkshop);
+        if(sanitWorkshop.length > 100){
+            sanitWorkshop = sanitWorkshop.substring(0, 100);
+        }
         sanitWorkshop = validator.whitelist(sanitWorkshop, eventWhiteListNames);
         session.workshop = sanitWorkshop;
 
@@ -313,8 +329,14 @@ let sanitizeEvent = module.exports.sanitizeEvent = function(event){
             //Sanitizing ticket name
             let ticketName = ticket.nameOfTicket;
             let sanitTicketName = validator.trim(ticketName);
+            if(sanitTicketName.length > 50){
+                sanitTicketName = sanitTicketName.substring(0, 100);
+            }
             sanitTicketName = validator.whitelist(sanitTicketName, eventWhiteListNames);
             ticket.nameOfTicket = sanitTicketName;
+
+            //Sanitizing ticket number
+            ticket.numOfTickets = Math.floor(ticket.numOfTickets);
         }
     }
     return event;
@@ -330,6 +352,7 @@ module.exports.convertClientEventToUniqueEvent = function(clientEvent, dojoId){
     event._id = clientEvent._id;
     event.name = clientEvent.name;
     event.description = clientEvent.description;
+    event.activeStatus = clientEvent.activeStatus;
 
 
     let startTime = new Date(clientEvent.day);
@@ -384,4 +407,136 @@ module.exports.removeRegisteredUserFromDataBaseEvent = function(event){
     return event;
 };
 
+module.exports.sanitizeSpecialEvent = function(specialEvent){
+    //we clone the special event
+    specialEvent = JSON.parse(JSON.stringify(specialEvent));
 
+    //Sanitizing the event name
+    let eventName = specialEvent.name;
+    let sanitEventName = validator.trim(eventName);
+    if(sanitEventName.length > 100){
+        sanitEventName = sanitEventName.substring(0, 100);
+    }
+    sanitEventName = validator.whitelist(sanitEventName, eventWhiteListNames);
+    specialEvent.name = sanitEventName;
+
+    let eventDescription = specialEvent.description;
+    let sanitDescription = validator.trim(eventDescription);
+    if(sanitDescription.length > 400){
+        sanitDescription = sanitDescription.substring(0, 400);
+    }
+    sanitDescription = validator.whitelist(sanitDescription, eventWhiteListNames);
+    specialEvent.description = sanitDescription;
+
+    let eventAddress = specialEvent.address;
+    let sanitAddress = validator.trim(eventAddress);
+    if(sanitAddress.length > 200){
+        sanitAddress = sanitAddress.substring(0, 200);
+    }
+    sanitAddress = validator.whitelist(sanitAddress, eventWhiteListNames);
+    specialEvent.address = sanitAddress;
+
+    let eventCity = specialEvent.city;
+    let sanitCity = validator.trim(eventCity);
+    sanitCity = validator.whitelist(sanitCity, eventWhiteListNames);
+    specialEvent.city = sanitCity;
+
+    let eventLatitude = specialEvent.latitude;
+    if(isNaN(eventLatitude)){
+        specialEvent.latitude = undefined;
+    }
+
+    let eventLongitude = specialEvent.longitude;
+    if(isNaN(eventLongitude)){
+        specialEvent.longitude = undefined;
+    }
+
+    let eventStartHour = specialEvent.startHour;
+    if(isNaN(eventStartHour)){
+        specialEvent.startHour = undefined;
+    }
+
+    let eventEndHour = specialEvent.endHour;
+    if(isNaN(eventEndHour)){
+        specialEvent.endHour = undefined;
+    }
+
+    let eventStartMinute = specialEvent.startMinute;
+    if(isNaN(eventStartMinute)){
+        specialEvent.startMinute = undefined;
+    }
+
+    let eventEndMinute = specialEvent.endMinute;
+    if(isNaN(eventEndMinute)){
+        specialEvent.endMinute = undefined;
+    }
+
+    let eventStartDay = specialEvent.startDay;
+    if(!isDate(eventStartDay)){
+        specialEvent.startDay = undefined;
+    }
+
+    let eventEndDay = specialEvent.endDay;
+    if(!isDate(eventEndDay)){
+        specialEvent.endDay = undefined;
+    }
+
+    return specialEvent;
+};
+
+module.exports.areSpecialEventsEqual = function(specialEvent1, specialEvent2){
+    if(specialEvent1.startHour != specialEvent2.startHour ||
+        specialEvent1.endHour != specialEvent2.endHour ||
+        specialEvent1.startMinute != specialEvent2.startMinute ||
+        specialEvent1.endMinute != specialEvent2.endMinute ||
+        specialEvent1.startDay != specialEvent2.startDay ||
+        specialEvent1.endDay != specialEvent2.endDay ||
+        specialEvent1.name != specialEvent2.name ||
+        specialEvent1.description != specialEvent2.description ||
+        specialEvent1.address != specialEvent2.address ||
+        specialEvent1.latitude != specialEvent2.latitude ||
+        specialEvent1.longitude != specialEvent2.longitude ||
+        specialEvent1.city != specialEvent2.city){
+        return false;
+    } else {
+        return true;
+    }
+};
+
+let isDate = module.exports.isDate = function(str) {
+    return !isNaN(Date.parse(str));
+};
+
+//Method that weakly compares (ObjectId and String will be equal) 2 user's ids
+module.exports.isSameUser = function(user1, user2){
+    return user1._id == user2._id;
+};
+
+
+module.exports.deletePhoto = function(filename){
+    fs.unlink(filename, function(err){
+        if(err){
+           return logger.error(`Error deleting file ${filename}:` + err);
+        }
+        logger.debug(`Deleted file ${filename}`);
+    });
+};
+
+module.exports.removeWhiteSpaces = function(string){
+    return string.replace(/\s/g, '');
+};
+
+module.exports.inspectUploadedImage = function(file, relativePath, callback){
+    var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+    magic.detectFile(relativePath + file.filename, function(err, result) {
+       if(err){
+           callback(err);
+       } else {
+           let fileInspect = {};
+           fileInspect.fileSize = file.size;
+           fileInspect.mimeType = result;
+           callback(null, fileInspect);
+      }
+    });
+
+};

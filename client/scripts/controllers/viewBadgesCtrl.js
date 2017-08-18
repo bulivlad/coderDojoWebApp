@@ -179,7 +179,7 @@ angular.module('coderDojoTimisoara')
                     $scope.setFilteredBadges(filterBadges($scope.badges));
                 });
             } else {
-                //If this is editProfilesCtrl, we minimize the filter badges by default
+                //If this is editProfilesCtrl, we minimize thegetBackgroundUrlForSpecialEventPhoto filter badges by default
                 $scope.showBadgesFilterMenu.view = false;
             }
 
@@ -187,112 +187,4 @@ angular.module('coderDojoTimisoara')
         initializeViewBadgesCtrl();
 
     })
-    .controller('viewAllBadgesCtrl',function($scope, $rootScope, $route,  $location, dataService, helperSvc){
 
-        //This is the method the viewBadgesCtrl will call when trying to get the badges to display them.
-        $scope.getBadges = function(callback){
-            if(!$scope.isUserLoggedIn()){
-                getAllBadges(callback);
-            } else {
-                getAllAuthBadges(callback);
-            }
-        };
-
-
-        var getAllBadges = function(callback){
-            dataService.getAllBadges()
-                .then(function(response){
-                    if(response.data.badges){
-                        $scope.badges = response.data.badges;
-                        if(callback){
-                            callback();
-                        }
-                    }
-                })
-                .catch(function(err){
-                    helperSvc.handlerCommunicationErrors(err, 'getBadges() viewAllBadgesCtrl', $scope);
-                })
-        };
-
-        var getAllAuthBadges = function(callback){
-            dataService.getAuthAllBadges()
-                .then(function(response){
-                    if(response.data.allBadges && response.data.userBadges){
-                        $scope.badges = helperSvc.mergeAllBadgesWithUserBadges(response.data.allBadges,
-                            response.data.userBadges);
-                        if(callback){
-                            callback();
-                        }
-                    }
-                })
-                .catch(function(err){
-                    helperSvc.handlerCommunicationErrors(err, 'getBadges() viewAllBadgesCtrl', $scope);
-                })
-        };
-
-        $scope.clickBadgeAction = function(badge){
-            $scope.setBadgeView(badge, keys.viewBadgesLocation);
-            $scope.goToViewBadge();
-        };
-
-        $scope.setFilteredBadges = function(filteredBadges){
-            $scope.filteredBadges = filteredBadges;
-        }
-
-
-    })
-    .controller('viewBadgeCtrl',function($scope, $rootScope, $route,  $location, dataService, helperSvc){
-        $scope.viewReceivedBadges = {};
-
-        $scope.getPresentableDateForBadgeReceived = function(date){
-            //convert the string to a date
-            date = new Date(date);
-            return helperSvc.capitalizeFirstLetter(keys.daysOfWeek[date.getDay()]) + ' ' +  date.getDate() +
-                ' ' + keys.months[date.getMonth()] + ' ' + date.getFullYear() + '.';
-
-        };
-
-        $scope.goBackAction = function(){
-            var badgesView = $scope.getBadgeView();
-            if(badgesView.previousLocation === keys.viewBadgesLocation){
-                $scope.goToViewBadges();
-            }else if(badgesView.previousLocation === keys.myProfile){
-                $scope.goToViewUserProfile();
-            } else {
-                $scope.goToViewUserProfile();
-            }
-        };
-
-        $scope.goToEditBadge = function(){
-            $scope.views = {};
-            $scope.views[keys.goToEditBadge] = true;
-        };
-
-        $scope.goToViewBadge = function(){
-            $scope.views = {};
-            $scope.views[keys.viewBadge] = true;
-        };
-
-        $scope.isCurrentView = function(view) {
-            return $scope.views[view];
-        };
-
-        //This is used by methods of inner scopes to set the badge in this scope
-        $scope.setBadge = function(badge){
-            $scope.badge = badge;
-        };
-
-
-        var initializeViewBadgeCtrl = function(){
-            var badgesView = $scope.getBadgeView();
-            if(badgesView){
-                $scope.badge = badgesView.badge;
-                $scope.views = {};
-                $scope.views[keys.viewBadge] = true;
-            } else {
-                $scope.goToViewBadges();
-            }
-        };
-
-        initializeViewBadgeCtrl();
-    });

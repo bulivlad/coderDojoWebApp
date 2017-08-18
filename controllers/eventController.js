@@ -5,11 +5,15 @@
 
 const keys = require('../static_keys/project_keys');
 const Event = require('../models/eventModel');
+const SpecialEvent = require('../models/specialEventModel');
 const Dojo = require('../models/dojoModel');
-const dojoController = require('./dojosController')
+const dojoController = require('./dojosController');
 const User = require('../models/userModel');
 const logger = require('winston');
 const helper = require('./helperController');
+const multer = require('multer');
+const mime = require('mime');
+let upload;
 
 //method for getting current events for a dojo for unauthenticated users
 module.exports.getCurrentDojoEvents = function(req, res){
@@ -21,14 +25,14 @@ module.exports.getCurrentDojoEvents = function(req, res){
             logger.error(`Error getting current events for dojo=(${dojoId})  from database` + err);
             return res.sendStatus(500);
         }
-        res.json({events: prepareEventsForGettingCurrentDojoEvents(events)});
+        res.json({events: prepareEventsForGettingCurrentEvents(events)});
     })
 
 };
 
-//We only add the session workshops, no other info for this call
-function prepareEventsForGettingCurrentDojoEvents(events){
-    logger.silly(`entering prepareEventsForGettingCurrentDojoEvents - events=${JSON.stringify(events)}`);
+// We only add the session workshops, no other info for this call. THis method is used for preparing dojo events as well
+// as all events.
+function prepareEventsForGettingCurrentEvents(events){
     let ret = [];
     events.forEach(function(event){
         let cloneEvent = {};
@@ -37,6 +41,8 @@ function prepareEventsForGettingCurrentDojoEvents(events){
         cloneEvent.endTime = event.endTime;
         cloneEvent.description = event.description;
         cloneEvent.copyOfRecurrentEvent = event.copyOfRecurrentEvent;
+        cloneEvent.eventRecurrenceType = event.eventRecurrenceType;
+        cloneEvent.dojoId = event.dojoId;
         cloneEvent._id = event._id;
         let cloneTickets = [];
         event.tickets.forEach(function(ticket){
@@ -50,7 +56,6 @@ function prepareEventsForGettingCurrentDojoEvents(events){
 
 //method for getting current events for a dojo for authenticated users
 module.exports.getAuthCurrentDojoEvents = function(req, res){
-    logger.debug(`Entering EventsRoute: ${keys.getAuthCurrentDojoEventsRoute}`);
     let dojoId = req.body.dojoId;
     let user = req.user;
     Event.getAuthCurrentDojoEvents(dojoId, function(err, events){
@@ -58,12 +63,12 @@ module.exports.getAuthCurrentDojoEvents = function(req, res){
             logger.error(`Error getting current auth events for dojo=(${dojoId}) for ${helper.getUser(req)}  from database` + err);
             return res.sendStatus(500);
         }
-        let preparedEvents = prepareEventsForGettingAuthCurrentDojoEvents(events, user);
+        let preparedEvents = prepareEventsForGettingAuthCurrentEvents(events, user);
 
         let regUsers = extractRegisteredUsersFromPreparedEvents(preparedEvents);
         //If the user or his/her children are registered for the events
         if(regUsers.length > 0){
-            let childrenRegisteredForEvent = extractChildrenRegisteredForEvent(regUsers, user._id.toString());
+            let childrenRegisteredForEvent = extractChildrenRegisteredForEvents(regUsers, user._id.toString());
             if(childrenRegisteredForEvent.length > 0){
                 logger.silly('User or his/her children registered for event');
                 //If there are children of the user registered for the event, we get the children's name (we also filter for
@@ -107,8 +112,8 @@ function extractRegisteredUsersFromPreparedEvents(preparedEvents){
     return ret;
 }
 
-//Method for preparing events for dojo for authenticated users
-function prepareEventsForGettingAuthCurrentDojoEvents(events, user){
+//Method for preparing events for authenticated users used for dojo events as well as all events.
+function prepareEventsForGettingAuthCurrentEvents(events, user){
     let ret = [];
     events.forEach(function(event){
         let cloneEvent = {};
@@ -117,7 +122,9 @@ function prepareEventsForGettingAuthCurrentDojoEvents(events, user){
         cloneEvent.endTime = event.endTime;
         cloneEvent.description = event.description;
         cloneEvent.copyOfRecurrentEvent = event.copyOfRecurrentEvent;
+        cloneEvent.eventRecurrenceType = event.eventRecurrenceType;
         cloneEvent._id = event._id;
+        cloneEvent.dojoId = event.dojoId;
         cloneEvent.regUsers = [];
         let cloneTickets = [];
 
@@ -148,7 +155,7 @@ function prepareEventsForGettingAuthCurrentDojoEvents(events, user){
 
 //Method for separating the children from the user in the users registered for an event. Method returns an array of child
 //ids.
-function extractChildrenRegisteredForEvent(regUsers, userId){
+function extractChildrenRegisteredForEvents(regUsers, userId){
     let ret = [];
     regUsers.forEach(function(regUser){
         if(regUser.userId != userId){
@@ -191,6 +198,229 @@ function makeMapOfUserIdToName(users){
     });
     return ret
 }
+
+//Makes a map of dojo _id as key dojo name
+function makeMapOfDojoIdIdToDojoName(dojos){
+    let ret = {};
+    dojos.forEach(function(dojo){
+        ret[dojo._id.toString()] = dojo.name;
+    });
+    return ret
+}
+
+module.exports.getMyEvents = function(req, res){
+    let user = req.user;
+    Event.getAuthCurrentEventsForAllDojos(function(err, events){
+        if(err){
+            logger.error(`Error getting events by ${helper.getUser(req)} for myEvents from database` + err);
+            return res.sendStatus(500);
+        }
+        let preparedEvents = prepareEventsForGettingMyEvents(events, user);
+
+        let regUsers = extractRegisteredUsersFromPreparedEvents(preparedEvents);
+        //If the user or his/her children are registered for the events
+        if(regUsers.length > 0){
+            let childrenRegisteredForEvent = extractChildrenRegisteredForEvents(regUsers, user._id.toString());
+            if(childrenRegisteredForEvent.length > 0){
+                logger.silly('User or his/her children registered for event');
+                //If there are children of the user registered for the event, we get the children's name (we also filter for
+                // users children that are under 18
+                User.getUsersNames(childrenRegisteredForEvent, true, function(err, children){
+                    if(err){
+                        logger.error(`Error getting children's names for ${helper.getUser(req)} for getting my events from database` + err);
+                        return res.sendStatus(500);
+                    }
+                    addChildrenNames(preparedEvents, children);
+
+                    //We need to get the dojo names for the events
+                    let eventsDojos = getEventDojos(preparedEvents);
+
+                    Dojo.getDojoNames(eventsDojos, function(err, dojosWithNames){
+                        if(err){
+                            logger.error(`Error getting dojos names for ${helper.getUser(req)} for getting my events from database` + err);
+                            return res.sendStatus(500);
+                        }
+                        addDojoNamesToEvents(preparedEvents, dojosWithNames);
+                        res.json({events: preparedEvents});
+                    });
+                });
+            } else {
+                logger.silly('Only User registered for upcoming events');
+                //If there are no children of the user registered for the events, we send the events
+
+                //We need to get the dojo names for the events
+                let eventsDojos = getEventDojos(preparedEvents);
+                Dojo.getDojoNames(eventsDojos, function(err, dojos){
+                    if(err){
+                        logger.error(`Error getting dojos names for ${helper.getUser(req)} for getting my events from database` + err);
+                        return res.sendStatus(500);
+                    }
+                    addDojoNamesToEvents(preparedEvents, eventsDojos);
+                    res.json({events: preparedEvents});
+                });
+            }
+        } else {
+            //If the user or his/her children are NOT registered for the events
+            res.json({events: preparedEvents});
+        }
+    });
+};
+
+function addDojoNamesToEvents(events, dojos){
+    let mapOfDojoNames = makeMapOfDojoIdIdToDojoName(dojos);
+    events.forEach(function(event){
+        event.dojoName = mapOfDojoNames[event.dojoId];
+    })
+}
+
+//Method that takes in an array of events and returns an array of dojos (of the events)
+function getEventDojos(events){
+    let set = new Set();
+    events.forEach(function(event){
+        set.add(event.dojoId);
+    });
+
+    return Array.from(set);
+}
+
+//Method for preparing events for a users my events view
+function prepareEventsForGettingMyEvents(events, user){
+    let ret = [];
+    events.forEach(function(event){
+        let cloneEvent = {};
+        cloneEvent.name = event.name;
+        cloneEvent.startTime = event.startTime;
+        cloneEvent.endTime = event.endTime;
+        cloneEvent.description = event.description;
+        cloneEvent.copyOfRecurrentEvent = event.copyOfRecurrentEvent;
+        cloneEvent._id = event._id;
+        cloneEvent.dojoId = event.dojoId;
+        cloneEvent.regUsers = [];
+        let cloneTickets = [];
+
+        let userOrChildrenRegisteredToEvent = false;
+        event.tickets.forEach(function(ticket){
+            let cloneTicket = {workshop: ticket.workshop, sessionId: ticket.sessionId};
+            cloneTickets.push(cloneTicket);
+            //We check if the user is registered for the ticket in the session of the event
+            let userRegistered = isUserRegisteredForSessionTicket(ticket.registeredMembers, user._id);
+            if(userRegistered){
+                userOrChildrenRegisteredToEvent = true;
+                cloneEvent.regUsers.push({firstName: user.firstName, lastName:user.lastName, userId: user._id.toString(),
+                    workshop: ticket.workshop, nameOfTicket: ticket.nameOfTicket, status: userRegistered.confirmed});
+            }
+            //We check if the user's children registered for the ticket in the session of the event
+            user.children.forEach(function(childId){
+                let childRegistered = isUserRegisteredForSessionTicket(ticket.registeredMembers, childId);
+                if(childRegistered){
+                    userOrChildrenRegisteredToEvent = true;
+                    cloneEvent.regUsers.push({userId:childId.toString(), workshop: ticket.workshop,
+                        nameOfTicket: ticket.nameOfTicket, status: childRegistered.confirmed});
+                }
+            });
+
+        });
+        //Only add the event if the users or his/her children are registered to the event
+        if(userOrChildrenRegisteredToEvent){
+            cloneEvent.tickets = cloneTickets;
+            ret.push(cloneEvent);
+        }
+    });
+    return ret;
+}
+
+//Route for getting current events for all dojos for authenticated users.
+module.exports.getCurrentAuthEvents = function(req, res){
+    let user = req.user;
+    Event.getAuthCurrentEventsForAllDojos(function(err, events){
+        if(err){
+            logger.error(`Error getting current auth events (${keys.getCurrentAuthEventsRoute}) ` +
+                `for ${helper.getUser(req)}  from database` + err);
+            return res.sendStatus(500);
+        }
+        let preparedEvents = prepareEventsForGettingAuthCurrentEvents(events, user);
+
+        let regUsers = extractRegisteredUsersFromPreparedEvents(preparedEvents);
+        //If the user or his/her children are registered for the events
+        if(regUsers.length > 0){
+            let childrenRegisteredForEvent = extractChildrenRegisteredForEvents(regUsers, user._id.toString());
+            if(childrenRegisteredForEvent.length > 0){
+                logger.silly('User or his/her children registered for event');
+                //If there are children of the user registered for the event, we get the children's name (we also filter for
+                // users children that are under 18
+                User.getUsersNames(childrenRegisteredForEvent, true, function(err, children){
+                    if(err){
+                        logger.error(`Error getting children's names for ${helper.getUser(req)} for getting current auth ` +
+                            ` (${keys.getCurrentAuthEventsRoute})events from database` + err);
+                        return res.sendStatus(500);
+                    }
+                    addChildrenNames(preparedEvents, children);
+
+                    //We need to get the dojo names for the events
+                    let eventsDojos = getEventDojos(preparedEvents);
+
+                    Dojo.getDojoNames(eventsDojos, function(err, dojosWithNames){
+                        if(err){
+                            logger.error(`Error getting dojos names for ${helper.getUser(req)} for getting current auth ` +
+                                ` (${keys.getCurrentAuthEventsRoute}) events from database` + err);
+                            return res.sendStatus(500);
+                        }
+                        addDojoNamesToEvents(preparedEvents, dojosWithNames);
+                        res.json({events: preparedEvents});
+                    });
+                });
+            } else {
+                //If there are no children of the user registered for the events, we send the events
+                //We need to get the dojo names for the events
+                let eventsDojos = getEventDojos(preparedEvents);
+                Dojo.getDojoNames(eventsDojos, function(err, dojos){
+                    if(err){
+                        logger.error(`Error getting dojos names for ${helper.getUser(req)} for getting current events from database` + err);
+                        return res.sendStatus(500);
+                    }
+                    addDojoNamesToEvents(preparedEvents, eventsDojos);
+                    res.json({events: preparedEvents});
+                });
+            }
+        } else {
+            let eventsDojos = getEventDojos(preparedEvents);
+            //If the user or his/her children are NOT registered for the events, we get the dojo names and return the events
+            Dojo.getDojoNames(eventsDojos, function(err, dojosWithNames){
+                if(err){
+                    logger.error(`Error getting dojos names for ${helper.getUser(req)} for getting current events from database` + err);
+                    return res.sendStatus(500);
+                }
+                addDojoNamesToEvents(preparedEvents, dojosWithNames);
+                res.json({events: preparedEvents});
+            });
+        }
+    });
+};
+
+module.exports.getCurrentEvents = function(req, res){
+    Event.getCurrentEventsForAllDojos(function(err, events) {
+        if (err) {
+            logger.error(`Error getting current events for all dojos for an unauthenticated users ` +
+                ` (${keys.getCurrentEventsRoute}) from database` + err);
+            return res.sendStatus(500);
+        }
+        //We need to clone the eve
+        events = prepareEventsForGettingCurrentEvents(events);
+
+        let eventsDojos = getEventDojos(events);
+        //If the user or his/her children are NOT registered for the events, we get the dojo names and return the events
+        Dojo.getDojoNames(eventsDojos, function(err, dojosWithNames){
+            if(err){
+                logger.error(`Error getting dojos names for ${helper.getUser(req)} for getting current events from database` + err);
+                return res.sendStatus(500);
+            }
+            addDojoNamesToEvents(events, dojosWithNames);
+            res.json({events: events});
+        });
+
+
+    });
+};
 
 //method for getting an event for unauthenticated users
 module.exports.getAuthEvent = function(req, res){
@@ -300,8 +530,7 @@ function prepareEvent(event, user, usersChildren){
     event.tickets.forEach(function(ticket){
         let tempTicket = {typeOfTicket: ticket.typeOfTicket, nameOfTicket: ticket.nameOfTicket,
             sessionId:ticket.sessionId, workshop: ticket.workshop};
-        let remainingSeats = ticket.numOfTickets - ticket.registeredMembers.length;
-        tempTicket.remainingSeats = remainingSeats;
+        tempTicket.remainingSeats = ticket.numOfTickets - ticket.registeredMembers.length;
         tempTicket._id = ticket._id;
         tempTicket.ticketOptions = [];
         if(user){
@@ -432,7 +661,7 @@ module.exports.registerUserForEvent = function(req, res){
                     }
                     //User being added is already registered to the event
                     if(userIsRegisteredToEvent(event, userIdToAddToEvent)){
-                        logger.error(`User (_id=${userIdToAddToEvent}) is already registered to the event, request by ${helper.getUser(req)}`);;
+                        logger.error(`User (_id=${userIdToAddToEvent}) is already registered to the event, request by ${helper.getUser(req)}`);
                         res.json({errors: keys.userAlreadyRegisteredForEventError});
                     } else {
                         //User being added is not already registered to the event, so we will register him/her
@@ -732,7 +961,7 @@ function editEvent(event, req, res){
     // saved event to the edited event we have here (the edited event does not have the registered members)
     Event.getEvent(event._id, function(err, eventWithRegUsers){
         if(err){
-            logger.error(`Error getting event for ${helper.getUser(req)}, for editing aa event (_id=${event.dojoId}) of `+
+            logger.error(`Error getting event for ${helper.getUser(req)}, for editing an event (_id=${event.dojoId}) of `+
                 `dojo (${event.dojoId}) :` + err);
             return res.sendStatus(500);
         }
@@ -890,8 +1119,158 @@ function sendInvitesForEventToDojoMembers(data){
             });
         })
     }
+}
+
+
+//Method for adding special events
+module.exports.addSpecialEvent = function(req, res){
+    let user = req.user;
+    if(helper.isUserAdmin(user)){
+        let specialEvent = req.body.specialEvent;
+        let sanitSpecialEvent = helper.sanitizeSpecialEvent(specialEvent);
+        if(helper.areSpecialEventsEqual(specialEvent, sanitSpecialEvent)){
+            let startTime = new Date(specialEvent.startDay);
+            startTime.setHours(specialEvent.startHour);
+            startTime.setMinutes(specialEvent.startMinute);
+            specialEvent.startTime = startTime;
+
+            let endTime = new Date(specialEvent.endDay);
+            endTime.setHours(specialEvent.endHour);
+            endTime.setMinutes(specialEvent.endMinute);
+            specialEvent.endTime = endTime;
+
+            SpecialEvent.addSpecialEvent(specialEvent, function(err){
+                if(err){
+                    logger.error(`Error saving special event (${specialEvent}) by ${helper.getUser(req)}:` + err);
+                    return res.sendStatus(500);
+                }
+                res.json({success:true});
+            })
+        } else {
+            res.json({sanitSpecialEvent:sanitSpecialEvent});
+        }
+    } else {
+        logger.error(`${helper.getUser(req)} tried to add a special event while not authorized to do so`);
+        res.json({errors: keys.notAuthorizedError});
+    }
 };
 
+//Method for adding special events
+module.exports.editSpecialEvent = function(req, res){
+    let user = req.user;
+    if(helper.isUserAdmin(user)){
+        let specialEvent = req.body.specialEvent;
+        let sanitSpecialEvent = helper.sanitizeSpecialEvent(specialEvent);
+        if(helper.areSpecialEventsEqual(specialEvent, sanitSpecialEvent)){
+            let startTime = new Date(specialEvent.startDay);
+            startTime.setHours(specialEvent.startHour);
+            startTime.setMinutes(specialEvent.startMinute);
+            specialEvent.startTime = startTime;
+
+            let endTime = new Date(specialEvent.endDay);
+            endTime.setHours(specialEvent.endHour);
+            endTime.setMinutes(specialEvent.endMinute);
+            specialEvent.endTime = endTime;
+
+            SpecialEvent.editSpecialEvent(specialEvent, function(err){
+                if(err){
+                    logger.error(`Error editing special event (${specialEvent}) by ${helper.getUser(req)}:` + err);
+                    return res.sendStatus(500);
+                }
+                res.json({success:true});
+            })
+        } else {
+            res.json({sanitSpecialEvent:sanitSpecialEvent});
+        }
+    } else {
+        logger.error(`${helper.getUser(req)} tried to edit a special (${JSON.stringify(specialEvent)}) event while` +
+            ` not authorized to do so`);
+        res.json({errors: keys.notAuthorizedError});
+    }
+};
+
+module.exports.getCurrentSpecialEvents = function(req, res){
+    SpecialEvent.getCurrentSpecialEvents(function(err, specialEvents){
+        if(err){
+            logger.error(`Error getting current special events: ` + err);
+            return res.sendStatus(500);
+        }
+        res.json({specialEvents: specialEvents});
+    });
+};
+
+
+module.exports.getSpecialEvent = function(req, res){
+    let specialEventId = req.body.specialEventId;
+    SpecialEvent.getSpecialEvent(specialEventId, function(err, specialEvent){
+        if(err){
+            logger.error(`Error getting special events (_id${specialEventId})=: ` + err);
+            return res.sendStatus(500);
+        }
+        res.json({specialEvent: specialEvent});
+    });
+};
+
+module.exports.uploadSpecialEventPhoto = function(req, res){
+    let user = req.user;
+    if(helper.isUserAdmin(user)){
+        upload(req, res, function(err){
+            let specialEventId = req.body.specialEventId;
+            if(err){
+                logger.error(`Error uploading special event photo specialEvent (_id=${specialEventId}) by ${helper.getUser(req)}:` + err);
+                return res.sendStatus(500);
+            }
+            let filename = req.file.filename;
+            let specialEventsRelativePath = 'client/img/special_events/';
+            helper.inspectUploadedImage(req.file, specialEventsRelativePath, function(err, fileInspect){
+                if(err){
+                    logger.error(`Error inspecting photo (_id=${JSON.stringify(req.file)}) for adding special event photo` +
+                        `for specialEvent  (_id=${specialEventId}) by ${helper.getUser(req)}: ` + err);
+                    return res.sendStatus(500);
+                    helper.deletePhoto(specialEventsRelativePath +  filename);
+                }
+                let filename = req.file.filename;
+                if(fileInspect.fileSize > 1000000){
+                    //If the file is larger than 500Kb it is not acceptable
+                    res.json({errors:keys.uploadedPhotoTooLargeError});
+                    //We delete the photo after it has been uploaded
+                    helper.deletePhoto(specialEventsRelativePath +  filename);
+                } else if((fileInspect.mimeType != 'image/jpeg') && (fileInspect.mimeType != 'image/png')){
+                    //Not a correct type of file
+                    res.json({errors:keys.uploadedPhotoNotCorrectMimeTypeError});
+                    //We delete the photo after it has been uploaded
+                    helper.deletePhoto(specialEventsRelativePath +  filename);
+                } else {
+                    //If the file is the right size and the correct mime type, we save the file
+                    SpecialEvent.updateSpecialEventPhoto(specialEventId, filename, function(err, oldSpecialEvent){
+                        if(err){
+                            logger.error(`Error updating special event photo for specialEvent (_id=${specialEventId}) by` +
+                                ` ${helper.getUser(req)}:` + err);
+                            return res.sendStatus(500);
+                        }
+                        res.json({specialEventPhoto:filename});
+                        helper.deletePhoto(specialEventsRelativePath +  oldSpecialEvent.photo);
+                    });
+                }
+            });
+        })
+    } else {
+        logger.error(` ${helper.getUser(req)} tried to change SpecialEvent photo while now authorized to do so`);
+        res.json({errors:keys.notAuthorizedError});
+    }
+};
+
+let storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, __dirname + '/../client/img/special_events');
+    },
+    filename: function (req, file, callback) {
+        callback(null, `${req.body.specialEventId}_${Date.now()}.${mime.extension(file.mimetype)}`);
+    }
+});
+
+//TODO must check for photo type
+upload =  multer({storage:storage}).single('special-event-photo');
 
 //Method for creating events from recurrent events for all dojos. If an event for that a particular dojo for the next
 //week has already been created in a previous run of the method, that recurrent event is skipped.
@@ -905,17 +1284,12 @@ module.exports.createEventsFromRecurrentEventsForAllDojos = function(){
         dojos.forEach(function(dojo){
             let listOfRecEventsIds = getListOfReccurentEventIds(dojo.recurrentEvents);
             Event.getCurrentEventsForADojoCreatedFromRecurrentEvents(dojo._id, listOfRecEventsIds, function(err, alreadyCreatedEvents){
-                logger.silly(`determining which events need to be created for dojo (id=${dojo._id}, name=${dojo.name})`);
-                //logger.silly(`alreadyCreatedEvents: ${JSON.stringify(alreadyCreatedEvents)}`);
-                //logger.silly(`recurrentEvents: ${JSON.stringify(dojo.recurrentEvents)}`)
                 if(err){
-                    logger.error(`Error getting while getCurrentEventsForADojoCreatedFromRecurrentEvents for dojo ${dojo_id}`);
+                    logger.error(`Error getting while getCurrentEventsForADojoCreatedFromRecurrentEvents for dojo ${dojo._id}:  ` + err);
                 }
                 //We determine which recurrent events need to be recreated
                 let eventsThatNeedToBeCreated = determineWhichEventsNeedToBeCreated(alreadyCreatedEvents, listOfRecEventsIds);
-                logger.silly(`eventsThatNeedToBeCreated: ${eventsThatNeedToBeCreated.length > 0 ? eventsThatNeedToBeCreated: "NONE"}`);
-                createEventsFromRecurrentEvents(eventsThatNeedToBeCreated, dojo.recurrentEvents, dojo._id);
-                logger.silly(`===================================================================================`);
+                createEventsFromRecurrentEvents(eventsThatNeedToBeCreated, dojo);
             });
         });
     });
@@ -923,22 +1297,22 @@ module.exports.createEventsFromRecurrentEventsForAllDojos = function(){
 
 // recurrentEvents is a list of recurrent events (with all the info)
 // eventsThatNeedToBeCreated is a list of ids of events that need to be created
-function createEventsFromRecurrentEvents(eventsThatNeedToBeCreated, recurrentEvents, dojoId){
-    recurrentEvents.forEach(function(recEvent){
+function createEventsFromRecurrentEvents(eventsThatNeedToBeCreated, dojo){
+    dojo.recurrentEvents.forEach(function(recEvent){
         //If the recurrent event is in the list of events that need to be created, we create it
         if(eventsThatNeedToBeCreated.indexOf(recEvent._id) >= 0){
-            createEventFromRecurrentEvent(recEvent, dojoId);
+            createEventFromRecurrentEvent(recEvent, dojo);
         }
     });
 }
 
-function createEventFromRecurrentEvent(recurrentEvent, dojoId){
-    logger.silly(`Entering createEventFromRecurrentEvent`);
-    let eventToSave = convertRecurrentEventToEvent(recurrentEvent, dojoId);
+function createEventFromRecurrentEvent(recurrentEvent, dojo){
+    let eventToSave = convertRecurrentEventToEvent(recurrentEvent, dojo._id);
     Event.createEvent(eventToSave, function(err){
         if(err){
-            logger.error(`Error saving event ${JSON.stringify(event)}`);
+            logger.error(`Error saving event ${JSON.stringify(eventToSave)}:` + err);
         }
+        logger.debug(`Event ${eventToSave.name} in dojo (${dojo.name}) created`);
     });
 }
 
@@ -948,9 +1322,19 @@ function convertRecurrentEventToEvent(recurrentEvent, dojoId){
     event.name = recurrentEvent.name;
     event.description = recurrentEvent.description;
     event.copyOfRecurrentEvent = recurrentEvent._id;
+    event.eventRecurrenceType = recurrentEvent.eventRecurrenceType;
 
-    let startEndTime = getNextEventTimes(recurrentEvent.startHour, recurrentEvent.startMinute, recurrentEvent.endHour,
-        recurrentEvent.endMinute, recurrentEvent.day);
+    let startEndTime = undefined;
+    if(recurrentEvent.eventRecurrenceType === keys.eventRecurrenceTypes[2]){//Monthly event types
+        startEndTime = getNextEventTimesForMonthlyEvent(recurrentEvent.startHour, recurrentEvent.startMinute, recurrentEvent.endHour,
+            recurrentEvent.endMinute,recurrentEvent.recurrenceDay);
+    } else if(recurrentEvent.eventRecurrenceType === keys.eventRecurrenceTypes[1]){//biMonthly event types
+        startEndTime = getNextEventTimesForBiMonthlyEvent(recurrentEvent.startHour, recurrentEvent.startMinute, recurrentEvent.endHour,
+                       recurrentEvent.endMinute,recurrentEvent.recurrenceDay);
+    } else {//weekly event
+        startEndTime = getNextEventTimesForWeeklyEvents(recurrentEvent.startHour, recurrentEvent.startMinute, recurrentEvent.endHour,
+            recurrentEvent.endMinute, recurrentEvent.day);
+    }
 
     event.startTime = startEndTime.startDate;
     event.endTime = startEndTime.endDate;
@@ -959,8 +1343,48 @@ function convertRecurrentEventToEvent(recurrentEvent, dojoId){
     return event;
 }
 
-//This method receives an hour, minutes and day, and returns a date when the event will occur next (less then a week)
-function getNextEventTimes(startHour, startMinute, endHour, endMinute, day){
+
+function getNextEventTimesForBiMonthlyEvent(startHour, startMinute, endHour, endMinute, recurrenceDay){
+    return getNextEventTimesForBiMonthlyAndMonthlyEvents(startHour, startMinute, endHour, endMinute, recurrenceDay,
+        keys.eventRecurrenceTypes[1]);
+}
+
+function getNextEventTimesForMonthlyEvent(startHour, startMinute, endHour, endMinute, recurrenceDay){
+    return getNextEventTimesForBiMonthlyAndMonthlyEvents(startHour, startMinute, endHour, endMinute, recurrenceDay,
+        keys.eventRecurrenceTypes[2]);
+}
+
+function getNextEventTimesForBiMonthlyAndMonthlyEvents(startHour, startMinute, endHour, endMinute, recurrenceDay, eventRecurrenceType){
+    let ret = {};
+    //We determine how many days to add based on the eventRecurrenceType
+    var timeToAdd = 1000 * 60 * 60 * 24 * 14;//default is two weeks
+    if(eventRecurrenceType === keys.eventRecurrenceTypes[2]){
+        timeToAdd = 1000 * 60 * 60 * 24 * 28;
+    }
+    //Cloning the recurrence day
+    let tempNewDate = new Date(recurrenceDay);
+    tempNewDate.setHours(startHour);
+    tempNewDate.setMinutes(startMinute);
+
+    let now = new Date();
+
+    //
+    while(now.getTime() > tempNewDate.getTime()){
+        //We add two weeks or a month to the original date set for the start of the event until we get a date past the present
+        tempNewDate = new Date(tempNewDate.getTime() + timeToAdd);
+    }
+    ret.startDate = tempNewDate;
+
+    let endDate = new Date(tempNewDate);
+    endDate.setHours(endHour);
+    endDate.setMinutes(endMinute);
+    ret.endDate = endDate;
+
+    return ret;
+}
+
+//This method receives an hour, minutes and day, and returns a date when the weekly event will occur next (less then a week).
+function getNextEventTimesForWeeklyEvents(startHour, startMinute, endHour, endMinute, day){
     let now = new Date();
     let ret = {};
     let daysToAdd = getNumberOfDaysToAdd(now, keys.daysOfWeek.indexOf(day), startHour, startMinute);
@@ -981,7 +1405,7 @@ function getNextEventTimes(startHour, startMinute, endHour, endMinute, day){
 
 }
 
-function getNumberOfDaysToAdd(dateNow, indexOfSelectedDay, startHours, startMinutes, eventRecurrence){
+function getNumberOfDaysToAdd(dateNow, indexOfSelectedDay, startHours, startMinutes){
     let indexOfNow = dateNow.getDay();
     if(indexOfSelectedDay > indexOfNow){
         return indexOfSelectedDay - indexOfNow;
@@ -1010,22 +1434,9 @@ function getNumberOfDaysToAdd(dateNow, indexOfSelectedDay, startHours, startMinu
     }
 }
 
-function isWeeklyEvent(eventRecurrence){
-    return keys.eventRecurrence[0] === eventRecurrence;
-}
-
-function isBiWeeklyEvent(eventRecurrence){
-    return keys.eventRecurrence[1] === eventRecurrence;
-}
-
-function isMonthlyEvent(eventRecurrence){
-    return keys.eventRecurrence[2] === eventRecurrence;
-}
-
 //Method that has two lists as arguments. A list of current dojo events, and a list of the recurrent events of the dojo.
 //It returns a list of rec events that need to be created.
 function determineWhichEventsNeedToBeCreated(currentEventsOfDojo, recurrentEventsIds){
-    logger.silly(`Entering determineWhichEventsNeedToBeCreated`);
     let ret = [];
     //We exact from the list of current events a list of id's of recurrent evens from which the event was created
     let listOfCurrentEventCopyFromIds = getListOfFieldsFromListOfObjects(currentEventsOfDojo, 'copyOfRecurrentEvent');

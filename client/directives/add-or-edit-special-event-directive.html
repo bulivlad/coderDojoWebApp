@@ -1,0 +1,152 @@
+<div class="add-or-edit-special-event-directive" ng-controller="addOrEditSpecialEventCtrl">
+    <div class="special-event-image">
+        <div class="image-div"  style="{{getBackgroundUrlForSpecialEventPhoto(local.specialEvent)}}"></div>
+        <button class="change-photo" ng-if="isEditSpecialEvent()" ng-click="changeSpecialEventPhoto()">
+            Schimba poza
+        </button>
+        <button class="back-btn" ng-if="isEditSpecialEvent()" ng-click="goBackAction()"><i class="fa fa-arrow-left" aria-hidden="true"></i> Inapoi</button>
+    </div>
+    <input class="always-hide" id="special-event-photo-input" type="file" name="special-event-picture">
+    <p class="sanitize-info" ng-if="hasBeenSanitized">
+        <i class="fa fa-window-close close-button" aria-hidden="true" ng-click="closeHasBeenSanitizedInfo()"></i>
+        Unele cîmpuri introduse au fost modificate deoarece nu se încadrează
+        în valorile acceptate (câmpurile sunt subliniate cu verde). Pentru mai multe informații despre
+        ce este permis, accesează informațiile.
+    </p>
+    <div class="special-event-name">
+        <div class="label-and-value">
+            <label for="special-event-name">Nume</label>
+            <input id="special-event-name" ng-model="local.specialEvent.name" ng-class="{sanitized: local.sanitized.sanitName}"
+                   ng-focus="local.errors.nameError = undefined; local.show.nameInfo = true"
+                   ng-blur="local.show.nameInfo = false">
+        </div>
+        <div class="error-and-info">
+            <p class="error" ng-if="local.errors.nameError">{{local.errors.nameError}}</p>
+            <p class="info" ng-if="local.show.nameInfo">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                Numele este obligatoriu si poate avea maxim 100 de caractere.
+            </p>
+        </div>
+    </div>
+    <div class="special-event-address">
+
+        <div class="label-and-value">
+            <label for="special-event-address">Adresa</label>
+            <textarea id="special-event-address" ng-model="local.specialEvent.address" ng-class="{sanitized: local.sanitized.sanitAddress}"
+                      ng-focus="local.errors.addressError = undefined; local.show.addressInfo = true"
+                      ng-blur="local.show.addressInfo = false"></textarea>
+        </div>
+        <div class="label-and-value">
+            <label for="special-event-long">Latitudine</label>
+            <input id="special-event-long" ng-model="local.specialEvent.latitude" ng-class="{sanitized: local.sanitized.sanitLatitude}"
+                   ng-focus="local.errors.latError = undefined; local.show.latLongInfo = true"
+                   ng-blur="local.show.latLongInfo = false" type="number">
+
+        </div>
+        <div class="label-and-value">
+            <label for="special-event-lat">Longitudine</label>
+            <input id="special-event-lat" ng-model="local.specialEvent.longitude" ng-class="{sanitized: local.sanitized.sanitLongitude}"
+                   ng-focus="local.errors.longError = undefined; local.show.latLongInfo = true"
+                   ng-blur="local.show.latLongInfo = false" type="number">
+        </div>
+        <div class="label-and-value">
+            <label for="special-event-city">Oras</label>
+            <select id="special-event-city" ng-model="local.specialEvent.city" placeholder="Alege orasul..."
+                    ng-focus="local.errors.cityError = undefined" ng-class="{sanitized: local.sanitized.sanitCity}"
+                     ng-options="city for city in keys.cities"></select>
+        </div>
+        <div class="error-and-info">
+            <p class="error" ng-if="local.errors.addressError">{{local.errors.addressError}}</p>
+            <p class="error" ng-if="local.errors.latError">{{local.errors.latError}}</p>
+            <p class="error" ng-if="local.errors.longError">{{local.errors.longError}}</p>
+            <p class="error" ng-if="local.errors.cityError">{{local.errors.cityError}}</p>
+            <p class="info" ng-if="local.show.addressInfo">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                Adresa este obligatorie si poate avea maxim 200 caractere.
+            </p>
+            <p class="info" ng-if="local.show.latLongInfo">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                Latitudinea si longitudinea sunt cifre, si sunt mandatorii.
+            </p>
+        </div>
+
+    </div>
+    <div class="special-event-timeline">
+
+        <div class="label-and-value">
+            <div class="start-time">
+                <label>Start eveniment special</label>
+                <div class="start-end-time">
+                    <div>
+                        <label>Ora</label>
+                        <input type="number" max="24" min="0" ng-model="local.specialEvent.startHour"
+                          ng-focus="local.errors.dateError = undefined; local.show.dateInfo = true"
+                               ng-blur="local.show.dateInfo = false" ng-class="{sanitized: local.sanitized.sanitStartHour}">
+                    </div>
+                    <div>
+                        <label>Minut</label>
+                        <input type="number" max="60" min="0" ng-model="local.specialEvent.startMinute"
+                               ng-focus="local.errors.dateError = undefined; local.show.dateInfo = true"
+                               ng-blur="local.show.dateInfo = false" ng-class="{sanitized: local.sanitized.sanitStartMinute}">
+                    </div>
+                    <div>
+                        <label>Ziua</label>
+                        <input type="date" ng-model="local.specialEvent.startDay" ng-blur="local.show.dateInfo = false"
+                               ng-focus="local.errors.dateError = undefined; local.show.dateInfo = true"
+                               ng-class="{sanitized: local.sanitized.sanitStartDay}">
+                    </div>
+
+                </div>
+            </div>
+            <div class="end-time">
+                <label class="end-time">Sfarsit eveniment special</label>
+                <div class="start-end-time">
+                    <div>
+                        <label>Ora</label>
+                        <input type="number" max="24" min="0" ng-model="local.specialEvent.endHour"
+                               ng-blur="local.show.dateInfo = false" ng-class="{sanitized: local.sanitized.sanitEndHour}"
+                               ng-focus="local.errors.dateError = undefined; local.show.dateInfo = true" >
+                    </div>
+                    <div>
+                        <label>Minut</label>
+                        <input type="number" max="60" min="0" ng-model="local.specialEvent.endMinute" ng-blur="local.show.dateInfo = false"
+                               ng-focus="local.errors.dateError = undefined; local.show.dateInfo = true"
+                               ng-class="{sanitized: local.sanitized.sanitEndMinute}">
+                    </div>
+                    <div>
+                        <label>Ziua</label>
+                        <input type="date" ng-model="local.specialEvent.endDay" ng-blur="local.show.dateInfo = false"
+                               ng-focus="local.errors.dateError = undefined; local.show.dateInfo = true"
+                               ng-class="{sanitized: local.sanitized.sanitEndDay}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="error-and-info">
+            <p class="error" ng-if="local.errors.dateError">{{local.errors.dateError}}</p>
+            <p class="info" ng-if="local.show.dateInfo">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                Datele de start si sfarsit sunt obligatorii, iar data de sfarsit trebuie sa fie dupa data de inceput.
+            </p>
+        </div>
+    </div>
+    <div class="special-event-description">
+        <div class="label-and-value">
+            <label for="special-event-description">Descriere</label>
+            <textarea id="special-event-description" ng-model="local.specialEvent.description"
+                      ng-focus="local.errors.descriptionError = undefined; local.show.descriptionInfo = true"
+                      ng-blur="local.show.descriptionInfo = false" ng-class="{sanitized: local.sanitized.sanitDescription}"></textarea>
+        </div>
+        <div class="error-and-info">
+            <p class="error" ng-if="local.errors.descriptionError">{{local.errors.descriptionError}}</p>
+            <p class="info" ng-if="local.show.descriptionInfo">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                Descrierea este obligatorie si poate avea maxim 400 caractere.
+            </p>
+        </div>
+    </div>
+
+    <div class="bttn-div">
+        <button ng-click="addOrEditSpecialEvent()">{{getEventBttnName()}}</button>
+    </div>
+</div>

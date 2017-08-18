@@ -5,7 +5,7 @@
 angular.module("coderDojoTimisoara")
     .directive('alertDirective', function(){
         return {
-            templateUrl: "directives/alert.html",
+            templateUrl: "directives/alert-directive.html",
             replace: true
         }
     })
@@ -22,15 +22,15 @@ angular.module("coderDojoTimisoara")
             replace: true
         }
     })
-    .directive("myProfile", function(){
+    .directive("viewUserProfileDirective", function(){
         return {
-            templateUrl: "directives/my-profile.html",
+            templateUrl: "directives/view-user-profile-directive.html",
             replace: true
         }
     })
-    .directive("editProfile", function(){
+    .directive("editUserProfileDirective", function(){
         return {
-            templateUrl: "directives/edit-profile.html",
+            templateUrl: "directives/edit-user-profile-directive.html",
             replace: true
         }
     })
@@ -46,33 +46,33 @@ angular.module("coderDojoTimisoara")
             replace: true
         }
     })
-    .directive("dojoDirective", function(){
+    .directive("viewDojoDirective", function(){
         return {
-            templateUrl: "directives/dojo-directive.html",
+            templateUrl: "directives/view-dojo-directive.html",
             replace: true
         }
     })
-    .directive("memberDirective", function(){
+    .directive("dojoMemberDirective", function(){
         return {
-            templateUrl: "directives/member-directive.html",
+            templateUrl: "directives/dojo-member-directive.html",
             replace: true
         }
     })
-    .directive("createOrEditDojoDirective", function(){
+    .directive("addOrEditDojoDirective", function(){
         return {
-            templateUrl: "directives/create-or-edit-dojo-directive.html",
+            templateUrl: "directives/add-or-edit-dojo-directive.html",
             replace: true
         }
     })
-    .directive("eventDirective", function(){
+    .directive("viewEventDirective", function(){
         return {
-            templateUrl: "directives/event-directive.html",
+            templateUrl: "directives/view-event-directive.html",
             replace: true
         }
     })
-    .directive("displayEventDirective", function(){
+    .directive("displayEditableEventDirective", function(){
         return {
-            templateUrl: "directives/display-event-directive.html",
+            templateUrl: "directives/display-editable-event-directive.html",
             replace: true
         }
     })
@@ -107,10 +107,65 @@ angular.module("coderDojoTimisoara")
         }
     })
     .directive("addBadgesToUsersDirective", function(){
-    return {
-        templateUrl: "directives/add-badges-to-users-directive.html",
-        replace: true
-    }
-});
+        return {
+            templateUrl: "directives/add-badges-to-users-directive.html",
+            replace: true
+        }
+    })
+    .directive("showEventsDirective", function(){
+        return {
+            templateUrl: "directives/show-events-directive.html",
+            replace: true
+        }
+    })
+    .directive("addOrEditSpecialEventDirective", function(){
+        return {
+            templateUrl: "directives/add-or-edit-special-event-directive.html",
+            replace: true
+        }
+    })
+    .directive("specialEventsDirective", function(){
+        return {
+            templateUrl: "directives/special-events-directive.html",
+            replace: true
+        }
+    })
+    .directive("viewSpecialEventDirective", function(){
+        return {
+            templateUrl: "directives/view-special-event-directive.html",
+            replace: true
+        }
+    })
+    .directive("aboutDirective", function(){
+        return {
+            templateUrl: 'directives/despre.html',
+            controller: 'mainCtrl',
+            replace: true
+        }
+    })
+    .directive("headerWideDirective", function(){
+        return {
+            templateUrl: 'directives/header-wide-directive.html',
+            replace: true
+        }
+    })
+    .directive("headerNarrowDirective", function(){
+        return {
+            templateUrl: 'directives/header-narrow-directive.html',
+            replace: true
+        }
+    })
+    .directive("changeUserIdentificationDirective", function(){
+        return {
+            templateUrl: 'directives/change-user-identification-directive.html',
+            replace: true
+        }
+    })
+    .directive("changeUserPasswordsDirective", function(){
+        return {
+            templateUrl: 'directives/change-user-passwords-directive.html',
+            replace: true
+        }
+    });
 
 

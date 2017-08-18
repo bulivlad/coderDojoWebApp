@@ -469,4 +469,106 @@ angular.module('coderDojoTimisoara')
                 data: data
             });
         };
+
+        this.getMyEvents = function(){
+            return $http({
+                url: '/events/' + keys.getMyEventsRoute,
+                method: "get"
+            });
+        };
+
+        this.getCurrentAuthEvents = function(){
+            return $http({
+                url: '/events/' + keys.getCurrentAuthEventsRoute,
+                method: "get"
+            });
+        };
+
+        this.getCurrentEvents = function(){
+            return $http({
+                url: '/events/' + keys.getCurrentEventsRoute,
+                method: "get"
+            });
+        };
+
+        this.addSpecialEvent = function(data){
+            return $http({
+                method: 'POST',
+                url: '/events/' + keys.addSpecialEventRoute,
+                data: data
+            });
+        };
+
+        this.editSpecialEvent = function(data){
+            return $http({
+                method: 'POST',
+                url: '/events/' + keys.editSpecialEventRoute,
+                data: data
+            });
+        };
+
+        this.getCurrentSpecialEvents = function(data){
+            return $http({
+                method: 'get',
+                url: '/events/' + keys.getCurrentSpecialEventsRoute,
+                data: data
+            });
+        };
+
+        this.getSpecialEvent = function(data){
+            return $http({
+                method: 'post',
+                url: '/events/' + keys.getSpecialEventRoute,
+                data: data
+            });
+        };
+
+        this.uploadSpecialEventPhoto = function(data){
+            return $http({
+                url: '/events/' + keys.uploadSpecialEventPictureRoute,
+                method: "POST",
+                data: data,
+                headers: {'Content-Type': undefined}
+            });
+        };
+
+        this.getChangeUserIdentificationInfoFromServer = function(data){
+            return $http({
+                url: '/user/' + keys.getChangeUserIdentificationInfoFromServerRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.changeUsersAlias = function(data){
+            return $http({
+                url: '/user/' + keys.changeUserAliasRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.changeUsersEmail = function(data){
+            return $http({
+                url: '/user/' + keys.changeUserEmailRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.getChangeUserPasswordInfoFromServer = function(data){
+            return $http({
+                url: '/user/' + keys.getChangeUserPasswordsInfoRoute,
+                method: "POST",
+                data: data
+            });
+        };
+
+        this.changeUserPassword = function(data){
+            return $http({
+                url: '/user/' + keys.changeUserPasswordRoute,
+                method: "POST",
+                data: data
+            });
+        };
     });

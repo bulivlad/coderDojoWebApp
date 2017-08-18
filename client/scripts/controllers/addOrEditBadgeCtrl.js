@@ -32,7 +32,7 @@ angular.module("coderDojoTimisoara")
             $scope.hasBeenSanitized = undefined;
         };
 
-        //Method for opening dialog for adding user picture
+        //Method for opening dialog for changing badge photo
         $scope.loadPicture = function(){
             var $fileInput = $('#badge-photo-input');
             //This is so the listener is only added once
@@ -40,24 +40,32 @@ angular.module("coderDojoTimisoara")
                 $fileInput.on('change', function(event){
                     //This event triggers when the users selects a file
                     var $fileInput = $('#badge-photo-input');
-                    //We build a formData from the hidden file input used
-                    var formData = new FormData();
-                    formData.append('badgeId', $scope.localBadge._id);
-                    formData.append('badge-photo', $fileInput[0].files[0]);
-                    dataService.uploadBadgePhoto(formData)
-                        .then(function(response){
-                            if(response.data.badgePhoto){
-                                $scope.localBadge.badgePhoto = response.data.badgePhoto;
-                            } else if (response.data.errors){
-                                if(!$scope.errors){
-                                    $scope.errors = {};
+
+                    //we check to see if a file was selected
+                    if ($fileInput[0].files.length > 0){
+                        //We build a formData from the hidden file input used
+                        var formData = new FormData();
+                        formData.append('badgeId', $scope.localBadge._id);
+                        formData.append('badge-photo', $fileInput[0].files[0]);
+                        dataService.uploadBadgePhoto(formData)
+                            .then(function(response){
+                                if(response.data.errors === keys.uploadedPhotoTooLargeError){
+                                    $scope.setSnackBar('Poza este prea mare. Maxim 500 de kb', 'error');
+                                } else if (response.data.errors === keys.uploadedPhotoNotCorrectMimeTypeError){
+                                    $scope.setSnackBar('Poza nu este un format acceptat (jpg, png).', 'error');
+                                } else if (response.data.errors === keys.notAuthorizedError){
+                                    $scope.showNotAuthorizedError();
+                                }else if(response.data.badgePhoto){
+                                    $scope.localBadge.badgePhoto = response.data.badgePhoto;
+                                    var msg = 'Poza badge-ului '  + $scope.localBadge.name + ' '  +
+                                        ' a fost schimbata cu success';
+                                    $scope.setSnackBar(msg, 'info');
                                 }
-                                $scope.errors[keys.uploadPhotoError] = response.data.errors;
-                            }
-                        })
-                        .catch(function(err){
-                            console.log(err);
-                        });
+                            })
+                            .catch(function(err){
+                                console.log(err);
+                            });
+                    }
                 });
                 //We set the initialized flag to true, for the event listener to be activated only once
                 $scope.initializations[keys.uploadPhotoListenerInitiated] = true;
@@ -69,17 +77,18 @@ angular.module("coderDojoTimisoara")
 
 
         $scope.saveOrEditBadgeAction = function(){
-           if($scope.isEditBadgeView()){
-               editBadge();
-           } else {
-               saveBadge();
-           }
+            if($scope.isEditBadgeView()){
+                editBadge();
+            } else {
+                saveBadge();
+            }
         };
 
         var editBadge = function(){
             var errors = validateBadgeFields();
             if(errors){
                 $scope.errors = errors;
+                $scope.setSnackBar('Exista error in unele campuri', 'error');
             } else {
                 dataService.editBadge({badge: removeSanitizeFlagsFromBadge( $scope.localBadge)})
                     .then(function(response){
@@ -88,13 +97,15 @@ angular.module("coderDojoTimisoara")
                         }else if(response.data.errors === keys.notSanitizedError){
                             $scope.hasBeenSanitized = true;
                             $scope.localBadge = addFlagsToBadge($scope.localBadge, response.data.sanitizedBadge);
+                            $scope.setSnackBar('Exista error in unele campuri', 'error');
                         } else if(response.data.success){
-                            $scope.views[keys.badgeEdited] = true;
                             //Reset the sanitize flag upon success
                             $scope.hasBeenSanitized = false;
                             //We need to set the original badge (that we edited and is still loaded in the badge viewer), to
                             // the badge in this scope
                             $scope.badge = $scope.setBadge($scope.localBadge);
+                            var msg = 'Badge-ul „' + $scope.localBadge.name + '” a fost editat cu success';
+                            $scope.setSnackBar(msg, 'info');
                         }
                     })
                     .catch(function(err){
@@ -157,7 +168,7 @@ angular.module("coderDojoTimisoara")
                 hasErrors = true;
             }
             if(hasErrors){
-               return errors;
+                return errors;
             }
 
 

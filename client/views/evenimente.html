@@ -1,0 +1,18 @@
+<div class="events-view" ng-controller="eventsViewCtrl">
+    <div class="events-navigation">
+        <div class="special-events" ng-class="{selected: views.viewSpecialEvents}" ng-click="viewSpecialEvents()">
+            <p>Evenimente<br>speciale</p>
+        </div>
+        <div class="dojo-events" ng-class="{selected: views.viewDojoEvents}" ng-click="viewDojoEvents()">
+            <p>Evenimente<br>currente</p>
+        </div>
+        <div class="my-events" ng-click="goToMyEvents()">
+            <p>Evenimentele<br>mele</p>
+        </div>
+
+    </div>
+    <div class="events-container">
+        <special-events-directive ng-if="views.viewSpecialEvents"></special-events-directive>
+        <show-events-directive ng-if="views.viewDojoEvents"></show-events-directive>
+    </div>
+</div>

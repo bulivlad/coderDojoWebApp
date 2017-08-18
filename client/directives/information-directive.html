@@ -11,6 +11,67 @@
         </div>
         <!--event-filter-registered-users-->
 
+        <!--recurrent-event-information-->
+        <div class="recurrent-event-information information-body" ng-if="information === keys.recurrentEventInfo">
+            <h3>Despre eveniment:</h3>
+            <p><strong>Nume eveniment</strong>: este obligatoriu, si are maxim 50 caractere</p>
+            <p><strong>Status</strong>: selecteaza daca evenimentul este activ (se creeaza noi instante ale sale) sau nu.</p>
+            <p><strong>Tip eveniment</strong>: Selecteaza frecventa evenimentului (saptamanal - default, bilunar, sau lunar). Daca este
+                selectata alta valoare decat saptamanal, apare un nou camp cu prima data a evenimentului</p>
+            <p><strong>Start, Sfarsit</strong>: Ora si minutul de inceput, respective sfarsit al evenimentului.</p>
+            <p><strong>Prima data</strong>: Prima data a evenimentelor bilunare sau lunare.</p>
+            <p><strong>Ziua</strong>: Ziua evenimentelor saptamanale (apare doar la evenimente saptamanale), obligatorie.</p>
+            <p><strong>Descriere</strong>: Obligatorie, maxim 300 caractere.</p>
+
+            <h3>Sesiunile evenimentelor</h3>
+            <p><strong>Atelier</strong>: este obligatoriu, si are maxim 100 caractere.</p>
+            <p><strong>Status sesiune</strong>: Indica daca sesiunea este activa (se creeaza noi instante ale sale cand evenimentul
+                este recreat.</p>
+
+            <h3>Ticketele sesiunilor</h3>
+            <p><strong>Tip ticket</strong>: Tipul ticketului trebuie sa fie in concordanta cu numele ticketului.</p>
+            <p><strong>Tip ticket</strong>: Este obligatoriu si are maxim 50 de caractere.</p>
+            <p><strong>Numar tickete</strong>: Este obligatoriu, numar si poate fi maxim 150.</p>
+            <button class="close-info-button" ng-click="resetInformation()">OK</button>
+        </div>
+        <!--recurrent-event-information-->
+
+        <!--created-event-information-->
+        <div class="created-event-information information-body" ng-if="information === keys.createdEventInfo">
+            <h3>Despre eveniment:</h3>
+            <p><strong>Nume eveniment</strong>: este obligatoriu, si are maxim 50 caractere</p>
+            <p><strong>Status</strong>: selecteaza daca evenimentul este activ (se creeaza noi instante ale sale) sau nu.</p>
+            <p><strong>Start, Sfarsit</strong>: Ora si minutul de inceput, respective sfarsit al evenimentului.</p>
+            <p><strong>Ziua</strong>: Ziua in care va avea loc evenimentul, obligatorie.</p>
+            <p><strong>Descriere</strong>: Obligatorie, maxim 300 caractere.</p>
+
+            <h3>Sesiunile evenimentelor</h3>
+            <p><strong>Atelier</strong>: este obligatoriu, si are maxim 100 caractere.</p>
+            <p><strong>Status sesiune</strong>: Indica daca sesiunea este activa (se creeaza noi instante ale sale cand evenimentul
+                este recreat.</p>
+
+            <h3>Ticketele sesiunilor</h3>
+            <p><strong>Tip ticket</strong>: Tipul ticketului trebuie sa fie in concordanta cu numele ticketului.</p>
+            <p><strong>Tip ticket</strong>: Este obligatoriu si are maxim 50 de caractere.</p>
+            <p><strong>Numar tickete</strong>: Este obligatoriu, numar si poate fi maxim 150.</p>
+            <button class="close-info-button" ng-click="resetInformation()">OK</button>
+        </div>
+        <!--created-event-information-->
+
+        <!--invite-members-to-dojo-->
+        <div class="information-body" ng-if="information === keys.inviteDojoMembersToEventInfo">
+            <h3>Invita membrii dojo-ului la eveniment</h3>
+            <p>
+                <strong>Utilizatorii care sa primeasca</strong>: checkbox-uri prin care sunt selectate categoriile de
+                utilizator care sa primeasca invitatia pentru eveniment. Valoarea 'toti' se poate selecta doar singura.
+            </p>
+            <p>
+                <strong>Utilizatori care au primit deja</strong>: indica care tip de utilizatori au primit deja
+                invitatiile pentru eveniment (pentru a evita mesaje de invitatie dublate).
+            </p>
+            <button class="close-info-button" ng-click="resetInformation()">OK</button>
+        </div>
+        <!--invite-members-to-dojo-->
 
     </div>
 </div>

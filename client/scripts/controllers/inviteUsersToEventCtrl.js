@@ -89,20 +89,23 @@ angular.module("coderDojoTimisoara")
 
                 if(continueWithSendingTheInvites){
                     dataService.sendInvitesToEvent({
-                        eventId: $scope.event._id,
-                        eventName: $scope.event.name,
-                        dojoName: $scope.event.dojo.name,
-                        dojoId: $scope.event.dojo._id,
-                        sendInvitesTo: sendInvitesTo,
-                        eventDate: helperSvc.getEventDate($scope.event, true)
-                    })
+                            eventId: $scope.event._id,
+                            eventName: $scope.event.name,
+                            dojoName: $scope.event.dojo.name,
+                            dojoId: $scope.event.dojo._id,
+                            sendInvitesTo: sendInvitesTo,
+                            eventDate: helperSvc.getEventDate($scope.event, true)
+                        })
                         .then(function(response){
                             if(response.data.errors === keys.notAuthorizedError){
                                 $scope.showNotAuthorizedError();
                             } else if (response.data.success){
                                 $scope.hideInviteUsersPanel();
-                                $scope.setUserInvitesSent();
+                                $scope.setSnackBar('Invitatii trimise cu success', 'info');
                             }
+                        })
+                        .catch(function(err){
+                            helperSvc.handlerCommunicationErrors(err, 'sendInvitations() inviteUsersToEventCtrl', $scope);
                         })
                 }
             }

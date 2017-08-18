@@ -1,46 +1,73 @@
-<div id="register" ng-controller="registerController">
+<div id="register" ng-controller="registerCtrl">
     <h3>Inregistrare cont</h3>
     <form>
         <div class="register">
+            <div class="sanitized-info-container" ng-if="register.sanitize.hasBeenSanitized">
+                <p class="sanitize-info">
+                    <i class="fa fa-window-close close-button" aria-hidden="true" ng-click="closeHasBeenSanitizedInfo()"></i>
+                    Unele cîmpuri introduse au fost modificate deoarece nu se încadrează
+                    în valorile acceptate (câmpurile sunt subliniate cu verde). Pentru mai multe informații despre
+                    ce este permis, accesează informațiile.
+                </p>
+            </div>
             <div class="input_and_error">
-                <input type="text" placeholder="Nume" title="Nume" name="lastName" ng-model="register.user.lastName" ng-focus="register.errors.lastName = undefined"><br>
+                <input type="text" placeholder="Nume" title="Nume" name="lastName" ng-model="register.user.lastName" autocomplete="off"
+                       ng-focus="register.errors.lastName = undefined; info.lastNameInfo = true;" ng-blur="info.lastNameInfo = false"
+                        ng-class="{sanitized: register.sanitize.lastName}"><br>
                 <p class="error" ng-if="register.errors.lastName">{{register.errors.lastName}}</p>
+                <p class="info" ng-if="info.lastNameInfo">Numele este obligatoriu, trebuie sa fie doar litere, si maxim 50 de caractere.</p>
             </div>
 
             <div class="input_and_error">
-                <input type="text" placeholder="Prenume" title="Prenume" name="firstName" ng-model="register.user.firstName"
-                       ng-focus="register.errors.firstName = undefined">
+                <input type="text" placeholder="Prenume" title="Prenume" name="firstName" ng-model="register.user.firstName" autocomplete="off"
+                       ng-focus="register.errors.firstName = undefined; info.firstNameInfo = true" ng-blur="info.firstNameInfo = false"
+                       ng-class="{sanitized: register.sanitize.firstName}">
                 <p class="error" ng-if="register.errors.firstName">{{register.errors.firstName}}</p>
+                <p class="info" ng-if="info.firstNameInfo">Prenumele este obligatoriu, trebuie sa fie doar litere, si maxim 50 de caractere.</p>
             </div>
 
             <div class="input_and_error input_and_error_date_container">
-                <input type="text" id="datepicker" title="Data nasterii" placeholder="Data nașterii" name="birthDateForm"
-                       ng-model="register.user.birthDate" ng-focus="register.errors.birthDate = undefined"><br>
+                <input type="text" id="datepicker" title="Data nasterii" placeholder="Data nașterii" name="birthDateForm" autocomplete="off"
+                       ng-model="register.user.birthDate" ng-focus="register.errors.birthDate = undefined; info.birthdateInfo = true;"
+                       ng-blur="info.birthdateInfo = false" ng-class="{sanitized: register.sanitize.birthDate}"><br>
                 <p class="error" ng-if="register.errors.birthDate">{{register.errors.birthDate}}</p>
+                <p class="info" ng-if="info.birthdateInfo">Data nasterii este obligatorie, si trebuie sa ai peste 14 ani sa iti poti face cont.</p>
             </div>
 
             <div class="input_and_error">
-                <textarea type="text" placeholder="Adresa" title="Adresa" name="address" ng-model="register.user.address"
-                       ng-focus="register.errors.address = undefined"></textarea>
+                <textarea type="text" placeholder="Adresa" title="Adresa" name="address" ng-model="register.user.address" autocomplete="off"
+                       ng-focus="register.errors.address = undefined;info.addressInfo = true;" ng-blur="info.addressInfo = false"
+                       maxlength="100" ng-class="{sanitized: register.sanitize.firstName}">
+                </textarea>
                 <p class="error" ng-if="register.errors.address">{{register.errors.address}}</p>
+                <p class="info" ng-if="info.addressInfo">Adresa este obligatorie, maxim 100 caractere.</p>
             </div>
 
             <div class="input_and_error input_and_error_date_container datepicker">
                 <input type="text" placeholder="Telefon" title="Telefon" name="phone" ng-model="register.user.phone"
-                       ng-focus="register.errors.phone = undefined"><br>
+                       ng-focus="register.errors.phone = undefined;info.phoneInfo = true" ng-blur="info.phoneInfo = false"
+                       autocomplete="off" maxlength="20" ng-class="{sanitized: register.sanitize.phone}"><br>
                 <p class="error" ng-show="register.errors.phone">{{register.errors.phone}}</p>
+                <p class="info" ng-if="info.phoneInfo">Numarul de telefon este necesar, si poate fi doar cifre (maxim 20).</p>
             </div>
 
             <div class="input_and_error">
                 <input type="text" placeholder="Adresa de email" title="Email" name="email" ng-model="register.user.email"
-                       ng-focus="register.errors.email = undefined" autocomplete="off"><br>
+                       ng-focus="register.errors.email = undefined;info.emailInfo = true" autocomplete="off"
+                       ng-blur="info.emailInfo = false" maxlength="254" ng-class="{sanitized: register.sanitize.email}"><br>
                 <p class="error" ng-if="register.errors.email">{{register.errors.email}}</p>
+                <p class="info email-info" ng-if="info.emailInfo">Adresa de email este necesara, trebuie sa fie formatata corect, si trebuie
+                        sa fie unicata in sistem</p>
             </div>
 
             <div class="input_and_error">
                 <input type="password" placeholder="parola" title="Parola" name="password" ng-model="register.user.password"
-                       ng-focus="register.errors.password = undefined">
+                       ng-focus="register.errors.password = undefined;info.passwordInfo = true" ng-blur="info.passwordInfo = false"
+                       maxlength="16" autocomplete="off" ng-class="{sanitized: register.sanitize.password}">
                 <p class="error" ng-if="register.errors.password">{{register.errors.password}}</p>
+                <p class="info" ng-if="info.passwordInfo">
+                    Parola are minim 8 caractere si maxim 16, si trebuie sa contina litere mici, litere mari si numere, si fara spatii.
+                </p>
             </div>
             <div class="input_and_error">
                 <input type="password" placeholder="reintrodu parola" title="Reintrodu parola" name="password2" ng-model="register.user.password2"

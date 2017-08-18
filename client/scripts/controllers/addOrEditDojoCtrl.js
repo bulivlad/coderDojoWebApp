@@ -114,6 +114,7 @@ angular.module("coderDojoTimisoara")
             var errors = validateDojoFields($scope.localDojo);
             if(errors){
                 $scope.errors = errors;
+                $scope.setSnackBar('Exista erori in unele campuri', 'error');
             } else {
                 dataService.addDojo(prepareDojoForSending($scope.localDojo))
                     .then(function(response){
@@ -123,6 +124,7 @@ angular.module("coderDojoTimisoara")
                             var dojoWithSanitizedFlags = addSanitizedFlag($scope.localDojo, response.data.sanitizedDojo);
                             $scope.localDojo = addNecessaryEmptyFields(dojoWithSanitizedFlags);
                             $scope.hasBeenSanitized = true;
+                            $scope.setSnackBar('Exista erori in unele campuri', 'error');
                         }else if (response.data.success){
                             $location.path('/' + keys.cautaUnDojo);
                             $scope.setAlert(keys.infoAlert, 'Dojo creat cu succes!');
@@ -199,6 +201,7 @@ angular.module("coderDojoTimisoara")
             var errors = validateDojoFields($scope.localDojo);
             if(errors){
                 $scope.errors = errors;
+                $scope.setSnackBar('Exista erori in unele campuri', 'error');
             } else {
                 dataService.editDojo(prepareDojoForSending($scope.localDojo))
                     .then(function(response){
@@ -208,10 +211,12 @@ angular.module("coderDojoTimisoara")
                             var dojoWithSanitizedFlags = addSanitizedFlag($scope.localDojo, response.data.sanitizedDojo);
                             $scope.localDojo = addNecessaryEmptyFields(dojoWithSanitizedFlags);
                             $scope.hasBeenSanitized = true;
+                            $scope.setSnackBar('Exista erori in unele campuri', 'error');
                         }else if (response.data.success){
                             //If the dojo was updated, we reload the dojo, running the initialize method from dojoCtrl
                             if($scope.initializeDojoCtrl){
                                 $scope.initializeDojoCtrl();
+                                $scope.setSnackBar('Dojo-ul ' + $scope.localDojo.name + ' a fost modificat cu success', 'info');
                             }
                         }
                     })

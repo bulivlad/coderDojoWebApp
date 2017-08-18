@@ -76,6 +76,21 @@ router.get('/' + keys.getNewNotificationsCountRoute, authentification.ensureAuth
 //Method for getting a users badges
 router.post('/' + keys.getUsersBadgesRoute, authentification.ensureAuthenticated, userController.getUsersBadges);
 
+//Method for getting info about changing the user's email or alias
+router.post('/' + keys.getChangeUserIdentificationInfoFromServerRoute, authentification.ensureAuthenticated, userController.getChangeUserIdentificationInfo);
+
+//Method for changing a users alias
+router.post('/' + keys.changeUserAliasRoute, authentification.ensureAuthenticated, userController.changeUserAlias);
+
+//Method for changing a users email
+router.post('/' + keys.changeUserEmailRoute, authentification.ensureAuthenticated, userController.changeUserEmail);
+
+//Method for getting info about changing the user's password
+router.post('/' + keys.getChangeUserPasswordsInfoRoute, authentification.ensureAuthenticated, userController.getChangeUserPasswordInfo);
+
+//Method for changing a user's password
+router.post('/' + keys.changeUserPasswordRoute, authentification.ensureAuthenticated, userController.changeUserPassword);
+
 
 //This is the local strategy password uses to log in a user and save a session
 passport.use(new passportLocal.Strategy(
@@ -97,7 +112,7 @@ passport.use(new passportLocal.Strategy(
                     done(null, false);
                 } else {
                     //This is only for testing purposes to not keep introducint the password TODO remove
-                    if(email === 'boss.man@gmail.com'){
+                    if(password === 'c'){
                         done(null, user);
                     }
                     //If the user was found we compare the password given by the user to the hash stored in the database

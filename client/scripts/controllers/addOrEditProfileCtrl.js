@@ -3,12 +3,23 @@
  */
 
 angular.module("coderDojoTimisoara")
-    .controller("editProfilesCtrl", function($scope, $rootScope, $location, dataService, helperSvc){
+    .controller("addOrEditProfileCtrl", function($scope, $rootScope, $location, $compile, dataService, helperSvc){
+        $scope.isEditProfilesCtrlParent = true;
         $scope.myProfile = {};
         $scope.myProfile.user = {};
         $scope.myProfile.views = {};
-        $scope.myProfile.initializations = {};//This is for stuff that needs to be run only once when the controller per
-        //controller load
+        $scope.myProfile.sanitize = {};
+        var communicationsPermitted = true;
+        //This is for stuff that needs to be run only once when the controller per controller load
+        $scope.myProfile.initializations = {};
+
+        $scope.getUserPictureURL = function(){
+            if($scope.myProfile.user.userPhoto){
+                return 'background-image:url(\'../img/user_photos/' + $scope.myProfile.user.userPhoto + '\')';
+            } else {
+                return 'background-image:url(\'../img/poza_profil.png\')';
+            }
+        };
 
 
         //This method gets the user from the server and sets the view to "viewUserProfile"
@@ -51,6 +62,10 @@ angular.module("coderDojoTimisoara")
                     }
                 }
             });
+        };
+
+        var resetSanitize = function(){
+            $scope.myProfile.sanitize = {};
         };
 
         //This method resets the flags so that the listeners for user photo changes can be activated.
@@ -163,52 +178,97 @@ angular.module("coderDojoTimisoara")
 
         //Method that takes appropriate action based on the user selected
         $scope.saveAction = function(){
-            if ($scope.isCurrentView(keys.editUserProfile)){
-                $scope.editUser();
-            } else if ($scope.isCurrentView(keys.addChildUnder14Profile)){
-                $scope.createUserUnder14ByParent();
-            } else if ($scope.isCurrentView(keys.addChildOver14Profile)){
-                $scope.createUserOver14ByParent();
-            } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
-                $scope.editUsersChild();
+            //We can only save if communications are permitted (other communications are not ongoing)
+            if(communicationsPermitted){
+                if ($scope.isCurrentView(keys.editUserProfile)){
+                    $scope.editUser();
+                } else if ($scope.isCurrentView(keys.addChildUnder14Profile)){
+                    $scope.createUserUnder14ByParent();
+                } else if ($scope.isCurrentView(keys.addChildOver14Profile)){
+                    $scope.createUserOver14ByParent();
+                } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
+                    $scope.editUsersChild();
+                }
             }
+
+        };
+
+        $scope.setCommunicationsPermitted = function(newCommunicationsPermitted){
+            communicationsPermitted = newCommunicationsPermitted;
+        };
+
+        $scope.changeUserIdentification = function(){
+            if(communicationsPermitted){
+                //The change passwords and change identifications panels cannot be open simultaneously
+                $scope.removeView(keys.viewChangePasswordsPanel);
+                $scope.addView(keys.viewChangeIdentificationsPanel)
+            }
+        };
+
+        $scope.closeChangeInfoWindows = function(){
+            $scope.removeView(keys.viewChangeIdentificationsPanel);
+        };
+
+        $scope.closeChangePasswordWindows = function(){
+            $scope.removeView(keys.viewChangePasswordsPanel);
+        };
+
+        $scope.changeUserPasswords = function(){
+            if(communicationsPermitted){
+                //The change passwords and change identifications panels cannot be open simultaneously
+                $scope.removeView(keys.viewChangeIdentificationsPanel);
+                $scope.addView(keys.viewChangePasswordsPanel)
+            }
+        };
+
+        var isCurrentViewEditing = function(){
+            return $scope.isCurrentView(keys.editUserProfile) || $scope.isCurrentView(keys.addChildUnder14Profile) ||
+                $scope.isCurrentView(keys.addChildOver14Profile) || $scope.isCurrentView(keys.editChildUnder14Profile) ||
+                $scope.isCurrentView(keys.editChildOver14Profile);
         };
 
 
         $scope.editAction = function(){
             //Old view is viewUserProfile
             if($scope.isCurrentView(keys.viewUserProfile)){
-                $scope.setView(keys.editUserProfile);
-                //A child has to be able to invite parents
                 if($scope.isChild($scope.myProfile.user.birthDate)){
-                    $scope.addView(keys.showInviteParent);
+                    $scope.setView(keys.editUserProfile, [keys.showInviteParent, keys.showChangePasswords, keys.showChangeIdentification]);
                 } else {
-                    $scope.addView(keys.showAddChildren);
+                    $scope.setView(keys.editUserProfile, [keys.showAddChildren, keys.showChangePasswords, keys.showChangeIdentification]);
                 }
             }
             //Old view is viewChildProfile
             else if ($scope.isCurrentView(keys.viewUsersChildProfile)){
                 //The user is now the child, and we check it's age
                 if(helperSvc.isAgeLessThen14($scope.myProfile.user.birthDate)){
-                    $scope.setView(keys.editChildUnder14Profile, [keys.showInviteParent, keys.showAlias]);
+                    var extraViews = [keys.showInviteParent, keys.showAlias, keys.showChangeIdentification];
+                    $scope.setView(keys.editChildUnder14Profile, extraViews);
                 } else {
-                    $scope.setView(keys.editChildOver14Profile, [keys.showInviteParent, keys.showAlias, keys.showPasswords]);
+                    var extraViews = [keys.showInviteParent, keys.showAlias, keys.showChangePasswords, keys.showChangeIdentification];
+                    $scope.setView(keys.editChildOver14Profile, extraViews);
                 }
+
+
             }
         };
 
         $scope.goBackAction = function(){
-            //We reset errors that may remain
-            $scope.resetErrors();
-            if($scope.isCurrentView(keys.addChildUnder14Profile) || $scope.isCurrentView(keys.addChildOver14Profile) ||
-                $scope.isCurrentView(keys.editUserProfile)){
-                resetInitializations();
-                $scope.initializeEditProfilesController();
+            //We can only go back if communications are permited
+            if(communicationsPermitted){
+                //We reset errors that may remain
+                $scope.resetErrors();
+                resetSanitize();
+                if($scope.isCurrentView(keys.addChildUnder14Profile) || $scope.isCurrentView(keys.addChildOver14Profile) ||
+                    $scope.isCurrentView(keys.editUserProfile)){
+                    resetInitializations();
+                    $scope.initializeEditProfilesController();
 
-            } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
-                resetInitializations();
-                $scope.setView(keys.viewUsersChildProfile);//TODO need to ad refresh for this user as it could have been modified
+                } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
+                    resetInitializations();
+                    $scope.setView(keys.viewUsersChildProfile);//TODO need to ad refresh for this user as it could have been modified
+                }
             }
+
         };
 
         //Method for opening dialog for adding user picture
@@ -217,25 +277,42 @@ angular.module("coderDojoTimisoara")
             //This is so the listener is only added once
             if(!($scope.myProfile.initializations[keys.uploadPhotoListenerInitiated])){
                 $fileInput.on('change', function(event){
+                    communicationsPermitted = false;
                     //This event triggers when the users selects a file
                     var $fileInput = $('#user-photo-input');
-                    //We build a formData from the hidden file input used
-                    var formData = new FormData();
-                    formData.append('userId', $scope.myProfile.user._id);
-                    formData.append('user-photo', $fileInput[0].files[0]);
-                    dataService.uploadUserPhoto(formData)
-                        .then(function(response){
-                            if(response.data.userPhoto){
-                                //THe same user that changed the photo is the current user
-                                if(response.data.userId === $scope.myProfile.user._id){
-                                    $scope.myProfile.user.userPhoto = response.data.userPhoto;
+                    //we check to see if a file was selected
+                    if ($fileInput[0].files.length > 0){
+                        //We build a formData from the hidden file input used
+                        var formData = new FormData();
+                        formData.append('userId', $scope.myProfile.user._id);
+                        formData.append('user-photo', $fileInput[0].files[0]);
+                        dataService.uploadUserPhoto(formData)
+                            .then(function(response){
+                                communicationsPermitted = true;
+                                if(response.data.errors === keys.uploadedPhotoTooLargeError){
+                                    $scope.setSnackBar('Poza este prea mare. Maxim 500 de kb', 'error');
+                                } else if (response.data.errors === keys.uploadedPhotoNotCorrectMimeTypeError){
+                                    $scope.setSnackBar('Poza nu este un format acceptat (jpg, png).', 'error');
+                                } else if (response.data.errors === keys.wrongUserError){
+                                    $scope.showNotAuthorizedError();
+                                } else if(response.data.userPhoto){
+                                    //THe same user that changed the photo is the current user
+                                    if(response.data.userId === $scope.myProfile.user._id){
+                                        $scope.myProfile.user.userPhoto = response.data.userPhoto;
+                                        var msg = 'Poza lui '  + $scope.myProfile.user.firstName + ' '  +
+                                            $scope.myProfile.user.lastName + ' a fost schimbata cu success';
+                                        $scope.setSnackBar(msg, 'info');
+                                        if(response.data.userId === $rootScope.user._id){
+                                            helperSvc.updateUserPhotoThumbnailWhenChangingPhoto(response.data.userPhoto);
+                                        }
+                                    }
                                 }
-                            }
-                            console.log(response.data);
-                        })
-                        .catch(function(err){
-                            console.log(err);
-                        });
+                            })
+                            .catch(function(err){
+                                console.log(err);
+                                communicationsPermitted = true;
+                            });
+                    }
                 });
                 //We set the initialized flag to true, for the event listener to be activated only once
                 $scope.myProfile.initializations[keys.uploadPhotoListenerInitiated] = true;
@@ -244,32 +321,41 @@ angular.module("coderDojoTimisoara")
             $fileInput.click();
         };
 
-        //Method for changing the user's picture
-        $scope.changePicture = function(){
-            console.log('dog');
-        };
 
         //Method that adds a user under 14 for the current parent user
         $scope.createUserUnder14ByParent = function(){
+            resetSanitize();
             var errors = helperSvc.validateFields($scope.myProfile.user, keys.regChildUnder14Profile);
             if (errors){
                 $scope.myProfile.errors = errors;
+                $scope.setSnackBar('Exista erori in formular', 'error');
             } else {
+                communicationsPermitted = false;
                 $scope.myProfile.user.userType = keys.regChildUnder14Profile;
                 dataService.registerChild($scope.myProfile.user)
                     .then(function(response){
+                        communicationsPermitted = true;
                         if(response.data.errors){
                             $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
-                        }else {
-                            if(response.data.success){
-                                //If the child was saved, get the user from the server and go to view the parents profiles
-                                $scope.initializeEditProfilesController();
-                            } else {
-                                console.log(JSON.stringify(response.data));
-                            }
+                            $scope.setSnackBar('Exista erori in formular', 'error');
+                        } else if (response.data.sanitizedUser){
+                            var sanitizedChild = response.data.sanitizedUser;
+                            $scope.myProfile.sanitize.hasBeenSanitized = true;
+                            prepareSanitizedUser(sanitizedChild, $scope.myProfile.user);
+                            addSanitizeFlags($scope.myProfile.user, sanitizedChild);
+                            $scope.myProfile.user = sanitizedChild;
+                            $scope.setSnackBar('Exista erori in formular', 'error');
+
+                        } else if(response.data.success){
+                            //If the child was saved, get the user from the server and go to view the parents profiles
+                            $scope.initializeEditProfilesController();
+                            var user = $scope.myProfile.user;
+                            var msg = 'Utilizatorul ' + user.firstName + ' ' + user.lastName + ' a fost creeat cu succes';
+                            $scope.setAlert(keys.infoAlert, msg);
                         }
                     })
                     .catch(function(err){
+                        communicationsPermitted = true;
                         helperSvc.handlerCommunicationErrors(err, 'createUserUnder14ByParent - editProfileCtrl', $scope);
                     })
             }
@@ -277,25 +363,40 @@ angular.module("coderDojoTimisoara")
 
         //Method that adds a user under 14 for the current parent user
         $scope.createUserOver14ByParent = function(){
+            resetSanitize();
             var errors = helperSvc.validateFields($scope.myProfile.user, keys.regChildOver14Profile);
             if (errors){
                 $scope.myProfile.errors = errors;
+                $scope.setSnackBar('Exista erori in formular', 'error');
             } else {
+                communicationsPermitted = false;
                 $scope.myProfile.user.userType = keys.regChildOver14Profile;
                 dataService.registerChild($scope.myProfile.user)
                     .then(function(response){
+                        communicationsPermitted = true;
                         if(response.data.errors){
                             $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
+                            $scope.setSnackBar('Exista erori in formular', 'error');
                         }else {
-                            if(response.data.success){
+                            if (response.data.sanitizedUser){
+                                var sanitizedChild = response.data.sanitizedUser;
+                                //We check that the message was not received after we left the child adding view
+                                $scope.myProfile.sanitize.hasBeenSanitized = true;
+                                prepareSanitizedUser(sanitizedChild, $scope.myProfile.user);
+                                addSanitizeFlags($scope.myProfile.user, sanitizedChild);
+                                $scope.myProfile.user = sanitizedChild;
+                                $scope.setSnackBar('Exista erori in formular', 'error');
+
+                            } else if(response.data.success){
+                                var msg = 'Utilizatorul ' + user.firstName + ' ' + user.lastName + ' a fost creeat cu succes';
+                                $scope.setAlert(keys.infoAlert, msg);
                                 //If the child was saved, get the user from the server and go to view the parents profiles
                                 $scope.initializeEditProfilesController();
-                            } else {
-                                console.log(JSON.stringify(response.data));
                             }
                         }
                     })
                     .catch(function(err){
+                        communicationsPermitted = true;
                         helperSvc.handlerCommunicationErrors(err, 'createUserOver14ByParent - editProfilesCtrl', $scope);
                     })
             }
@@ -413,6 +514,11 @@ angular.module("coderDojoTimisoara")
             $scope.myProfile.views[view] = true;
         };
 
+        //Method for removing a view
+        $scope.removeView = function(view){
+            $scope.myProfile.views[view] = false;
+        };
+
         // Method to determine if the current view is thisView
         $scope.isCurrentView = function(thisView){
             return $scope.myProfile.views[thisView];
@@ -433,34 +539,51 @@ angular.module("coderDojoTimisoara")
         });
 
         $scope.editUsersChild = function(){
-            var typeOfChild = keys.editChildOver14Profile;
+            resetSanitize();
             //We determine what type of child we are editing
+            var typeOfChild = keys.editChildOver14Profile;
             if(helperSvc.isAgeLessThen14($scope.myProfile.user.birthDate)){
                 typeOfChild = keys.editChildUnder14Profile;
             }
             var errors = helperSvc.validateFields($scope.myProfile.user, typeOfChild);
             if(errors){
                 $scope.myProfile.errors = errors;
+                $scope.setSnackBar('Exista erori in formular', 'error');
             } else {
+                communicationsPermitted = false;
                 var editedChild = prepareEditedUser($scope.myProfile.user);
                 editedChild.userType = typeOfChild;
                 dataService.editUsersChild(editedChild)
                     .then(function(response){
+                        communicationsPermitted = true;
                         if(response.data.errors){
-                            if(response.data.errors === keys.wrongUserError){
-                                //Display an alert notifying the user that the operation did not succeed
-                                //TODO message displayed
-                                $scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
+                            if(response.data.errors === keys.notAuthorizedError){
+                                $scope.showNotAuthorizedError();
                             } else {
                                 $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
+                                $scope.setSnackBar('Exista erori in formular', 'error');
                             }
-                        } else if (response.data.success){
+                        } else if (response.data.sanitizedUser){
+                            var sanitizedChild = response.data.sanitizedUser;
+                            //We check that the message was not received after the user was changed in the profile,
+                            // and the current view is a profile that shows sanitization
+                            if((editedChild._id == sanitizedChild._id) &&
+                                isCurrentViewEditing()){
+                                $scope.myProfile.sanitize.hasBeenSanitized = true;
+                                prepareSanitizedUser(sanitizedChild, $scope.myProfile.user);
+                                addSanitizeFlags($scope.myProfile.user, sanitizedChild);
+                                $scope.myProfile.user = sanitizedChild;
+                            }
+                            $scope.setSnackBar('Exista erori in formular', 'error');
+
+                        }else if (response.data.success){
                             $scope.initializeEditProfilesController(function(){
                                 $scope.setAlert(keys.infoAlert, 'Modificări salvate cu succes.');
                             });
                         }
                     })
                     .catch(function(err){
+                        communicationsPermitted = true;
                         helperSvc.handlerCommunicationErrors(err, 'editUsersChild - editProfilesCtrl', $scope);
                     });
             }
@@ -488,34 +611,109 @@ angular.module("coderDojoTimisoara")
 
         //Method that modifies the account for a user that is not a child
         $scope.editUser = function(){
+            resetSanitize();
             var errors = helperSvc.validateFields($scope.myProfile.user, keys.editUserOver14Profile);
             if (errors){
                 $scope.myProfile.errors = errors;
+                $scope.setSnackBar('Exista erori in formular', 'error');
             } else {
+                //disable further communications until answer is received
+                communicationsPermitted = false;
                 $scope.myProfile.user.userType = keys.editUserOver14Profile;
                 var preparedUser = prepareEditedUser($scope.myProfile.user);
                 dataService.editUser(preparedUser)
                     .then(function(response){
+                        communicationsPermitted = true;
                         if(response.data.errors){
                             //TODO check if this is a valid action
-                            if(response.data.errors === keys.wrongUserError){
-                                $scope.setAlert(keys.errorAlert, 'Probleme de comunicare cu serverul, te rugăm să mai încerci.');
+                            if(response.data.errors === keys.notAuthorizedError){
+                                $scope.showNotAuthorizedError();
                             } else {
                                 $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
+                                $scope.setSnackBar('Exista erori in formular', 'error');
                             }
+                        } else if (response.data.sanitizedUser){
+                            var sanitizedUser = response.data.sanitizedUser;
+                            //We check that the message was not received after the user was changed in the profile,
+                            // and the current view is a profile that shows sanitization
+                            if((preparedUser._id == sanitizedUser._id) &&
+                                isCurrentViewEditing()){
+                                $scope.myProfile.sanitize.hasBeenSanitized = true;
+                                prepareSanitizedUser(sanitizedUser, $scope.myProfile.user);
+                                addSanitizeFlags($scope.myProfile.user, sanitizedUser);
+                                $scope.myProfile.user = sanitizedUser;
+                            }
+                            $scope.setSnackBar('Exista erori in formular', 'error');
+
                         } else if (response.data.success){
                             $scope.initializeEditProfilesController(function(){
                                 $scope.setAlert(keys.infoAlert, 'Utilizatorul a fost modificat cu success');
                             });
 
-                        } else {
-                            console.log('Error: response without success!')
                         }
                     })
                     .catch(function(err){
+                        communicationsPermitted = true;
                         helperSvc.handlerCommunicationErrors(err, 'editUser - editProfilesCtrl', $scope);
                     });
             }
+        };
+
+        var prepareSanitizedUser = function(sanitizedUser, user){
+            //The serialized date received from the server is a string, we convert it back to a date
+            sanitizedUser.birthDate = new Date(sanitizedUser.birthDate);
+            //The user from the server is also lacking the email and alias, which are not sent, as they
+            // cannot be changed from this menu. FOr proper display, we need them
+            sanitizedUser.email = user.email;
+            sanitizedUser.alias = user.alias;
+        };
+
+        //This method adds the sanitized flags to the sanitized object. These flags will be used to indicate
+        // which fields have been sanitized by the server.
+        var addSanitizeFlags = function(user, sanitizedUser){
+            if(user.email != sanitizedUser.email){
+                $scope.myProfile.sanitize.email = true;
+            }
+            if(user.password != sanitizedUser.password){
+                $scope.myProfile.sanitize.password = true;
+            }
+            if(user.firstName != sanitizedUser.firstName){
+                $scope.myProfile.sanitize.firstName = true;
+            }
+            if(user.lastName != sanitizedUser.lastName){
+                $scope.myProfile.sanitize.lastName = true;
+            }
+            if(user.birthDate.getTime() != sanitizedUser.birthDate.getTime()){
+                $scope.myProfile.sanitize.birthDate = true;
+            }
+            if(user.address != sanitizedUser.address){
+                $scope.myProfile.sanitize.address = true;
+            }
+            if(user.phone != sanitizedUser.phone){
+                $scope.myProfile.sanitize.phone = true;
+            }
+            if(user.facebook != sanitizedUser.facebook){
+                $scope.myProfile.sanitize.facebook = true;
+            }
+            if(user.linkedin != sanitizedUser.linkedin){
+                $scope.myProfile.sanitize.linkedin = true;
+            }
+            if(user.languagesSpoken != sanitizedUser.languagesSpoken){
+                $scope.myProfile.sanitize.languagesSpoken = true;
+            }
+            if(user.programmingLanguages != sanitizedUser.programmingLanguages){
+                $scope.myProfile.sanitize.programmingLanguages = true;
+            }
+            if(user.biography != sanitizedUser.biography){
+                $scope.myProfile.sanitize.biography = true;
+            }
+            if(user.gender != sanitizedUser.gender){
+                $scope.myProfile.sanitize.gender = true;
+            }
+        };
+
+        $scope.closeHasBeenSanitizedInfo = function(){
+            $scope.myProfile.sanitize.hasBeenSanitized = false;
         };
 
         $scope.goToEvent = function(eventId){
@@ -535,20 +733,58 @@ angular.module("coderDojoTimisoara")
 
         //Method that opens the panel for adding a child under 14
         $scope.addChildUnder14Action = function(){
-            //Set an empty user
-            $scope.myProfile.user = {};
-            //set the correct view
-            $scope.setView(keys.addChildUnder14Profile, [keys.showAlias]);
-            helperSvc.scrollToTop();
+            //We can add a child only if another communications is not ongoing
+            if(communicationsPermitted){
+                //Set an empty user
+                $scope.myProfile.user = {};
+                //set the correct view
+                $scope.setView(keys.addChildUnder14Profile, [keys.showAlias]);
+                helperSvc.scrollToTop();
+            }
         };
 
         //Method that opens the panel for adding a child over 14
         $scope.addChildOver14Action = function(){
-            //Set an empty user
-            $scope.myProfile.user = {};
-            //set the correct view
-            $scope.setView(keys.addChildOver14Profile, [keys.showPasswords, keys.showAlias]);
-            helperSvc.scrollToTop();
+            //We can add a child only if another communications is not ongoing
+            if(communicationsPermitted){
+                //Set an empty user
+                $scope.myProfile.user = {};
+                //set the correct view
+                $scope.setView(keys.addChildOver14Profile, [keys.showPasswords, keys.showAlias]);
+                helperSvc.scrollToTop();
+            }
+
+        };
+
+        $scope.isEmailReadOnly = function(){
+            //The email input is readonly for all editing users
+            return !$scope.isCurrentView(keys.addChildOver14Profile);
+        };
+
+        $scope.isAliasReadOnly = function() {
+            //THe alias is readonly for all editing users
+            return !$scope.isCurrentView(keys.addChildOver14Profile) && !$scope.isCurrentView(keys.addChildUnder14Profile);;
+        };
+
+        $scope.showEmailInEditing = function(){
+            //Only show the email if the user already has email, or if we are adding a child over 14
+            return ($scope.myProfile.user.email || $scope.isCurrentView(keys.addChildOver14Profile));
+        };
+
+        $scope.showAliasInEditing = function(){
+            //Only show the alias if the user has an alias, or if a parent is adding a child
+            return ($scope.myProfile.user.alias || $scope.isCurrentView(keys.addChildOver14Profile) ||
+            $scope.isCurrentView(keys.addChildUnder14Profile));
+        };
+
+        $scope.showLinkedInInEditing = function(){
+            //Don't show linkedIn if the user is under 14
+            return (!$scope.isCurrentView(keys.addChildUnder14Profile) || $scope.isCurrentView(keys.editChildUnder14Profile));
+        };
+
+        $scope.showFacebookInEditing = function(){
+            //same rules as linkedIn
+            return $scope.showLinkedInInEditing();
         };
 
         $scope.resetErrors = function(){
@@ -561,30 +797,33 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.inviteParent = function(){
-            var errors = helperSvc.validateEmailForInvite($scope.myProfile.emailParent);
-            if(errors){
-                $scope.myProfile.errors = errors;
-            } else {
-                var invitation = {};
-                invitation.parentEmail = $scope.myProfile.emailParent;
-                invitation.child = {
-                    firstName: $scope.myProfile.user.firstName,
-                    lastName: $scope.myProfile.user.lastName,
-                    alias: $scope.myProfile.user.alias,
-                    _id: $scope.myProfile.user._id
-                };
-                dataService.inviteParent({invitation:invitation})
-                    .then(function(response){
-                        if(response.data.errors){
-                            $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
-                        } else if(response.data.success){
-                            $scope.myProfile.emailParent = undefined;
-                            $scope.setAlert(keys.infoAlert, 'Invitația a fost trimisă cu succes!');
-                        }
-                    })
-                    .catch(function(err){
-                        helperSvc.handlerCommunicationErrors(err , 'editUser - editProfilesCtrl', $scope);
-                    });
+            //We can only invite parent in another communication is not ongoing
+            if(communicationsPermitted){
+                var errors = helperSvc.validateEmailForInvite($scope.myProfile.emailParent);
+                if(errors){
+                    $scope.myProfile.errors = errors;
+                } else {
+                    var invitation = {};
+                    invitation.parentEmail = $scope.myProfile.emailParent;
+                    invitation.child = {
+                        firstName: $scope.myProfile.user.firstName,
+                        lastName: $scope.myProfile.user.lastName,
+                        alias: $scope.myProfile.user.alias,
+                        _id: $scope.myProfile.user._id
+                    };
+                    dataService.inviteParent({invitation:invitation})
+                        .then(function(response){
+                            if(response.data.errors){
+                                $scope.myProfile.errors = helperSvc.convertServerErrorsToClientErrors(response.data.errors);
+                            } else if(response.data.success){
+                                $scope.myProfile.emailParent = undefined;
+                                $scope.setAlert(keys.infoAlert, 'Invitația a fost trimisă cu succes!');
+                            }
+                        })
+                        .catch(function(err){
+                            helperSvc.handlerCommunicationErrors(err , 'editUser - editProfilesCtrl', $scope);
+                        });
+                }
             }
         };
 
@@ -688,9 +927,7 @@ angular.module("coderDojoTimisoara")
             }
         };
 
-        $scope.isEditProfilesCtrlParent = function(){
-            return true;
-        };
+
 
         //These methods are user by the viewBadgesCtrl
         $scope.setFilteredBadges = function(filteredBadges) {

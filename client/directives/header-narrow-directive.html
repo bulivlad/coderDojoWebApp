@@ -28,7 +28,7 @@
                 <li><a href="#!cum_pot_ajuta" ng-click="hideMenuNarrow()">Cum pot ajuta?</a></li>
                 <li><a href="">Resurse</a></li>
                 <li><a href="">Parteneri</a></li>
-                <li><a href="">Evenimente</a></li>
+                <li><a href="" ng-click="goToEvents();hideMenuNarrow()">Evenimente</a></li>
                 <li><a href="{{'#!' + keys.viewBadgesLocation}}" ng-click="hideMenuNarrow()">Toate badge-urile</a></li>
                 <li><a href="">News</a></li>
                 <li><a href="">Blog</a></li>
@@ -42,7 +42,7 @@
                 <img src="../img/arrow-right.png" alt="Sageata dreapta" ng-click="hideUserMenuNarrow()">
                 <img src="../img/close.png" alt="Inchis meniul" ng-click="hideMenuNarrow()"></div>
             <div id="user-image-narrow">
-                <img src="../img/poza_profil.png" alt="Poza profil">
+                <img id="header-narrow-user-thumbnail" src="{{getUserThumbnailPhoto()}}" alt="Poza profil">
             </div>
             <ul>
                 <li><a href="" ng-click="hideMenuNarrow();goToViewUserProfile();">Profilul meu</a></li>
@@ -53,7 +53,10 @@
                 <li ng-show="user.authorizationLevel === keys.admin">
                     <a ng-href="{{'#!' + keys.addBadgeLocation}}" ng-click="hideMenuNarrow()">Adaugă Badge</a>
                 </li>
-                <li><a href="">Evenimentele mele</a></li>
+                <li ng-show="user.authorizationLevel === keys.admin">
+                    <a href="" ng-click="goToAddSpecialEvent();hideMenuNarrow()">Adaugă eveniment special</a>
+                </li>
+                <li><a href="" ng-click="goToMyEvents();hideMenuNarrow()">Evenimentele mele</a></li>
                 <li><a href="" ng-click="logoutUser()">Logout</a></li>
             </ul>
         </div>

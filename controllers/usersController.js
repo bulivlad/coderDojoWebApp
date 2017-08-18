@@ -5,12 +5,13 @@
 const keys = require('../static_keys/project_keys');
 const User = require('../models/userModel');
 const Dojo = require('../models/dojoModel');
-//const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 const logger = require('winston');
-const validator = require('../validator/validator');
+const customValidator = require('../validator/validator');
 const multer = require('multer');
 const mime = require('mime');
 const helper = require('./helperController');
+const validator = require('validator');
 let upload;
 
 //Method for registering user
@@ -25,42 +26,50 @@ module.exports.registerUser = function(req, res){
         res.json({errors: errors})
     } else {
         let user = req.body.user;
-        //No validation errors at this point
-        //Fist we check if the the email is already in use
-        User.findOne({email: user.email}, function(err, result){
-            if (err){
-                return res.sendStatus(500);
-            }
-            if(result){
-                //If we already find an entry with this email we send an error to the client that the email is already in use
-                errors = [];
-                errors.push(createServerError('email', 'Cont existent'));
-                res.json({errors:errors});
-                logger.info("An account with this email already exists: " + (req.body.user.email));
-            } else {
-                //If there are no errors
-                //We remove password2, as this was only check for the user to make sure they typed the password correctly
-                user.password2 = undefined;
-                let newUser = new User(user);
-                //We save the user
-                User.createUser(newUser, function(err, user){
-                    if(err){
-                        logger.error('Error saving user in the database:' + err);
-                        return res.sendStatus(500);
-                    }
-                    //If there was no error, the user was created
-                    logger.debug('User created:', user.email);
-                    res.json({success:true});
-                });
-            }
-        });
+        //If all the fields of the user object are filled, we need to sanitize them
+        let sanitizedUser = sanitizeUserForRegistration(user);
+        if(areUsersEqual(user, sanitizedUser)){
+            //If the sanitization process has not modified the user, we save him
+            //No validation errors at this point
+            //Fist we check if the the email is already in use
+            User.searchForUserByEmail(user.email, function(err, result){
+                if (err){
+                    logger.error(`Error seaching for existing email (${user.email}) for registering user: ` + err);
+                    return res.sendStatus(500);
+                }
+                if(result){
+                    //If we already find an entry with this email we send an error to the client that the email is already in use
+                    errors = [];
+                    errors.push(createServerError('email', 'Cont existent'));
+                    res.json({errors:errors});
+                    logger.info("An account with this email already exists: " + (req.body.user.email));
+                } else {
+                    //If there are no errors
+                    //We remove password2, as this was only check for the user to make sure they typed the password correctly
+                    user.password2 = undefined;
+                    let newUser = new User(user);
+                    //We save the user
+                    User.createUser(newUser, function(err, user){
+                        if(err){
+                            logger.error('Error saving user in the database:' + err);
+                            return res.sendStatus(500);
+                        }
+                        //If there was no error, the user was created
+                        logger.debug('User created:', user.email);
+                        res.json({success:true});
+                    });
+                }
+            });
+        } else {
+            //IF there were modifications made by the sanitization process, we send the sanitized user back to the client
+            res.json({sanitizedUser: sanitizedUser});
+        }
     }
 };
 
 module.exports.registerUsersChild = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.registerChildRoute} for ${helper.getUser(req)}`);
     let childUser = req.body.user;
-    logger.silly('user:' + JSON.stringify(childUser));
     let childUserType = childUser.userType;
     //TODO sanitize the fields for malicious intent
     let errors = validateFields(req, childUserType);
@@ -68,41 +77,48 @@ module.exports.registerUsersChild = function(req, res){
         res.json({errors: errors})
     } else {
         //No validation errors at this point
-        //We make sure the alias is unique
-        User.findOne({alias: childUser.alias}, function(err, aliasFound){//TODO make one call for email and alias checking
-            if (err){
-                logger.error('Error seaching database for alias (' + childUser.alias + ') : ' + err);
-                return res.sendStatus(500);
-            }
-            else if(aliasFound){
-                //If we already find an entry with this alias
-                errors = [];
-                errors.push(createServerError('alias', 'Alias existent'));
-                res.json({errors:errors});
-                logger.debug("An account with this alias already exists: " + (childUser.alias));
-            } else {
-                //We must make sure the email is unique as well
-                if(childUser.email){
-                    User.findOne({email:childUser.email}, function(err, emailFound){
-                        if (err){
-                            logger.error('Error seaching database for email(' + childUser.email + ') : ' + err);
-                            return res.status(500).json({errors:keys.dbsUserCreationError})
-                        }
-                        else if(emailFound){
-                            //If we already find an entry with this email
-                            errors = [];
-                            errors.push(createServerError('email', 'Email existent'));
-                            res.json({errors:errors});
-                            logger.info("An account with this email already exists: " + (childUser.email));
-                        } else {
-                            saveChildToDbsAndRegisterWithParent(req, res, childUser);
-                        }
-                    });
-                } else {
-                    saveChildToDbsAndRegisterWithParent(req, res, childUser);
+        let sanitizedChild = sanitizeUserForRegistration(childUser);
+        //If the sanitization process has not changed anything we continue with the process
+        if (areUsersEqual(sanitizedChild, childUser)) {
+            //We make sure the alias is unique
+            User.checkIfAliasExists(childUser.alias, function (err, aliasFound) {//TODO make one call for email and alias checking
+                if (err) {
+                    logger.error('Error seaching database for alias (' + childUser.alias + ') : ' + err);
+                    return res.sendStatus(500);
                 }
-            }
-        });
+                else if (aliasFound) {
+                    //If we already find an entry with this alias
+                    errors = [];
+                    errors.push(createServerError('alias', 'Alias existent'));
+                    res.json({errors: errors});
+                    logger.debug("An account with this alias already exists: " + (childUser.alias));
+                } else {
+                    //We must make sure the email is unique as well
+                    if (childUser.email) {
+                        User.checkIfEmailExists(childUser.email, function (err, emailFound) {
+                            if (err) {
+                                logger.error('Error seaching database for email(' + childUser.email + ') : ' + err);
+                                return res.status(500).json({errors: keys.dbsUserCreationError})
+                            }
+                            else if (emailFound) {
+                                //If we already find an entry with this email
+                                errors = [];
+                                errors.push(createServerError('email', 'Email existent'));
+                                res.json({errors: errors});
+                                logger.info("An account with this email already exists: " + (childUser.email));
+                            } else {
+                                saveChildToDbsAndRegisterWithParent(req, res, childUser);
+                            }
+                        });
+                    } else {
+                        saveChildToDbsAndRegisterWithParent(req, res, childUser);
+                    }
+                }
+            });
+        } else {
+            //IF the sanitization process has changed the user, we return the sanitized user to the client
+            res.json({sanitizedUser: sanitizedChild});
+        }
     }
 };
 
@@ -183,65 +199,62 @@ module.exports.logout = function(req, res){
 
 //method for editing a user
 module.exports.editUser = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.editUser} for ${helper.getUser(req)}`);
-    let newUser = req.body.user;
-    logger.silly(`Original user: ${JSON.stringify(req.user)}`);
-    logger.silly(`Modified user: ${JSON.stringify(newUser)}`);
+    let editedUser = req.body.user;
+    let user = req.user;
     //We check that the user editing the account is the logged in user
-    if (req.user._id != newUser._id){//One is objectId one is String, hence the weak comparator
-        res.json({errors:keys.wrongUserError});
-        logger.error(`Logged in user email (email=${req.user.email}, _id=${req.user._id}) does not match edited
-                    user (email=${req.user.email}, _id=${req.user._id}) info`);
+    if (!helper.isSameUser(user, editedUser)){
+        res.json({errors:keys.notAuthorizedError});
+        logger.error(`${helper.getUser(req)} tried to modify user (${JSON.stringify(editedUser)}) while not being that user.` + `
+                route is ${keys.editUser}`);
     } else {
         let errors = validateFields(req, keys.editUserOver14Profile);
         if (errors){
-            logger.debug('Errors validating fields:' + JSON.stringify(errors));
             res.json({errors:errors});
         } else {
-            logger.silly('newUser', JSON.stringify(newUser , undefined, 2));
-            User.findOneAndUpdate({'_id':req.user._id}, //The user to update (the currently authenticated user)
-                {$set: selectUserFieldsForSaving(newUser)}, // what to modify the current user to
-                function(err){
+            let sanitizedEditedUser = sanitizeUserForEditing(editedUser);
+            if(areUsersEqual(editedUser, sanitizedEditedUser)){
+                User.updateUser(user, selectUserFieldsForSaving(editedUser), function(err){
                     if (err){
-                        logger.error(`Error modifying user (${req.user.email}) in the database: ` + err);
+                        logger.error(`Error saving modifications ${helper.getUser(req)}, modifications ` +
+                            `=((${JSON.stringify(editedUser)})): ` + err);
                         return res.sendStatus(500);
-                    } else {
-                        res.json({success: true});
                     }
+                    res.json({success: true});
                 });
+            } else {
+                res.json({sanitizedUser: sanitizedEditedUser});
+            }
         }
     }
 };
 
 //Method for editing a user's child
 module.exports.editUsersChild = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.editUsersChild} for ${helper.getUser(req)}`);
     let usersChild = req.body.user;
-    logger.silly(`Original user: ${JSON.stringify(req.user)}`);
-    logger.silly(`Users child: ${JSON.stringify(usersChild)}`);
+    let user = req.user;
     //We check that the user editing the child is its parent
     if (!isUsersChild(req.user, usersChild)){
-        res.json({errors:keys.wrongUserError});
-        logger.error(`Logged in user (email=${req.user.email}, _id=${req.user._id}) does not have a child:
-                    (email=${usersChild.email}, alias=${usersChild.alias} _id=${usersChild._id}) `);
+        res.json({errors:keys.notAuthorizedError});
+        logger.error(`${helper.getUser(req)} (children =${JSON.stringify(user.children)} ) tried to modify user ` +
+            ` (${JSON.stringify(usersChild)}) while not being that users parent. route is ${keys.editUsersChild}`);
     } else {
         let errors = validateFields(req, usersChild.userType);
         if (errors){
-            logger.debug('Errors validating fields:' + JSON.stringify(errors));
             res.json({errors:errors});
         } else {
-            User.findOneAndUpdate({'_id':usersChild._id}, //The user to update (the child of the authenticated user)
-                {$set: selectUserFieldsForSaving(usersChild)}, // what to modify the current user to
-                {new: true}, //Return the new, modified user
-                function(err){
+            let sanitizedEditedChild = sanitizeUserForEditing(usersChild);
+            if(areUsersEqual(usersChild, sanitizedEditedChild)){
+                User.updateUser(usersChild, selectUserFieldsForSaving(usersChild), function(err){
                     if (err){
-                        logger.error(`Error modifying child user (email=${usersChild.email}, alias=${usersChild.alias} _id=${usersChild._id})
-                                      by the parent (email=${req.user.email}, alias=${req.user.alias} _id=${req.user._id}) in the database: ` + err);
+                        logger.error(`Error editing child user (${JSON.stringify(usersChild)} by: ${helper.getUser(req)} ` + err);
                         return res.sendStatus(500);
                     } else {
                         res.json({success: true});
                     }
                 });
+            } else {
+                res.json({sanitizedUser: sanitizedEditedChild});
+            }
         }
     }
 };
@@ -294,9 +307,7 @@ module.exports.getUsersChildsNotifications = function(req, res){
 
 //Method for inviting a user to be parent
 module.exports.inviteUserToBeParent = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.inviteUserToBeParentRoute} for ${helper.getUser(req)}`);
     let invitation = req.body.invitation;
-    logger.silly(`Invitation = ${JSON.stringify(invitation)}`);
 
     User.findOne({email: invitation.parentEmail},{children: true, birthDate: true, notifications: true}, function(err, user){
         if(err){
@@ -304,30 +315,24 @@ module.exports.inviteUserToBeParent = function(req, res){
             return res.sendStatus(500);
         }
         if (!user){
-            logger.debug(`User (email=${invitation.parentEmail}) does not exist!`);
             let errors = [];
             errors.push(createServerError('inviteEmail', 'Nu există utilizator cu acest email.'));
             res.json({errors:errors});
         } else {
-            logger.silly(`Parent to be user = ${JSON.stringify(user)}`);
-            let isParentAdult = validator.customValidators.isAgeGreaterThen18(user.birthDate);
+            let isParentAdult = customValidator.customValidators.isAgeGreaterThen18(user.birthDate);
             if (!isParentAdult){
-                logger.debug(`User (email=${invitation.parentEmail}) is a minor`);
                 let errors = [];
                 errors.push(createServerError('inviteEmail', 'Păintele trebuie sa fie adult'));
                 res.json({errors:errors});
             }else {
                 //We need to check that the potential parent isn't a parent of the child already
                 if(isUsersChild(user, {_id:invitation.child._id})){
-                    logger.debug(`User (email=${invitation.parentEmail}) is already a parent of user (_id=${invitation.child._id})`);
                     let errors = [];
                     errors.push(createServerError('inviteEmail', 'Utilizatorul deja este parinte'));
                     res.json({errors:errors});
                 } else {
                     //We check if a notification has not already been sent to this user
                     if(userHasAlreadyBeenNotifiedToBeParent(user.notifications, invitation.child._id)){
-                        logger.debug(`User (email=${invitation.parentEmail}) is already received an invite to be a parent
-                                      of user (_id=${invitation.child._id})`);
                         let errors = [];
                         errors.push(createServerError('inviteEmail', 'Exista deja o invitație trimisă către acest utilizator'));
                         res.json({errors:errors});
@@ -459,9 +464,8 @@ module.exports.getNewNotificationsCount = function(req, res){
 };
 
 //Method for getting a users badges. It works for users getting badges for themselves, and for users getting badges
-//for their children. The difference is that when getting the users childrens badges, a childId parameter is sent.
+//for their children. The difference is that when getting the users children's badges, a childId parameter is sent.
 module.exports.getUsersBadges = function(req, res){
-    logger.debug(`Entering UsersRoute: ${keys.getUsersBadgesRoute} by ${helper.getUser(req)}`);
     let childId = req.body.childId;
     let user = req.user;
     let authorized = true;
@@ -475,11 +479,11 @@ module.exports.getUsersBadges = function(req, res){
     if(authorized){
         let userId = childId ? childId : user._id;
         User.getBadgesOfUser(userId, function(err, userWithBadges){
-           if(err){
-               logger.error(`Error getting badges by ${helper.getUser(req)} for user (_id=${userId}: ` + err);
-               return res.sendStatus(500);
-           }
-           res.json({badges: userWithBadges.badges, ownerOfBadges: userId});
+            if(err){
+                logger.error(`Error getting badges by ${helper.getUser(req)} for user (_id=${userId}: ` + err);
+                return res.sendStatus(500);
+            }
+            res.json({badges: userWithBadges.badges, ownerOfBadges: userId});
         });
     } else {
         logger.error(`${helper.getUser(req)} tried get user's (_id:${childId}) badges while not authorized to do so.`);
@@ -492,28 +496,55 @@ module.exports.uploadUserPicture = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.uploadUserPictureRoute} for ${helper.getUser(req)}`);
 
     upload(req, res, function(err){
+        let fileName = req.file.filename;
+        let userToUpdatePhoto = req.body.userId;
+        let user = req.user;
         if (err){
             logger.error(`Error uploading user photo for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
-        let userToUpdatePhoto = req.body.userId;
-        let user = req.user;
+
         //If the user changing the photo is the logged in user or if the user changing photo is the
         //logged in user's child
+
+        let userImagesRelativePath =  'client/img/user_photos/';
+
         if(user._id.toString() == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
-            let fileName = req.file.filename;
-            User.updatePhotoForUser(userToUpdatePhoto, fileName, function(err){
+            helper.inspectUploadedImage(req.file, userImagesRelativePath, function(err, fileInspect){
                 if(err){
-                    logger.error(`Error updating user photo for for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
+                    logger.error(`Error inspecting photo (_id=${JSON.stringify(req.file)}) for adding user photo  ` +
+                        `for user (_id=${userToUpdatePhoto}) by ${helper.getUser(req)}: ` + err);
                     return res.sendStatus(500);
+                    helper.deletePhoto(userImagesRelativePath +  filename);
                 }
-                res.json({userPhoto:fileName, userId: userToUpdatePhoto});
-                //TODO delete the old photo of the user
-            })
+                let filename = req.file.filename;
+                if(fileInspect.fileSize > 500000){
+                    //If the file is larger than 500Kb it is not acceptable
+                    res.json({errors:keys.uploadedPhotoTooLargeError});
+                    //We delete the photo after it has been uploaded
+                    helper.deletePhoto(userImagesRelativePath +  filename);
+                } else if((fileInspect.mimeType != 'image/jpeg') && (fileInspect.mimeType != 'image/png')){
+                    //Not a correct type of file
+                    res.json({errors:keys.uploadedPhotoNotCorrectMimeTypeError});
+                    //We delete the photo after it has been uploaded
+                    helper.deletePhoto(userImagesRelativePath +  filename);
+                } else {
+                    //If the file is the right size and the correct mime type, we save the file
+                    User.updatePhotoForUser(userToUpdatePhoto, fileName, function(err, oldUser){
+                        if(err){
+                            logger.error(`Error updating user photo for for ${userToUpdatePhoto} by ${helper.getUser(req)}:` + err);
+                            return res.sendStatus(500);
+                        }
+                        res.json({userPhoto:fileName, userId: userToUpdatePhoto});
+                        helper.deletePhoto(userImagesRelativePath +  oldUser.userPhoto);
+                    })
+                }
+            });
         } else {
-            //TODO we must delete the uploaded photo if the user is not authorized
-            logger.error(` ${helper.getUser(req)} (children=${user.children}) tried to change photo for user _id=${userToUpdatePhoto} while not being the user or the users child`)
+            logger.error(` ${helper.getUser(req)} (children=${user.children}) tried to change photo for ` +
+                `user _id=${userToUpdatePhoto} while not being the user or the users child (not authorized)`);
             res.json({errors:keys.wrongUserError});
+            helper.deletePhoto(userImagesRelativePath +  fileName);
         }
     })
 };
@@ -531,7 +562,285 @@ let storage = multer.diskStorage({
 upload =  multer({storage:storage}).single('user-photo');
 
 
+//Method that informs the user on what he/she can change in their account (alias and email)
+module.exports.getChangeUserIdentificationInfo = function(req, res){
+    let user = req.user;
+    let userToChangeInfoId = req.body.userId;
+    //We verify that the user is authorized to get this info
+    if(helper.isSameUser(user, {_id:userToChangeInfoId}) || helper.isUsersChild(user, {_id:userToChangeInfoId})){
+        User.getChangeUserIdentificationInfo(userToChangeInfoId, function(err, userFromDb){
+            if (err){
+                logger.error(`Error getting user change identification information by ${helper.getUser(req)}, for ` +
+                    `user (_id=${userToChangeInfoId}):` + err);
+                return res.sendStatus(500);
+            }
 
+            let showChangeEmail = canUserHaveEmail(userFromDb);
+
+            res.json({changeInfo: {oldEmail: userFromDb.email, oldAlias:userFromDb.alias, showChangeEmail: showChangeEmail}});
+        })
+
+    } else {
+        logger.error(`${helper.getUser(req)} tried to get information to change email or alias for user ` +
+            `(id=${userToChangeInfoId} not authorized to do so`);
+        res.json({errors:keys.notAuthorizedError});
+    }
+};
+
+//Method for changing a users alias
+//Method that informs the user on what he/she can change in their account (alias and email)
+module.exports.changeUserAlias = function(req, res){
+    let user = req.user;
+    let userToChangeInfoId = req.body.userId;
+    let newAlias = req.body.newAlias;
+    //We verify that the user is authorized to get this info
+    if(helper.isSameUser(user, {_id:userToChangeInfoId}) || helper.isUsersChild(user, {_id:userToChangeInfoId})){
+        //If for some reason no new alias arrives at the server, we sent a validation error back
+        if(!newAlias){
+            return res.json({errors: {newAlias: 'Aliasul lipseste'}});
+        }
+
+        let sanitizedNewAlias = sanitizeAlias(newAlias);
+        if(sanitizedNewAlias == newAlias){
+            User.checkIfAliasExists(sanitizedNewAlias, function(err, aliasExists){
+                if(err){
+                    logger.error(`Error checking if alias ${newAlias} exists by ${helper.getUser(req)}, for ` +
+                        `user (_id=${userToChangeInfoId}):` + err);
+                    return res.sendStatus(500);
+                }
+                if(aliasExists){
+                    return res.json({errors: {newAlias: 'Aliasul exista deja.'}})
+                }
+
+                User.changeUsersAlias(sanitizedNewAlias, userToChangeInfoId, function(err){
+                    if(err){
+                        logger.error(`Error modifying the alias (new alias= ${newAlias}) of  ` +
+                            `user (_id=${userToChangeInfoId}) by ${helper.getUser(req)}:` + err);
+                        return res.sendStatus(500);
+                    }
+                    res.json({success: true});
+                })
+            })
+
+        } else {
+            res.json({sanitizedNewAlias: sanitizedNewAlias});
+        }
+    } else {
+        logger.error(`${helper.getUser(req)} tried to  change  alias for user ` +
+            `(id=${userToChangeInfoId} not authorized to do so`);
+        res.json({errors:keys.notAuthorizedError});
+    }
+};
+
+module.exports.changeUserEmail = function(req, res){
+    let user = req.user;
+    let userToChangeInfoId = req.body.userId;
+    let newEmail = req.body.newEmail;
+    //We verify that the user is authorized to get this info
+    if(helper.isSameUser(user, {_id:userToChangeInfoId}) || helper.isUsersChild(user, {_id:userToChangeInfoId})){
+        //We check to make sure we do not add an email to a user that does not have the required age (fail safe)
+        User.getChangeUserIdentificationInfo(userToChangeInfoId, function(err, userFromDb){
+            if (err){
+                logger.error(`Error getting user age info for changing email by ${helper.getUser(req)}, for ` +
+                    `user (_id=${userToChangeInfoId}):` + err);
+                return res.sendStatus(500);
+            }
+            //If the user has the correct age we go ahead
+            if(canUserHaveEmail(userFromDb)){
+                //If for some reason no new email arrives at the server, we sent a validation error back
+                if(!newEmail){
+                    return res.json({errors: {newEmail: 'Email-ul lipseste'}});
+                } else if(!validator.isEmail(newEmail)){
+                    return res.json({errors: {newEmail: 'Email-ul nu are formatul corect'}});
+                }
+
+                let sanitizedNewEmail = sanitizeEmail(newEmail);
+                if(sanitizedNewEmail == newEmail){
+                    User.checkIfEmailExists(sanitizedNewEmail, function(err, emailExists){
+                        if(err){
+                            logger.error(`Error checking if email ${newEmail} exists by ${helper.getUser(req)}, for ` +
+                                `user (_id=${userToChangeInfoId}):` + err);
+                            return res.sendStatus(500);
+                        }
+                        if(emailExists){
+                            return res.json({errors: {newEmail: 'Email-ul exista deja.'}})
+                        }
+
+                        User.changeUsersEmail(sanitizedNewEmail, userToChangeInfoId, function(err){
+                            if(err){
+                                logger.error(`Error modifying the email (new email= ${newEmail}) of  ` +
+                                    `user (_id=${userToChangeInfoId}) by ${helper.getUser(req)}:` + err);
+                                return res.sendStatus(500);
+                            }
+                            res.json({success: true});
+                        })
+                    })
+
+                } else {
+                    res.json({sanitizedNewEmail: sanitizedNewEmail});
+                }
+            } else {
+                logger.error(`${helper.getUser(req)} tried to change email for user ` +
+                    `(id=${userToChangeInfoId}) while the user (id=${userToChangeInfoId}) was under 14`);
+                res.json({errors:keys.notAuthorizedError});
+            }
+
+        })
+    } else {
+        logger.error(`${helper.getUser(req)} tried to change email for user ` +
+            `(id=${userToChangeInfoId}) not authorized to do so`);
+        res.json({errors:keys.notAuthorizedError});
+    }
+};
+
+
+function canUserHaveEmail(user){
+    return customValidator.customValidators.isAgeGreaterThen14(user.birthDate);
+}
+
+function canUserHavePassword(user){
+    return customValidator.customValidators.isAgeGreaterThen14(user.birthDate);
+}
+
+
+//Method that informs the user on what he/she can change in their account (alias and email)
+module.exports.getChangeUserPasswordInfo = function(req, res){
+    let user = req.user;
+    let userToChangeInfoId = req.body.userId;
+    //We verify that the user is authorized to get this info
+    if(helper.isSameUser(user, {_id:userToChangeInfoId}) || helper.isUsersChild(user, {_id:userToChangeInfoId})){
+        User.getChangeUserPasswordInfo(userToChangeInfoId, function(err, userFromDb){
+            if (err){
+                logger.error(`Error getting user change password information by ${helper.getUser(req)}, for ` +
+                    `user (_id=${userToChangeInfoId}):` + err);
+                return res.sendStatus(500);
+            }
+
+            let hasPassword = userFromDb.password ? true: false;
+
+
+            res.json({changeInfo: {hasPassword: hasPassword}});
+        })
+
+    } else {
+        logger.error(`${helper.getUser(req)} tried to get information to change email or alias for user ` +
+            `(id=${userToChangeInfoId} not authorized to do so`);
+        res.json({errors:keys.notAuthorizedError});
+    }
+};
+
+module.exports.changeUserPassword = function(req, res){
+    let user = req.user;
+    let userToChangeInfoId = req.body.userId;
+    let oldPassword = req.body.oldPassword;
+    let newPassword = req.body.newPassword;
+    let newPassword2 = req.body.newPassword2;
+    //We verify that the user is authorized to get this info
+    if(helper.isSameUser(user, {_id:userToChangeInfoId}) || helper.isUsersChild(user, {_id:userToChangeInfoId})){
+        //We check to make sure we do not add an email to a user that does not have the required age (fail safe)
+        User.getChangeUserPasswordInfo(userToChangeInfoId, function(err, userFromDb){
+            if (err){
+                logger.error(`Error getting password info for changing password by ${helper.getUser(req)}, for ` +
+                    `user (_id=${userToChangeInfoId}):` + err);
+                return res.sendStatus(500);
+            }
+
+
+            if(userFromDb.password){
+                //If the user already has a password, we compare the password in the database with the one provided by the
+                //user
+                bcrypt.compare(oldPassword, userFromDb.password, function (err, isMatch) {
+                    if (err) {
+                        logger.error('Error comparing passwords with bcrypt for changing user password: ' + err);
+                        return res.sendStatus(500);
+                    }
+                    //If the passwords match we save the user
+                    if (isMatch) {
+                        saveUsersNewPassword(req, res, userToChangeInfoId, newPassword, newPassword2);
+                    } else {
+                        res.json({errors:{oldPassword: 'Parola veche nu este corecta.'}});
+                    }
+                })
+
+            } else {
+                //IF the user in the database does not have a password yet (a child user)
+                if(newPassword){
+                    //We check if the user can have a password (age > 14) (this is a fail-safe)
+                    if(canUserHavePassword(userFromDb)){
+                        saveUsersNewPassword(req, res, userToChangeInfoId, newPassword, newPassword2);
+                    } else {
+                        logger.error(`${helper.getUser(req)} tried to add password for user ` +
+                            `(id=${userToChangeInfoId}) while the user (id=${userToChangeInfoId}) was under 14`);
+                        res.json({errors:keys.notAuthorizedError});
+                    }
+                } else {
+                    //IF no new password was sent (this is a fail safe)
+                    res.json({errors: {newPassword: 'Parola noua lipseste'}});
+                }
+            }
+
+        })
+    } else {
+        logger.error(`${helper.getUser(req)} tried to change email for user ` +
+            `(id=${userToChangeInfoId} not authorized to do so`);
+        res.json({errors:keys.notAuthorizedError});
+    }
+};
+
+function saveUsersNewPassword(req, res, userToChangeInfoId, newPassword, newPassword2){
+    let errors = validatePassword(newPassword);
+    if(errors) {
+        res.json({errors:errors});
+    } else {
+        //If the new passwords passed validation
+        let sanitizedNewPassword = sanitizePassword(newPassword);
+        if (sanitizedNewPassword == newPassword) {
+            //We now check if the newPassword matches newPassword2
+            if (sanitizedNewPassword === newPassword2) {
+                bcrypt.genSalt(10, function (err, salt) {
+                    if (err) {
+                        logger.error(`Error obtaining salt for changing user (${res.body.userId})  by ${helper.getUser(req)} ` +
+                            `password: ` + err);
+                        return res.sendStatus(500);
+                    }
+                    bcrypt.hash(sanitizedNewPassword, salt, function (err, hashOfNewPassword) {
+                        if (err) {
+                            logger.error(`Error obtaining hashing password for changing user (${res.body.userId})  by ${helper.getUser(req)} ` +
+                                `password: ` + err);
+                            return res.sendStatus(500);
+                        }
+                        User.changeUsersPassword(hashOfNewPassword, userToChangeInfoId, function (err) {
+                            if (err) {
+                                logger.error(`Error saving hased password for changing user (${res.body.userId})  by ${helper.getUser(req)} ` +
+                                    `password: ` + err);
+                                return res.sendStatus(500);
+                            }
+                            res.json({success: true});
+                        })
+                    });
+                });
+            } else {
+                res.json({errors: {newPassword2: 'Confirmarea parolei nu e buna'}});
+            }
+        } else {
+            //IF the sanitizedNewPassword isn't equal to the newPassword
+            res.json({sanitizedNewPassword: true});
+        }
+    }
+}
+
+function validatePassword(newPassword){
+    let errors = {};
+    let hasErrors = false;
+    if(!customValidator.customValidators.isPasswordValid(newPassword)){
+        errors.newPassword = 'Parola trebuie sa fie de minim 8 caractere si sa aibe cel putin o litera mare,' +
+            ' una mica si o cifra';
+        hasErrors = true;
+    }
+    if(hasErrors){
+        return errors;
+    }
+}
 
 function saveChildToDbsAndRegisterWithParent(req, res, child){
     logger.debug('Entering saveChildToDbsAndRegisterWithParent(req, res, child)');
@@ -541,29 +850,31 @@ function saveChildToDbsAndRegisterWithParent(req, res, child){
     child.parents = [parent._id];
     let newUser = new User(child);
 
-    User.createUser(newUser, function(err, savedChild){
-        if(err){
-            logger.error('Error saving user in the database:' + err);
-            return res.status(500).json({errors:keys.dbsUserCreationError})
-        } else {
-            //TODO register the child to the users' dojos
-            //At this point the child user was saved
-            logger.debug(`Child user saved email(${savedChild.email}), alias(${savedChild.alias})`);
-            //We have to find the parent and add a reference to the saved child to it
+    let sanitizedChild = sanitizeUserForRegistration(child);
+    if(areUsersEqual(child, sanitizedChild)){
+        User.createUser(newUser, function(err, savedChild){
+            if(err){
+                logger.error(`Error saving child (${JSON.stringify(child)}) by ${helper.getUser(req)} in the database:` + err);
+                return res.status(500).json({errors:keys.dbsUserCreationError})
+            } else {
+                //We have to find the parent and add a reference to the saved child to it
+                User.update({_id: parent._id}, {$addToSet: {children: savedChild._id}}, function(err){
+                    if(err){
+                        //TODO what to do when a parent was not updated with the child reference
+                        logger.error(`Parent (${parent.email}) not updated with the child (alias=${savedChild.alias}, email=${savedChild.alias})`);
+                    } else {
+                        res.json({success:true});
+                        addChildToUsersDojos(parent._id.toString(), savedChild._id.toString());
+                    }
+                });
 
-            User.update({_id: parent._id}, {$addToSet: {children: savedChild._id}}, function(err){
-                if(err){
-                    //TODO what to do when a parent was not updated with the child reference
-                    logger.error(`Parent (${parent.email}) not updated with the child (alias=${savedChild.alias}, email=${savedChild.alias})`);
-                } else {
-                    logger.debug(`Parent updated, responded with success.`);
-                    res.json({success:true});
-                    addChildToUsersDojos(parent._id.toString(), savedChild._id.toString());
-                }
-            });
+            }
+        });
+    } else {
+        res.json({sanitizedUser: sanitizedChild});
+    }
 
-        }
-    });
+
 }
 
 //Method that takes a parentId and a childId(as strings) and adds the child to all the dojos the the parent is a member
@@ -761,6 +1072,292 @@ function selectUserFieldsForSaving(user){
         biography: user.biography,
         gender: user.gender
     };
+}
+
+
+function sanitizeUserForRegistration(user){
+    let retUser = {};
+
+    //Registering a child, you can have a user with no email
+    if(user.email){
+        retUser.email = sanitizeEmail(user.email);
+    }
+
+    //Registering a child, you can have a child with no password
+    if(user.password){
+        let sanitPassword = helper.removeWhiteSpaces(user.password);
+        if(sanitPassword.length > 20){
+            sanitPassword = sanitPassword.substring(0, 20);
+        }
+
+        //IF the password has been modified, we reset it
+        if(sanitPassword != user.password){
+            sanitPassword = '';
+        }
+        retUser.password = sanitPassword;
+
+        //Password 2 is kept as it is
+        retUser.password2 = user.password2;
+    }
+
+    if(user.alias){
+        let sanitAlias = validator.trim(user.alias);
+        if(sanitAlias.length > 50){
+            sanitAlias = sanitAlias.substring(0, 50);
+        }
+        retUser.alias = sanitAlias;
+    }
+
+    if(user.facebook){
+        let sanitFacebook = validator.trim(user.facebook);
+        if(sanitFacebook.length > 100){
+            sanitFacebook = sanitFacebook.substring(0, 100);
+        }
+        sanitFacebook = validator.whitelist(sanitFacebook, helper.linkWhiteList);
+        retUser.facebook = sanitFacebook;
+    }
+
+    if(user.linkedin){
+        let sanitLinkedIn = validator.trim(user.linkedin);
+        if(sanitLinkedIn.length > 100){
+            sanitLinkedIn = sanitLinkedIn.substring(0, 100);
+        }
+        sanitLinkedIn = validator.whitelist(sanitLinkedIn, helper.linkWhiteList);
+        retUser.linkedin = sanitLinkedIn;
+    }
+
+    if(user.languagesSpoken){
+        let sanitLanguagesSpoken = validator.trim(user.languagesSpoken);
+        if(sanitLanguagesSpoken.length > 100){
+            sanitLanguagesSpoken = sanitLanguagesSpoken.substring(0, 100);
+        }
+        sanitLanguagesSpoken = validator.whitelist(sanitLanguagesSpoken, helper.userNameWhitelist);
+        retUser.languagesSpoken = sanitLanguagesSpoken;
+    }
+
+    if(user.programmingLanguages){
+        let sanitProgrammingLanguages = validator.trim(user.programmingLanguages);
+        if(sanitProgrammingLanguages.length > 100){
+            sanitProgrammingLanguages = sanitProgrammingLanguages.substring(0, 100);
+        }
+        sanitProgrammingLanguages = validator.whitelist(sanitProgrammingLanguages, helper.userNameWhitelist);
+        retUser.programmingLanguages = sanitProgrammingLanguages;
+    }
+
+    if(user.biography){
+        let sanitBiography = validator.trim(user.biography);
+        if(sanitBiography.length > 100){
+            sanitBiography = sanitBiography.substring(0, 100);
+        }
+        sanitBiography = validator.whitelist(sanitBiography, helper.userNameWhitelist);
+        retUser.biography = sanitBiography;
+    }
+
+    if(user.gender){
+        let sanitGender = validator.trim(user.gender);
+        if(sanitGender.length > 100){
+            sanitGender = sanitGender.substring(0, 100);
+        }
+        sanitGender = validator.whitelist(sanitGender, helper.userNameWhitelist);
+        retUser.gender = sanitGender;
+    }
+
+    if(helper.isDate(user.birthDate)){
+        retUser.birthDate  =user.birthDate;
+    }
+
+    let sanitAddress = validator.trim(user.address);
+    if(sanitAddress.length > 100){
+        sanitAddress = sanitAddress.substring(0, 100);
+    }
+    sanitAddress = validator.whitelist(sanitAddress, helper.eventWhiteListNames);
+    retUser.address = sanitAddress;
+
+    let sanitPhone = validator.trim(user.phone);
+    if(sanitPhone.length > 20){
+        sanitPhone = sanitPhone.substring(0, 20);
+    }
+    sanitPhone = validator.whitelist(sanitPhone, helper.phoneWhiteList);
+
+    let sanitFirstName = validator.trim(user.firstName);
+    if(sanitFirstName.length > 50){
+        sanitFirstName = sanitFirstName.substring(0, 50);
+    }
+    sanitFirstName = validator.whitelist(sanitFirstName, helper.userNameWhitelist);
+    retUser.firstName = sanitFirstName;
+
+    let sanitLastName = validator.trim(user.lastName);
+    if(sanitLastName.length > 50){
+        sanitLastName = sanitLastName.substring(0, 50);
+    }
+    sanitLastName = validator.whitelist(sanitLastName, helper.userNameWhitelist);
+    retUser.lastName = sanitLastName;
+
+    retUser.phone = sanitPhone;
+    return retUser;
+}
+
+function areUsersEqual(user1, user2){
+    let ret = true;
+    if(user1.email !== user2.email){
+        ret = false;
+    } else if(user1.alias !== user2.alias){
+        ret = false;
+    }else if(user1.password !== user2.password){
+        ret = false;
+    } else if(user1.firstName !== user2.firstName){
+        ret = false;
+    } else if(user1.lastName !== user2.lastName){
+        ret = false;
+    } else if(user1.birthDate !== user2.birthDate){
+        ret = false;
+    } else if(user1.address !== user2.address){
+        ret = false;
+    } else if(user1.phone !== user2.phone){
+        ret = false;
+    } else if(user1.facebook !== user2.facebook){
+        ret = false;
+    } else if(user1.linkedin !== user2.linkedin){
+        ret = false;
+    } else if(user1.languagesSpoken !== user2.languagesSpoken){
+        ret = false;
+    } else if(user1.programmingLanguages !== user2.programmingLanguages){
+        ret = false;
+    } else if(user1.biography !== user2.biography){
+        ret = false;
+    }
+
+    return ret;
+}
+
+
+function sanitizeUserForEditing(user){
+    let retUser = {};
+
+    if(helper.isDate(user.birthDate)){
+        retUser.birthDate  =user.birthDate;
+    }
+
+    let sanitAddress = validator.trim(user.address);
+    if(sanitAddress.length > 100){
+        sanitAddress = sanitAddress.substring(0, 100);
+    }
+    sanitAddress = validator.whitelist(sanitAddress, helper.eventWhiteListNames);
+    retUser.address = sanitAddress;
+
+    let sanitPhone = validator.trim(user.phone);
+    if(sanitPhone.length > 20){
+        sanitPhone = sanitPhone.substring(0, 20);
+    }
+    sanitPhone = validator.whitelist(sanitPhone, helper.phoneWhiteList);
+    retUser.phone = sanitPhone;
+
+    let sanitFirstName = validator.trim(user.firstName);
+    if(sanitFirstName.length > 50){
+        sanitFirstName = sanitFirstName.substring(0, 50);
+    }
+    sanitFirstName = validator.whitelist(sanitFirstName, helper.userNameWhitelist);
+    retUser.firstName = sanitFirstName;
+
+    let sanitLastName = validator.trim(user.lastName);
+    if(sanitLastName.length > 50){
+        sanitLastName = sanitLastName.substring(0, 50);
+    }
+    sanitLastName = validator.whitelist(sanitLastName, helper.userNameWhitelist);
+    retUser.lastName = sanitLastName;
+
+    if(user.facebook){
+        let sanitFacebook = validator.trim(user.facebook);
+        if(sanitFacebook.length > 100){
+            sanitFacebook = sanitFacebook.substring(0, 100);
+        }
+        sanitFacebook = validator.whitelist(sanitFacebook, helper.linkWhiteList);
+        retUser.facebook = sanitFacebook;
+    }
+
+    if(user.linkedin){
+        let sanitLinkedIn = validator.trim(user.linkedin);
+        if(sanitLinkedIn.length > 100){
+            sanitLinkedIn = sanitLinkedIn.substring(0, 100);
+        }
+        sanitLinkedIn = validator.whitelist(sanitLinkedIn, helper.linkWhiteList);
+        retUser.linkedin = sanitLinkedIn;
+    }
+
+    if(user.languagesSpoken){
+        let sanitLanguagesSpoken = validator.trim(user.languagesSpoken);
+        if(sanitLanguagesSpoken.length > 100){
+            sanitLanguagesSpoken = sanitLanguagesSpoken.substring(0, 100);
+        }
+        sanitLanguagesSpoken = validator.whitelist(sanitLanguagesSpoken, helper.userNameWhitelist);
+        retUser.languagesSpoken = sanitLanguagesSpoken;
+    }
+
+    if(user.programmingLanguages){
+        let sanitProgrammingLanguages = validator.trim(user.programmingLanguages);
+        if(sanitProgrammingLanguages.length > 100){
+            sanitProgrammingLanguages = sanitProgrammingLanguages.substring(0, 100);
+        }
+        sanitProgrammingLanguages = validator.whitelist(sanitProgrammingLanguages, helper.userNameWhitelist);
+        retUser.programmingLanguages = sanitProgrammingLanguages;
+    }
+
+    if(user.biography){
+        let sanitBiography = validator.trim(user.biography);
+        if(sanitBiography.length > 100){
+            sanitBiography = sanitBiography.substring(0, 100);
+        }
+        sanitBiography = validator.whitelist(sanitBiography, helper.userNameWhitelist);
+        retUser.biography = sanitBiography;
+    }
+
+    if(user.gender){
+        let sanitGender = validator.trim(user.gender);
+        if(sanitGender.length > 100){
+            sanitGender = sanitGender.substring(0, 100);
+        }
+        sanitGender = validator.whitelist(sanitGender, helper.userNameWhitelist);
+        retUser.gender = sanitGender;
+    }
+
+    retUser._id = user._id;
+    //the email and alias cannot be modified from this panel, so we are sending them right back
+    retUser.alias = user.alias;
+    retUser.email = user.email;
+
+    return retUser;
+}
+
+function sanitizeAlias(alias){
+    let sanitAlias = validator.trim(alias);
+    if(sanitAlias.length > 50){
+        sanitAlias = sanitAlias.substring(0, 50);
+    }
+    sanitAlias = validator.whitelist(sanitAlias, helper.userNameWhitelist);
+
+    return sanitAlias;
+}
+
+function sanitizeEmail(email){
+    let sanitEmail = validator.trim(email);
+    if(sanitEmail.length > 254){
+        sanitEmail = sanitEmail.substring(0, 254);
+    }
+    return sanitEmail;
+}
+
+function sanitizePassword(password){
+    let sanitPassword = helper.removeWhiteSpaces(password);
+    if(sanitPassword.length > 20){
+        sanitPassword = sanitPassword.substring(0, 20);
+    }
+
+    //IF the password has been modified, we reset it
+    if(sanitPassword != password){
+        sanitPassword = '';
+    }
+
+    return sanitPassword;
 }
 
 

@@ -44,7 +44,7 @@
                     </div>
 
                 </div>
-                <div >
+                <div ng-if="myProfile.user.dojos.length > 0">
                     <h3>Membru al dojo</h3>
                     <hr>
                     <div class="dojo-bubble-container" ng-controller="dojoBubbleCtrl">
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="my-profile-notifications">
+                <div class="my-profile-notifications" ng-if="myProfile.user.notifications.length > 0">
                     <h3>Notificări</h3>
                     <hr>
                     <div class="my-profile-notification-container" ng-repeat="notification in myProfile.user.notifications">

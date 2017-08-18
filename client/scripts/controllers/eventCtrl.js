@@ -58,10 +58,6 @@ angular.module("coderDojoTimisoara")
             $scope.views[keys.showInviteUsersPanel] = false;
         };
 
-        $scope.setUserInvitesSent = function(){
-            $scope.views.userInvitesSend = true;
-        };
-
         $scope.selectRegisteredUsersFilter = function(filter){
             //When name filter is selected
             if(filter === keys.filterRegisteredEventUsersValues.name) {
@@ -162,6 +158,10 @@ angular.module("coderDojoTimisoara")
                     $scope.goToViewDojo();
                 } else if (eventView.previousLocation === keys.viewUserProfile){
                     $scope.goToViewUserProfile();
+                }else if (eventView.previousLocation === keys.myEventsLocation){
+                    $scope.goToMyEvents();
+                }else if (eventView.previousLocation === keys.eventsLocation){
+                    $scope.goToEvents();
                 } else {
                     $scope.goToDespre();
                 }
@@ -248,17 +248,19 @@ angular.module("coderDojoTimisoara")
                     dojoId: $scope.event.dojoId
                 })
                 .then(function(response){
+                    $scope.communicationsPermitted = true;
                     if(response.data.errors == keys.wrongUserError){
                         $scope.setAlert(keys.infoAlert, 'Utilizatorul nu poate face această acțiune.');
-                        $scope.communicationsPermitted = true;
+
                     } else if(response.data.errors == keys.userNoLongerPartOfDojo){
                         $scope.setAlert(keys.infoAlert, 'Utilizatorul nu mai face parte din dojo.');
-                        $scope.communicationsPermitted = true;
                     }  else if(response.data.errors == keys.userAlreadyRegisteredForEventError){
                         $scope.setAlert(keys.infoAlert, 'Utilizatorul este de inregistrat la acest eveniment.');
-                        $scope.communicationsPermitted = true;
                     } else if(response.data.success){
                         $scope.initializeEvent();
+                        var msg = 'Utilizatorul ' + ticketOption.firstName + ' '  + ticketOption.lastName + ' s-a inscris ' +
+                                'la eveniment ca ' + ticket.nameOfTicket + '.';
+                        $scope.setSnackBar(msg, 'info');
                     }
                 })
                 .catch(function(err){
@@ -281,6 +283,9 @@ angular.module("coderDojoTimisoara")
                         $scope.communicationsPermitted = true;
                     } else if(response.data.success){
                         $scope.initializeEvent();
+                        var msg = 'Utilizatorul ' + ticketOption.firstName + ' '  + ticketOption.lastName + ' a renuntat ' +
+                            'inscrierea la eveniment ca ' + ticket.nameOfTicket + '.';
+                        $scope.setSnackBar(msg, 'info');
                     }
                 })
                 .catch(function(err){
@@ -471,17 +476,15 @@ angular.module("coderDojoTimisoara")
                 $scope.communicationsPermitted = false;
                 dataService.confirmOrRemoveUserFromEvent(data)
                     .then(function(response){
+                        $scope.communicationsPermitted = true;
                         if(response.data.errors === keys.notAuthorizedError){
                             $scope.showNotAuthorizedError();
-                            $scope.communicationsPermitted = true;
                         } else if(response.data.usersRegForEvent){
                             //The data received from the server is separated into tickets (we need to separate it by sessions)
                             var usersBySession = helperSvc.convertEventTicketsToSessions(response.data.usersRegForEvent.tickets);
                             //Now we have to add the users to each session to be displayed
                             addViewUsersToCurrentEvent(usersBySession);
-                            $scope.communicationsPermitted = true;
                         }
-                        $scope.communicationsPermitted = true;
                     })
                     .catch(function(err){
                         helperSvc.handlerCommunicationErrors(err, 'confirmOrRemoveUserFromEvent()', $scope);

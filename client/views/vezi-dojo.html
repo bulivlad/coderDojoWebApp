@@ -1,0 +1,10 @@
+<!--View Dojo Part-->
+<div id="view-dojo" ng-controller="dojoCtrl">
+    <view-dojo-directive ng-if="views[keys.viewDojo]"></view-dojo-directive>
+    <dojo-member-directive ng-if="views[keys.viewMembers]"></dojo-member-directive>
+    <add-or-edit-dojo-directive ng-if="views[keys.editDojo]"></add-or-edit-dojo-directive>
+    <add-or-edit-event-directive ng-if="views[keys.addEventToDojo]"></add-or-edit-event-directive>
+</div>
+
+
+<!--View Dojo Part-->

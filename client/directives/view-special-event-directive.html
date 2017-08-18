@@ -1,0 +1,23 @@
+<div class="view-special-event-directive">
+
+    <div class="special-event">
+        <div class="special-event-image-container">
+            <div class="special-event-image" style="{{getBackgroundUrlForSpecialEventPhoto(specialEvent)}}"></div>
+        </div>
+        <div class="bttns-bar">
+            <button ng-if="isUserAdmin()" ng-click="editSpecialEventAction()">Editează</button>
+            <button ng-click="goBackAction()"><i class="fa fa-arrow-left" aria-hidden="true"></i> Inapoi</button>
+        </div>
+
+        <div class="wrapper">
+            <h3 class="special-event-name"><code>{{specialEvent.name}}</code></h3>
+            <h4 class="event-date">{{getSpecialEventDate(specialEvent)}}</h4>
+            <p class="description">{{specialEvent.description}}</p>
+
+            <div class="special-event-map">
+                <div id="special-event-map"></div>
+            </div>
+        </div>
+
+    </div>
+</div>

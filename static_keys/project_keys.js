@@ -12,7 +12,6 @@ let keyMap = {
     register: 'register',
     editUser: 'editUser',
     editUsersChild: 'editUsersChild',
-    myProfile: 'myProfile',
     editProfiles: 'editProfiles',
     getDojosRoute: 'getDojos',
     getMyDojosRoute: 'getMyDojos',
@@ -68,6 +67,19 @@ let keyMap = {
     addBadgesToUsersRoute: 'addBadgesToUsers',
     getUsersBadgesRoute: 'getUsersBadges',
     getMyEventsRoute: 'getMyEvents',
+    getCurrentAuthEventsRoute: 'getCurrentAuthEvents',
+    getCurrentEventsRoute: 'getCurrentEvents',
+    addSpecialEventRoute: 'addSpecialEvent',
+    editSpecialEventRoute: 'editSpecialEvent',
+    getSpecialEventRoute: 'getSpecialEvent',
+    uploadSpecialEventPictureRoute: 'uploadSpecialEventPicture',
+    getCurrentSpecialEventsRoute: 'getCurrentSpecialEvents',
+    getChangeUserIdentificationInfoFromServerRoute: 'getChangeUserIdentificationInfoFromServer',
+    changeUserEmailRoute: 'changeUserEmail',
+    changeUserAliasRoute: 'changeUserAlias',
+    getChangePasswordsInfoRoute: 'getChangePasswordsInfo',
+    getChangeUserPasswordsInfoRoute: 'getChangePasswordsInfo',
+    changeUserPasswordRoute: 'changeUserPassword',
 
     //View locations
     viewEventLocation: 'viewevent',
@@ -75,6 +87,11 @@ let keyMap = {
     viewBadgesLocation: 'viewBadgesLocation',
     viewBadgeLocation: 'viewBadgeLocation',
     myEventsLocation: 'myEventsLocation',
+    eventsLocation: 'events',
+    addSpecialEventLocation: 'addSpecialEvent',
+    viewSpecialEventLocation: 'viewSpecialEvent',
+    userProfileLocation: 'userProfile',
+
 
     //Notification types
     parentInviteNotification: 'parentInviteNotification',
@@ -97,6 +114,8 @@ let keyMap = {
     userNoLongerPartOfDojo: 'userNoLongerPartOfDojo',
     notSanitizedError: 'notSanitizedError',
     uploadPhotoError: 'uploadPhotoError',
+    uploadedPhotoTooLargeError: 'uploadedPhotoTooLargeError',
+    uploadedPhotoNotCorrectMimeTypeError: 'uploadedPhotoNotCorrectMimeTypeError',
 
     //Alerts
     childRegisterAlert: 'childRegisterAlert',
@@ -106,6 +125,9 @@ let keyMap = {
 
     //Information
     eventFilterRegisteredUsers: 'eventFilterRegisteredUsers',
+    recurrentEventInfo: 'recurrentEventInfo',
+    createdEventInfo: 'createdEvent',
+    inviteDojoMembersToEventInfo: 'inviteDojoMembersToEventInfo',
 
     //User roles
     user: 'user',
@@ -144,6 +166,10 @@ let keyMap = {
     addChildOver14Profile: 'addChildOver14Profile',
     showDojoInUserProfile: 'showDojoInUserProfile',
     showPasswords: 'showPasswords',
+    showChangePasswords: 'showChangePasswords',
+    viewChangePasswordsPanel: 'viewChangePasswordsPanel',
+    showChangeIdentification: 'showChangeIdentification',
+    viewChangeIdentificationsPanel: 'viewChangeIdentificationsPanel',
     showAlias: 'showAlias',
     showAddChildren: 'showAddChildren',
     showInviteParent: 'showInviteParent',
@@ -212,6 +238,11 @@ let keyMap = {
     },
     badgeEdited: 'badgeEdited',
 
+
+    //Views for special events
+    viewSpecialEvent: 'viewSpecialEvent',
+    editSpecialEvent: 'editSpecialEvent',
+
     //Enums
     daysOfWeek: ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbată'],
     daysOfWeekShort: ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ'],
@@ -220,6 +251,8 @@ let keyMap = {
     eventTypesUnique: 'unic',
     eventStatus: ['Activ', 'Inactiv'],
     months: ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie' , 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'],
+    eventRecurrenceTypes: ['Săptămânal', 'Bilunar', 'Lunar'],
+    cities: ['Arad', 'Ciacova', 'București', 'Hades', 'Timișoara', 'Slatina'],
 
     //Key-values
     eventStatus_Confirmed:'Confirmat',

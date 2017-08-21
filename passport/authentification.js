@@ -3,6 +3,9 @@
  */
 
 const logger = require('winston');
+const initializeStrategies = require('./authentification_strategies');
+
+initializeStrategies();
 
 let authentification = {};
 

@@ -21,7 +21,9 @@ const express = require("express"),
     validator = require('./validator/validator'),
     helper = require('./auxiliary/helper'),
     morgan = require('morgan');
-    MongoStore = require('connect-mongo')(expressSession);
+    MongoStore = require('connect-mongo')(expressSession),
+    https = require('https'),
+    fs = require('fs');
 
 
 
@@ -65,7 +67,7 @@ app.use(passport.session());//Puts data into local session
 
 
 
-// This middleware is used for validating fields, the error formater is used to format the error message which will be
+// This middleware is used for validating fields, the error formatter is used to format the error message which will be
 // send to the client.
 app.use(expressValidator({
     errorFormatter: validator.errorFormatter,
@@ -79,15 +81,15 @@ app.use("/dojos", dojosRoute);
 app.use("/events", eventsRoute);
 app.use("/badges", badgesRoute);
 
+let port = process.env.PORT || 3000;
 
+const httpOptions = {
+    cert: fs.readFileSync(path.join(__dirname, 'ssl', 'server.crt')),
+    key: fs.readFileSync(path.join(__dirname, 'ssl', 'server.key'))
+};
 
+https.createServer(httpOptions, app)
+    .listen(port, function(){
+        logger.info(`LOGGING:Server started on port ${app.get("port")}`);
+    });
 
-
-//Starting the server on port 3000
-//Set port
-app.set("port", (process.env.PORT || 3000));
-
-app.listen(app.get("port"), function(){
-    logger.info(`LOGGING:Server started on port ${app.get("port")}`);
-
-});

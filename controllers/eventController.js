@@ -1270,9 +1270,9 @@ let storage = multer.diskStorage({
     }
 });
 
-//TODO must check for photo type
 upload =  multer({storage:storage}).single('special-event-photo');
 
+//TODO must set this method to a recurrent timer for it to create recurrent events when the old ones expire
 //Method for creating events from recurrent events for all dojos. If an event for that a particular dojo for the next
 //week has already been created in a previous run of the method, that recurrent event is skipped.
 module.exports.createEventsFromRecurrentEventsForAllDojos = function(){

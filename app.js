@@ -40,10 +40,6 @@ mongoose.connect('mongodb://localhost/' + dataBaseName, function(err){
 
 helper.initializeApp();
 
-//Read data files
-//templating.initiate();
-
-
 let app = express();
 
 app.use(morgan('dev'));
@@ -90,6 +86,6 @@ const httpOptions = {
 
 https.createServer(httpOptions, app)
     .listen(port, function(){
-        logger.info(`LOGGING:Server started on port ${app.get("port")}`);
+        logger.info(`LOGGING:Server started on port ${port}`);
     });
 

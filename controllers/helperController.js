@@ -6,8 +6,8 @@ const keys = require('../static_keys/project_keys');
 const validator = require('validator');
 const logger = require('winston');
 const fs = require('fs');
-const mmm = require('mmmagic'),
-    Magic = mmm.Magic;
+//const mmm = require('mmmagic'), removed for enabling early deploy to azure
+//    Magic = mmm.Magic;
 
 module.exports.isActive = function(eventOrSession){
     if(eventOrSession.activeStatus === keys.eventStatus[0]){ //If the event is active
@@ -527,16 +527,23 @@ module.exports.removeWhiteSpaces = function(string){
 };
 
 module.exports.inspectUploadedImage = function(file, relativePath, callback){
-    var magic = new Magic(mmm.MAGIC_MIME_TYPE);
-    magic.detectFile(relativePath + file.filename, function(err, result) {
-       if(err){
-           callback(err);
-       } else {
-           let fileInspect = {};
-           fileInspect.fileSize = file.size;
-           fileInspect.mimeType = result;
-           callback(null, fileInspect);
-      }
-    });
+    //Commented because mmagic could not be installed in azure (just to see the server running)
+    //var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+    //magic.detectFile(relativePath + file.filename, function(err, result) {
+    //   if(err){
+    //       callback(err);
+    //   } else {
+    //       let fileInspect = {};
+    //       fileInspect.fileSize = file.size;
+    //       fileInspect.mimeType = result;
+    //       callback(null, fileInspect);
+    //  }
+    //});
+
+    let fileInspect = {};
+    fileInspect.fileSize = file.size;
+    fileInspect.mimeType = 'image/jpeg';
+    callback(null, fileInspect);
+
 
 };

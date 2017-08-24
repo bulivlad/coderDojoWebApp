@@ -27,9 +27,9 @@ const express = require("express"),
 
 
 
-let dataBaseName = 'coderDojoTimisoara';
+let dataBaseName = process.env.MONGO_URI || 'mongodb://localhost/coderDojoTimisoara';
 //Connecting to the database
-mongoose.connect('mongodb://localhost/' + dataBaseName, function(err){
+mongoose.connect(dataBaseName, function(err){
     if (err){
         console.log("Error:", err);
         logger.error('Cannot connect to database: ' + err);
@@ -60,8 +60,6 @@ app.use(expressSession({
 app.use(express.static(path.join(__dirname, 'client')));
 app.use(passport.initialize());//Grabs the data from the session
 app.use(passport.session());//Puts data into local session
-
-
 
 // This middleware is used for validating fields, the error formatter is used to format the error message which will be
 // send to the client.

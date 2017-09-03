@@ -37,12 +37,12 @@ mongoose.connect(dataBaseName, function(err){
     }
 });
 
-//helper.initializeApp();
+helper.initializeApp();
 
 let app = express();
 
 //WHen running on the dev's computer no NODE_ENV is set-up, and so we start morgan
-if(process.env.NODE_ENV){
+if(process.env.ENV){
     app.use(morgan('dev'));
 }
 

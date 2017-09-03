@@ -28,6 +28,6 @@ let monthlyTransport = {
 
 winston.add(winston.transports.DailyRotateFile, monthlyTransport);
 
-winston.level = process.env.ENV === 'development' ? 'debug' : 'info'; //{ error: 0, warn: 1, info: 2, verbose: 3, debug: 4, silly: 5 }
+winston.level = process.env.ENV === 'development' ? 'silly' : 'info'; //{ error: 0, warn: 1, info: 2, verbose: 3, debug: 4, silly: 5 }
 module.exports = winston;
 

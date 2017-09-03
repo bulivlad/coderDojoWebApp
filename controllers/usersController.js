@@ -267,14 +267,20 @@ module.exports.getUsersNotifications = function(req, res){
             logger.error(`Error searching database for notifications for ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
-        logger.debug(`Notifications for ${helper.getUser(req)} are: ` + JSON.stringify(user.notifications));
-        let usersNotifications = user.notifications ? user.notifications.notifications: [];
-        res.json({
-            notificationObject:{
-                ownerOfNotifications: req.user._id,
-                notifications: usersNotifications
-            }
-        })
+        if(user){
+            logger.debug(`Notifications for ${helper.getUser(req)} are: ` + JSON.stringify(user.notifications));
+            let usersNotifications = user.notifications ? user.notifications.notifications: [];
+            res.json({
+                notificationObject:{
+                    ownerOfNotifications: req.user._id,
+                    notifications: usersNotifications
+                }
+            })
+        } else {
+            logger.error(`User's id=${helper.getUser(req)} not found in database to get his/her notification`);
+            return res.sendStatus(500);
+        }
+
     })
 };
 

@@ -42,9 +42,9 @@ mongoose.connect(dataBaseName, function(err){
 let app = express();
 
 //WHen running on the dev's computer no NODE_ENV is set-up, and so we start morgan
-//if(!process.env.NODE_ENV){
-//    app.use(morgan('dev'));
-//}
+if(!process.env.NODE_ENV){
+    app.use(morgan('dev'));
+}
 
 ////Body parser middleware
 app.use(bodyParser.json());

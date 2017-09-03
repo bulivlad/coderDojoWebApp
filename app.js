@@ -42,7 +42,10 @@ helper.initializeApp();
 
 let app = express();
 
-app.use(morgan('dev'));
+//WHen running on the dev's computer no NODE_ENV is set-up, and so we start morgan
+if(process.env.NODE_ENV){
+    app.use(morgan('dev'));
+}
 
 //Body parser middleware
 app.use(bodyParser.json());
@@ -77,13 +80,21 @@ app.use("/badges", badgesRoute);
 
 let port = process.env.PORT || 3000;
 
-const httpOptions = {
-    cert: fs.readFileSync(path.join(__dirname, 'ssl', 'server.crt')),
-    key: fs.readFileSync(path.join(__dirname, 'ssl', 'server.key'))
-};
+//TODO SSL support does not exist for the free AppSvc we use at this point
+//const httpOptions = {
+//    cert: fs.readFileSync(path.join(__dirname, 'ssl', 'server.crt')),
+//    key: fs.readFileSync(path.join(__dirname, 'ssl', 'server.key'))
+//};
+//
+//https.createServer(httpOptions, app)
+//    .listen(port, function(){
+//        logger.info(`LOGGING:Server started on port ${port}`);
+//    });
 
-https.createServer(httpOptions, app)
-    .listen(port, function(){
-        logger.info(`LOGGING:Server started on port ${port}`);
-    });
-
+app.listen(port, function(err){
+   if(err){
+       logger.error(`Error connecting on port ${port}: ` + err);
+   } else {
+       logger.info(`Server started on port ${port}`);
+   }
+});

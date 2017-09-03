@@ -38,7 +38,7 @@ mongoose.connect(dataBaseName, function(err){
     }
 });
 
-helper.initializeApp();
+//helper.initializeApp();
 
 let app = express();
 

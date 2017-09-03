@@ -27,16 +27,16 @@ const express = require("express"),
 
 
 
-let dataBaseName = process.env.MONGO_URI || 'mongodb://localhost/coderDojoTimisoara';
-//Connecting to the database
-mongoose.connect(dataBaseName, function(err){
-    if (err){
-        console.log("Error:", err);
-        logger.error('Cannot connect to database: ' + err);
-    } else {
-        logger.info('Connected to dbs: ' + dataBaseName);
-    }
-});
+//let dataBaseName = process.env.MONGO_URI || 'mongodb://localhost/coderDojoTimisoara';
+////Connecting to the database
+//mongoose.connect(dataBaseName, function(err){
+//    if (err){
+//        console.log("Error:", err);
+//        logger.error('Cannot connect to database: ' + err);
+//    } else {
+//        logger.info('Connected to dbs: ' + dataBaseName);
+//    }
+//});
 
 //helper.initializeApp();
 

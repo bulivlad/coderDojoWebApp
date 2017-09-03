@@ -4,7 +4,6 @@
 
 const express = require("express"),
     path = require("path"),
-    templating = require("./templating/info.js"),
     routes = require('./routes/index'),
     usersRoute = require('./routes/usersRoute'),
     dojosRoute = require('./routes/dojosRoute'),

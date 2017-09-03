@@ -42,9 +42,9 @@ mongoose.connect(dataBaseName, function(err){
 let app = express();
 
 //WHen running on the dev's computer no NODE_ENV is set-up, and so we start morgan
-if(process.env.NODE_ENV){
-    app.use(morgan('dev'));
-}
+//if(!process.env.NODE_ENV){
+//    app.use(morgan('dev'));
+//}
 
 ////Body parser middleware
 app.use(bodyParser.json());
@@ -90,10 +90,12 @@ let port = process.env.EXPRESS_PORT || 3000;
 //        logger.info(`LOGGING:Server started on port ${port}`);
 //    });
 
-app.listen(port, function(err){
-   if(err){
-       logger.error(`Error connecting on port ${port}: ` + err);
-   } else {
-       logger.info(`Server started on port ${port}`);
-   }
-});
+try {
+    app.listen(port, function(err){
+        logger.info(`Server started on port ${port}`);
+    });
+} catch(err){
+    if(err){
+        logger.error(`Error stating server: ` + err);
+    }
+}

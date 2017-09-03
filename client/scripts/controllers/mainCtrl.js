@@ -374,7 +374,7 @@ angular.module("coderDojoTimisoara")
         };
 
         $scope.getUserThumbnailPhoto = function(){
-            if($rootScope.user.userPhoto){
+            if($rootScope.user && $rootScope.user.userPhoto){
                 return '../img/user_photos/' + $rootScope.user.userPhoto;
             } else {
                 return '../img/poza_profil.png';

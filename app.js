@@ -77,7 +77,7 @@ app.use("/dojos", dojosRoute);
 app.use("/events", eventsRoute);
 app.use("/badges", badgesRoute);
 
-let port = process.env.EXPRESS_PORT || 3000;
+let port = process.env.PORT || 3000;
 
 //TODO SSL support does not exist for the free AppSvc we use at this point
 //const httpOptions = {

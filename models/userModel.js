@@ -251,7 +251,7 @@ module.exports.getUserNotifications = function(userId, callback){
 
 module.exports.getUserNotificationsAndResetNewNotifications = function(userId, callback){
     User.findOneAndUpdate({_id:userId},
-        {$set: {'notifications.newNotificationCount': 0, dateNotificationsRead: Date.now()}},{notifications:true}, callback);
+        {$set: {'notifications.newNotificationCount': 0, 'notifications.dateNotificationsRead': Date.now()}},{notifications:true}, callback);
 };
 
 module.exports.deleteNotificationForUser = function(userId, notificationId, callback){

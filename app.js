@@ -33,10 +33,9 @@ mongoose.connect(dataBaseName, function(err){
         logger.error('Cannot connect to database: ' + err);
     } else {
         logger.info('Connected to dbs: ' + dataBaseName);
+        helper.initializeApp();
     }
 });
-
-helper.initializeApp();
 
 let app = express();
 

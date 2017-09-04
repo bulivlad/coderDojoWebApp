@@ -558,7 +558,8 @@ module.exports.uploadUserPicture = function(req, res){
 
 let storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null, __dirname + '/../client/img/user_photos');
+        let dirURI = __dirname + '/../client/img/user_photos';
+        callback(null, dirURI);
     },
     filename: function (req, file, callback) {
         callback(null, `${req.body.userId}_${Date.now()}.${mime.extension(file.mimetype)}`);
@@ -1366,6 +1367,7 @@ function sanitizePassword(password){
 
     return sanitPassword;
 }
+
 
 
 

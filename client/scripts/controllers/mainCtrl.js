@@ -377,7 +377,7 @@ angular.module("coderDojoTimisoara")
             if($rootScope.user && $rootScope.user.userPhoto){
                 return '../img/user_photos/' + $rootScope.user.userPhoto;
             } else {
-                return '../img/poza_profil.png';
+                return '../img/user_photos/poza_profil.png';
             }
 
 

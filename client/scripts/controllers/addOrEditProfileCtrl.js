@@ -17,7 +17,7 @@ angular.module("coderDojoTimisoara")
             if($scope.myProfile.user.userPhoto){
                 return 'background-image:url(\'../img/user_photos/' + $scope.myProfile.user.userPhoto + '\')';
             } else {
-                return 'background-image:url(\'../img/poza_profil.png\')';
+                return 'background-image:url(\'../img/user_photos/poza_profil.png\')';
             }
         };
 

@@ -1028,7 +1028,6 @@ My PROFILE
     height: $profile_banner_height;
   }
 
-  //style="background-image:url('../img/poza_profil.png')"
   img { //Regular uneditable image
     border-radius: 50px;
     height:80px;
@@ -1038,7 +1037,7 @@ My PROFILE
   }
 
   div.user-profile-img {
-    background-image: url("../img/poza_profil.png");
+    background-image: url("../img/user_photos/poza_profil.png");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

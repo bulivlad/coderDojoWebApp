@@ -27,10 +27,10 @@ const express = require("express"),
 
 
 let dataBaseName = process.env.MONGO_URI || 'mongodb://localhost/coderDojoTimisoara';
+logger.silly('databaseName: ', dataBaseName);
 //Connecting to the database
 mongoose.connect(dataBaseName, function(err){
     if (err){
-        console.log("Error:", err);
         logger.error('Cannot connect to database: ' + err);
     } else {
         logger.info('Connected to dbs: ' + dataBaseName);
@@ -90,12 +90,8 @@ let port = process.env.PORT || 3000;
 //        logger.info(`LOGGING:Server started on port ${port}`);
 //    });
 
-try {
-    app.listen(port, function(err){
-        logger.info(`Server started on port ${port}`);
-    });
-} catch(err){
-    if(err){
-        logger.error(`Error stating server: ` + err);
-    }
-}
+
+app.listen(port, function(err) {
+    logger.info(`Server started on port ${port}`);
+
+});

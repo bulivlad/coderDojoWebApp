@@ -212,7 +212,7 @@ let fieldsToGetUserForMember = {
 
 //Method for updating a users photo
 module.exports.updatePhotoForUser = function(userId, userPhotoName, callback){
-    User.findOneAndUpdate({_id: userId}, {$set :{userPhoto: userPhotoName}}, callback);
+    User.findOneAndUpdate({_id: userId}, {$set :{userPhoto: userPhotoName}}, {upsert:false}, callback);
 };
 
 let fieldsToGetForUsersNames = {firstName: true, lastName: true};

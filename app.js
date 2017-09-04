@@ -27,7 +27,6 @@ const express = require("express"),
 
 
 let dataBaseName = process.env.MONGO_URI || 'mongodb://localhost/coderDojoTimisoara';
-logger.silly('databaseName: ', dataBaseName);
 //Connecting to the database
 mongoose.connect(dataBaseName, function(err){
     if (err){
@@ -37,7 +36,7 @@ mongoose.connect(dataBaseName, function(err){
     }
 });
 
-//helper.initializeApp();
+helper.initializeApp();
 
 let app = express();
 

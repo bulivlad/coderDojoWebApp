@@ -177,7 +177,7 @@ let fieldsToGetForUsersForMember = {
 //Method for adding a notification for a user
 module.exports.addNotificationForUser = function(userId, notification, callback){
     logger.silly(`enter addNotification, notification =${JSON.stringify(notification)}`);
-    User.findOneAndUpdate({_id: userId},
+    findOneAndUpdateFix({_id: userId},
         {$push: {'notifications.notifications': notification}, $inc: {'notifications.newNotificationCount':1}}, callback);
 };
 
@@ -212,8 +212,22 @@ let fieldsToGetUserForMember = {
 
 //Method for updating a users photo
 module.exports.updatePhotoForUser = function(userId, userPhotoName, callback){
-    User.findOneAndUpdate({_id: userId}, {$set :{userPhoto: userPhotoName}}, callback);
+    findOneAndUpdateFix({_id: userId}, {$set :{userPhoto: userPhotoName}}, callback);
 };
+
+//This method is used because on Azure findOneAndUpdate returned a null object even though it edited the document in the
+//database. It works fine on local machine. Did not find any solution on the intenet. So I find the information I need
+//(the original object) and after I edit the document.
+function findOneAndUpdateFix(userId, whatToSet, callback){
+    User.findOne({_id:userId}, function(err, objectToFind){
+        if(err){
+            return callback(err);
+        }
+        User.findOneAndUpdate({_id:userId}, whatToSet, function(err){
+            callback(err, objectToFind);
+        })
+    })
+}
 
 let fieldsToGetForUsersNames = {firstName: true, lastName: true};
 //Method for getting user's names

@@ -108,7 +108,7 @@ let UserSchema = mongoose.Schema({
 });
 
 // Here we export the DataBase interface to our other modules
-let User = mongoose.model("User", UserSchema);
+let User = module.exports = mongoose.model("User", UserSchema);
 
 //Method for saving a new user to the database
 module.exports.createUser = function(newUser, callback){

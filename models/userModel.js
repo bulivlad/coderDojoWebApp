@@ -177,7 +177,7 @@ let fieldsToGetForUsersForMember = {
 //Method for adding a notification for a user
 module.exports.addNotificationForUser = function(userId, notification, callback){
     logger.silly(`enter addNotification, notification =${JSON.stringify(notification)}`);
-    findOneAndUpdateFix({_id: userId},
+    User.findOneAndUpdate({_id: userId},
         {$push: {'notifications.notifications': notification}, $inc: {'notifications.newNotificationCount':1}}, callback);
 };
 
@@ -264,7 +264,7 @@ module.exports.getUserNotifications = function(userId, callback){
 };
 
 module.exports.getUserNotificationsAndResetNewNotifications = function(userId, callback){
-    User.findOneAndUpdate({_id:userId},
+    findOneAndUpdateFix({_id:userId},
         {$set: {'notifications.newNotificationCount': 0, 'notifications.dateNotificationsRead': Date.now()}}, callback);
 };
 

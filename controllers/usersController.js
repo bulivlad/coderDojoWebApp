@@ -267,6 +267,7 @@ module.exports.getUsersNotifications = function(req, res){
             logger.error(`Error searching database for notifications for ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
+        //TODO remove this check, as this situation should not arise
         if(user){
             logger.debug(`Notifications for ${helper.getUser(req)} are: ` + JSON.stringify(user.notifications));
             let usersNotifications = user.notifications ? user.notifications.notifications: [];

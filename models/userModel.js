@@ -108,7 +108,7 @@ let UserSchema = mongoose.Schema({
 });
 
 // Here we export the DataBase interface to our other modules
-let User = module.exports = mongoose.model("User", UserSchema);
+let User = mongoose.model("User", UserSchema);
 
 //Method for saving a new user to the database
 module.exports.createUser = function(newUser, callback){
@@ -212,7 +212,7 @@ let fieldsToGetUserForMember = {
 
 //Method for updating a users photo
 module.exports.updatePhotoForUser = function(userId, userPhotoName, callback){
-    User.findOneAndUpdate({_id: userId}, {$set :{userPhoto: userPhotoName}}, {upsert:false}, callback);
+    User.findOneAndUpdate({_id: userId}, {$set :{userPhoto: userPhotoName}}, callback);
 };
 
 let fieldsToGetForUsersNames = {firstName: true, lastName: true};

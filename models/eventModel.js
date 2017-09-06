@@ -214,7 +214,7 @@ module.exports.getEventTickets = function(eventId, callback){
 
 //Method for registering user to event
 module.exports.registerUserForEvent = function(eventId, ticketId, userIdToAddToEvent, callback){
-    Event.findOneAndUpdate({_id: eventId, 'tickets._id': ticketId},
+    Event.findOneAndUpdate({_id: eventId, tickets: {$elemMatch:{_id: ticketId}} },
         {$addToSet: {'tickets.$.registeredMembers': {userId: userIdToAddToEvent, confirmed: false}}}, callback);
 };
 

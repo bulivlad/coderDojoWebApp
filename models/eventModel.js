@@ -88,7 +88,7 @@ let eventSchema = module.exports.eventSchema = new mongoose.Schema({
     },
     eventRecurrenceType: {
         type:String,
-        enum: keys.eventRecurrenceTypes,
+        enum: keys.eventRecurrenceTypes
     },
     activeStatus: {
         type: String,
@@ -120,7 +120,7 @@ let recurrentEventSchema = module.exports.recurrentEventSchema = new mongoose.Sc
 
     eventRecurrenceType: {
         type:String,
-        enum: keys.eventRecurrenceTypes,
+        enum: keys.eventRecurrenceTypes
     },
     recurrenceDay: {
         type: Date
@@ -285,7 +285,8 @@ module.exports.confirmOrRemoveUserFromEvent = function(data, callback){
         }
         let indexOfTicket =  getTicketIndexInTickets(data.ticketId, event.tickets);
         if(indexOfTicket === -1){
-            return callback(Error(`Ticket (_id=${ticketId}) not found in tickets ${JSON.stringify(event.tickets)} for ${data.whichAction} user from event (_id=${eventId})`));
+            return callback(Error(`Ticket (_id=${ticketId}) not found in tickets ${JSON.stringify(event.tickets)} for` +
+                ` ${data.whichAction} user from event (_id=${data.eventId})`));
         }
 
         //This is used by mongo to know which ticket to add the user to
@@ -295,7 +296,7 @@ module.exports.confirmOrRemoveUserFromEvent = function(data, callback){
             //is necessary because the simpler method commented at the bottom does not work in Azure.
             let removeFromTicket = {$pull: {}};
             removeFromTicket["$pull"][ticketToEdit] = {userId: data.userToAddOrRemoveId};
-            Event.findOneAndUpdate({_id: data.eventId, }, removeFromTicket, {new:true}, callback);
+            Event.findOneAndUpdate({_id: data.eventId}, removeFromTicket, {new:true}, callback);
         } else {
             //Confirm user path. First we must remove the user from the database, and then add him/her back confirmed
             // I have not found a more efficient way to do this at the moment, but there must be one
@@ -304,8 +305,7 @@ module.exports.confirmOrRemoveUserFromEvent = function(data, callback){
 
             Event.findOneAndUpdate({_id: data.eventId}, removeFromTicket, {_id:1}, function(err){
                 if(err){
-                    logger.error(`Error removing user (id=${data.userToAddOrRemoveId}) from event right before adding him confirmed:` + err);
-                    return res.sendStatus(500);
+                   return callback(err);
                 }
                 let addToTicket = {$addToSet: {}};
                 addToTicket["$addToSet"][ticketToEdit] = {userId: data.userToAddOrRemoveId, confirmed: true};

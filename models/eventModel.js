@@ -214,9 +214,43 @@ module.exports.getEventTickets = function(eventId, callback){
 
 //Method for registering user to event
 module.exports.registerUserForEvent = function(eventId, ticketId, userIdToAddToEvent, callback){
-    Event.findOneAndUpdate({_id: eventId, tickets: {$elemMatch:{_id: ticketId}} },
-        {$addToSet: {'tickets.$.registeredMembers': {userId: userIdToAddToEvent, confirmed: false}}}, callback);
+    Event.findOne({_id: eventId}, {tickets: true}, function(err, event){
+        if(err){
+            return callback(err);
+        }
+        let indexOfTicket =  getTicketIndexInTickets(ticketId, event.tickets);
+        if(indexOfTicket === -1){
+            return callback(Error(`Ticket (_id=${ticketId}) not found in tickets ${JSON.stringify(event.tickets)} for registering user for event (_id=${eventId})`));
+        }
+
+        //This is used by mongo to know which ticket to add the user to
+        let ticketToEdit = 'tickets.' + indexOfTicket + '.registeredMembers';
+        //This object build in this convoluted manner is used to edit the event by adding the user to the tickets. This
+        //is necessary because the simpler method commented at the bottom does not work in Azure.
+        let addToTicket = {$addToSet: {}};
+        addToTicket["$addToSet"][ticketToEdit] = {userId: userIdToAddToEvent, confirmed: false};
+
+        Event.findOneAndUpdate({_id: eventId}, addToTicket, callback);
+    });
+
+    //This works perfectly fine on my local machine, not so on the Azure deploy (I left it here for future information)
+    //Event.findOneAndUpdate({_id: eventId, tickets: {$elemMatch:{_id: ticketId}} },
+    //    {$addToSet: {'tickets.$.registeredMembers': {userId: userIdToAddToEvent, confirmed: false}}}, callback);
 };
+
+function getTicketIndexInTickets(ticketId, tickets){
+    let ret = -1;
+    if(tickets){
+        for(let i = 0; i <= tickets.length; i++){
+            let ticket = tickets[i];
+            if(ticket._id.toString() === ticketId){
+                ret = i;
+                break;
+            }
+        }
+    }
+    return ret;
+}
 
 //Method for removing user from event
 module.exports.removeUserFromEvent = function(eventId, ticketId, userIdToRemoveFromEvent, callback){
@@ -270,3 +304,4 @@ module.exports.getUsersInvitedToEvent = function(eventId, callback){
 module.exports.addToUsersInvited = function(eventId, invitesToAdd, callback){
   Event.findOneAndUpdate({_id:eventId}, {$addToSet: {invitesAlreadySent: {$each: invitesToAdd}}}, callback);
 };
+

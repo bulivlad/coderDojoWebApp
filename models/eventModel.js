@@ -254,29 +254,86 @@ function getTicketIndexInTickets(ticketId, tickets){
 
 //Method for removing user from event
 module.exports.removeUserFromEvent = function(eventId, ticketId, userIdToRemoveFromEvent, callback){
-    Event.findOneAndUpdate({_id: eventId, 'tickets._id': ticketId},
-        {$pull: {'tickets.$.registeredMembers': {userId: userIdToRemoveFromEvent}}}, callback);
+    Event.findOne({_id: eventId}, {tickets: true}, function(err, event){
+        if(err){
+            return callback(err);
+        }
+        let indexOfTicket =  getTicketIndexInTickets(ticketId, event.tickets);
+        if(indexOfTicket === -1){
+            return callback(Error(`Ticket (_id=${ticketId}) not found in tickets ${JSON.stringify(event.tickets)} for removing user from event (_id=${eventId})`));
+        }
+
+        //This is used by mongo to know which ticket to add the user to
+        let ticketToEdit = 'tickets.' + indexOfTicket + '.registeredMembers';
+        //This object build in this convoluted manner is used to edit the event by adding the user to the tickets. This
+        //is necessary because the simpler method commented at the bottom does not work in Azure.
+        let removeFromTicket = {$pull: {}};
+        removeFromTicket["$pull"][ticketToEdit] = {userId: userIdToRemoveFromEvent};
+
+        Event.findOneAndUpdate({_id: eventId}, removeFromTicket, callback);
+    });
+
+    //This works perfectly fine on my local machine, not so on the Azure deploy (I left it here for future information)
+    //Event.findOneAndUpdate({_id: eventId, 'tickets._id': ticketId},
+    //    {$pull: {'tickets.$.registeredMembers': {userId: userIdToRemoveFromEvent}}}, callback);
 };
 
 module.exports.confirmOrRemoveUserFromEvent = function(data, callback){
-    if(data.whichAction === keys.eventRemoveUser){
-        Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
-            {$pull: {'tickets.$.registeredMembers': {_id: data.regUserId}}}, {new:true}, callback);
-    } else {
-        //Confirm user path. First we must remove the user from the database, and then add him/her back confirmed
-        // I have not found a more efficient way to do this at the moment, but there must be one
-        Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
-            {$pull: {'tickets.$.registeredMembers': {_id: data.regUserId}}}, {_id:1}, function(err){
+    Event.findOne({_id: data.eventId}, {tickets: true}, function(err, event){
+        if(err){
+            return callback(err);
+        }
+        let indexOfTicket =  getTicketIndexInTickets(data.ticketId, event.tickets);
+        if(indexOfTicket === -1){
+            return callback(Error(`Ticket (_id=${ticketId}) not found in tickets ${JSON.stringify(event.tickets)} for ${data.whichAction} user from event (_id=${eventId})`));
+        }
+
+        //This is used by mongo to know which ticket to add the user to
+        let ticketToEdit = 'tickets.' + indexOfTicket + '.registeredMembers';
+        if(data.whichAction === keys.eventRemoveUser){
+            //This object build in this convoluted manner is used to edit the event by adding the user to the tickets. This
+            //is necessary because the simpler method commented at the bottom does not work in Azure.
+            let removeFromTicket = {$pull: {}};
+            removeFromTicket["$pull"][ticketToEdit] = {userId: data.userToAddOrRemoveId};
+            Event.findOneAndUpdate({_id: data.eventId, }, removeFromTicket, {new:true}, callback);
+        } else {
+            //Confirm user path. First we must remove the user from the database, and then add him/her back confirmed
+            // I have not found a more efficient way to do this at the moment, but there must be one
+            let removeFromTicket = {$pull: {}};
+            removeFromTicket["$pull"][ticketToEdit] = {userId: data.userToAddOrRemoveId};
+
+            Event.findOneAndUpdate({_id: data.eventId}, removeFromTicket, {_id:1}, function(err){
                 if(err){
                     logger.error(`Error removing user (id=${data.userToAddOrRemoveId}) from event right before adding him confirmed:` + err);
                     return res.sendStatus(500);
                 }
+                let addToTicket = {$addToSet: {}};
+                addToTicket["$addToSet"][ticketToEdit] = {userId: data.userToAddOrRemoveId, confirmed: true};
+
                 //Now we add the user as confirmed
-                Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
-                    {$addToSet: {'tickets.$.registeredMembers':
-                    {_id:data.regUserId,userId: data.userToAddOrRemoveId, confirmed: true}}}, {new:true}, callback);
+                Event.findOneAndUpdate({_id: data.eventId}, addToTicket, {new:true}, callback);
             });
-    }
+        }
+    });
+    //This works perfectly fine on my local machine, not so on the Azure deploy (I left it here for future information)
+    //if(data.whichAction === keys.eventRemoveUser){
+    //    Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
+    //        {$pull: {'tickets.$.registeredMembers': {_id: data.regUserId}}}, {new:true}, callback);
+    //} else {
+    //    //Confirm user path. First we must remove the user from the database, and then add him/her back confirmed
+    //    // I have not found a more efficient way to do this at the moment, but there must be one
+    //    Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
+    //        {$pull: {'tickets.$.registeredMembers': {_id: data.regUserId}}}, {_id:1}, function(err){
+    //            if(err){
+    //                logger.error(`Error removing user (id=${data.userToAddOrRemoveId}) from event right before adding him confirmed:` + err);
+    //                return res.sendStatus(500);
+    //            }
+    //            //Now we add the user as confirmed
+    //            Event.findOneAndUpdate({_id: data.eventId, 'tickets._id': data.ticketId},
+    //                {$addToSet: {'tickets.$.registeredMembers':
+    //                {_id:data.regUserId,userId: data.userToAddOrRemoveId, confirmed: true}}}, {new:true}, callback);
+    //        });
+    //}
 };
 
 module.exports.deleteEvent = function(eventId, callback){

@@ -33,7 +33,7 @@ angular.module("coderDojoTimisoara", [
 
 
 
-const keys = {
+var keys = {
     //Communication routes
     despre: 'despre',
     cumPotAjuta: "cum_pot_ajuta",

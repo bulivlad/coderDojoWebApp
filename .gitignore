@@ -5,14 +5,22 @@ node_modules
 .idea
 
 # scss map files
-/client/styles/*.map
-/client/styles/main.css
-/client/styles/.sass-cache
+/src/styles/*.map
+/src/styles/main.css
+/src/styles/.sass-cache
 
-# log files
-/logger/logFiles/
+# the client folder
+/client/directives
+/client/scripts
+/client/styles
+/client/vendor
+/client/views
+/client/*.html
 
 # images
 /client/img/badges/user_uploaded/
 /client/img/special_events/user_uploaded/
 /client/img/user_photos/user_uploaded/
+
+# log files
+/logger/logFiles/

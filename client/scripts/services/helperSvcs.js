@@ -375,8 +375,8 @@ angular.module('coderDojoTimisoara')
         };
 
         this.updateUserPhotoThumbnailWhenChangingPhoto = function(newPhotoUrl){
-            $('#header-wide-user-thumbnail').attr("src",'../img/user_photos/' + newPhotoUrl);
-            $('#header-narrow-user-thumbnail').attr("src",'../img/user_photos/' + newPhotoUrl);
+            $('#header-wide-user-thumbnail').attr("src",'../img/user_photos/user_uploaded/' + newPhotoUrl);
+            $('#header-narrow-user-thumbnail').attr("src",'../img/user_photos/user_uploaded/' + newPhotoUrl);
         };
 
         //Method that constructs an event date
@@ -990,7 +990,7 @@ angular.module('coderDojoTimisoara')
 
         this.getBackgroundUrlForSpecialEventPhoto = function(specialEvent){
             if(specialEvent.photo){
-                return 'background-image:url(\'../img/special_events/' + specialEvent.photo + '\')';
+                return 'background-image:url(\'../img/special_events/user_uploaded/' + specialEvent.photo + '\')';
             } else {
                 return 'background-image:url(\'../img/special_events/special_event_default_photo.jpg\')'
             }

@@ -3,14 +3,12 @@
  */
 
 
-const eventController = require('../controllers/eventController')
+const eventController = require('../controllers/eventController');
 let helper = {};
 
-
 helper.initializeApp = function(){
-  eventController.createEventsFromRecurrentEventsForAllDojos();
+    eventController.createEventsFromRecurrentEventsForAllDojos();
+
 };
-
-
 
 module.exports = helper;

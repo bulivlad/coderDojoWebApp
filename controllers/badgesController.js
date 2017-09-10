@@ -125,7 +125,7 @@ module.exports.uploadBadgePicture = function(req, res){
                logger.error(`Error uploading badge photo for badge (_id=${badgeId}) by ${helper.getUser(req)}:` + err);
                return res.sendStatus(500);
            }
-           let badgesRelativePath = 'client/img/badges/';
+           let badgesRelativePath = 'client/img/badges/user_uploaded/';
            helper.inspectUploadedImage(req.file, badgesRelativePath, function(err, fileInspect){
                if(err){
                    logger.error(`Error inspecting photo (_id=${JSON.stringify(req.file)}) for adding badge photo for badge ` +
@@ -165,7 +165,7 @@ module.exports.uploadBadgePicture = function(req, res){
 
 let storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null, __dirname + '/../client/img/badges');
+        callback(null, __dirname + '/../client/img/badges/user_uploaded');
     },
     filename: function (req, file, callback) {
         callback(null, `${req.body.badgeId}_${Date.now()}.${mime.extension(file.mimetype)}`);

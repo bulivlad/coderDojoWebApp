@@ -514,7 +514,7 @@ module.exports.uploadUserPicture = function(req, res){
         //If the user changing the photo is the logged in user or if the user changing photo is the
         //logged in user's child
 
-        let userImagesRelativePath =  'client/img/user_photos/';
+        let userImagesRelativePath =  'client/img/user_photos/user_uploaded/';
         logger.debug(`userToUpdatePhoto=${userToUpdatePhoto}`);
 
         if(user._id.toString() == userToUpdatePhoto || isUsersChild(user, {_id:userToUpdatePhoto})){
@@ -559,7 +559,7 @@ module.exports.uploadUserPicture = function(req, res){
 
 let storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        let dirURI = __dirname + '/../client/img/user_photos';
+        let dirURI = __dirname + '/../client/img/user_photos/user_uploaded';
         callback(null, dirURI);
     },
     filename: function (req, file, callback) {

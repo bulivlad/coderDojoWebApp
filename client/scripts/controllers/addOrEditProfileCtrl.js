@@ -15,7 +15,7 @@ angular.module("coderDojoTimisoara")
 
         $scope.getUserPictureURL = function(){
             if($scope.myProfile.user.userPhoto){
-                return 'background-image:url(\'../img/user_photos/' + $scope.myProfile.user.userPhoto + '\')';
+                return 'background-image:url(\'../img/user_photos/user_uploaded/' + $scope.myProfile.user.userPhoto + '\')';
             } else {
                 return 'background-image:url(\'../img/user_photos/poza_profil.png\')';
             }

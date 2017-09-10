@@ -2,7 +2,7 @@
     <div id="edit-profile-picture">
         <div></div>
         <div class="user-profile-img"
-             style="{{myProfile.user.userPhoto ? 'background-image:url(\'../img/user_photos/' + myProfile.user.userPhoto + '\')': 'background-image:url(\'../img/user_photos/poza_profil.png\')'}}"></div>
+             style="{{myProfile.user.userPhoto ? 'background-image:url(\'../img/user_photos/user_uploaded/' + myProfile.user.userPhoto + '\')': 'background-image:url(\'../img/user_photos/poza_profil.png\')'}}"></div>
         <p>{{myProfile.user.firstName}}</p>
     </div>
     <button class="edit-profile-button" ng-click="editAction()" ng-if="!(myProfile.views[keys.hideEditButton])">Editare profil</button>
@@ -29,7 +29,7 @@
                         <div class="my-profile-child" ng-repeat="child in myProfile.user.children"
                              ng-click="viewChildAction(child)">
                             <div class="child-profile-img"
-                                 style="{{child.userPhoto ? 'background-image:url(\'../img/user_photos/' + child.userPhoto + '\')': 'background-image:url(\'../img/user_photos/poza_profil.png\')'}}"></div>
+                                 style="{{child.userPhoto ? 'background-image:url(\'../img/user_photos/user_uploaded/' + child.userPhoto + '\')': 'background-image:url(\'../img/user_photos/poza_profil.png\')'}}"></div>
                             <p>{{child.firstName + " " + child.lastName}}</p>
                         </div>
                     </div>
@@ -60,7 +60,7 @@
                         <div class="my-profile-child" ng-repeat="parent in myProfile.user.parents"
                              ng-click="viewParentAction(parent)">
                             <div class="child-profile-img"
-                                 style="{{parent.userPhoto ? 'background-image:url(\'../img/user_photos/' + parent.userPhoto + '\')': 'background-image:url(\'../img/user_photos/poza_profil.png\')'}}"></div>
+                                 style="{{parent.userPhoto ? 'background-image:url(\'../img/user_photos/user_uploaded/' + parent.userPhoto + '\')': 'background-image:url(\'../img/user_photos/poza_profil.png\')'}}"></div>
                             <p>{{parent.firstName + " " + parent.lastName}}</p>
                         </div>
                     </div>

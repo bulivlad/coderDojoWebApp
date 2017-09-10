@@ -8,3 +8,11 @@ node_modules
 /client/styles/*.map
 /client/styles/main.css
 /client/styles/.sass-cache
+
+# log files
+/logger/logFiles/
+
+# images
+/client/img/badges/user_uploaded/
+/client/img/special_events/user_uploaded/
+/client/img/user_photos/user_uploaded/

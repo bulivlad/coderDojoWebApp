@@ -216,7 +216,7 @@ angular.module("coderDojoTimisoara")
 
         $scope.getBackgroundUrlForPhoto = function(badge){
             if(badge.badgePhoto){
-                return 'background-image:url(\'../img/badges/' + badge.badgePhoto + '\')';
+                return 'background-image:url(\'../img/badges/user_uploaded/' + badge.badgePhoto + '\')';
             } else {
                 return 'background-image:url(\'../img/badges/default-badge.png\')'
             }
@@ -375,7 +375,7 @@ angular.module("coderDojoTimisoara")
 
         $scope.getUserThumbnailPhoto = function(){
             if($rootScope.user && $rootScope.user.userPhoto){
-                return '../img/user_photos/' + $rootScope.user.userPhoto;
+                return '../img/user_photos/user_uploaded/' + $rootScope.user.userPhoto;
             } else {
                 return '../img/user_photos/poza_profil.png';
             }

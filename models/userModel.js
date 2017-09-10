@@ -185,7 +185,7 @@ module.exports.addNotificationForUser = function(userId, notification, callback)
 module.exports.addNotificationsForUser = function(userId, notifications, callback){
     User.findOneAndUpdate({_id: userId},
         {$push: {'notifications.notifications': {$each:notifications}},
-         $inc: {'notifications.newNotificationCount':notifications.length}}, callback);
+            $inc: {'notifications.newNotificationCount':notifications.length}}, callback);
 };
 
 module.exports.getDetailedUserForMember = function(userId, callback){

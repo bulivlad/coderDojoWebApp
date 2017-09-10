@@ -1222,7 +1222,7 @@ module.exports.uploadSpecialEventPhoto = function(req, res){
             }
 
             let filename = req.file.filename;
-            let specialEventsRelativePath = 'client/img/special_events/';
+            let specialEventsRelativePath = 'client/img/special_events/user_uploaded/';
             helper.inspectUploadedImage(req.file, specialEventsRelativePath, function(err, fileInspect){
                 if(err){
                     logger.error(`Error inspecting photo (_id=${JSON.stringify(req.file)}) for adding special event photo` +
@@ -1263,7 +1263,7 @@ module.exports.uploadSpecialEventPhoto = function(req, res){
 
 let storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null, __dirname + '/../client/img/special_events');
+        callback(null, __dirname + '/../client/img/special_events/user_uploaded');
     },
     filename: function (req, file, callback) {
         callback(null, `${req.body.specialEventId}_${Date.now()}.${mime.extension(file.mimetype)}`);

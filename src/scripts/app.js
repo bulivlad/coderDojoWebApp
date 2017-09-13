@@ -31,8 +31,6 @@ angular.module("coderDojoTimisoara", [
             .otherwise({redirectTo: '/despre'})
     }]);
 
-
-
 var keys = {
     //Communication routes
     despre: 'despre',

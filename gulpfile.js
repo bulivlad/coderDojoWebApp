@@ -57,7 +57,7 @@ gulp.task('copy-css', ['empty-styles'], function(){
         .pipe(gulp.dest('client/styles'))
 });
 
-gulp.task('build-styles', ['empty-styles', 'copy-css', 'sass']);
+gulp.task('build-styles', ['copy-css', 'sass']);
 
 
 
@@ -103,6 +103,11 @@ gulp.task('build-index.html-and-app.js', ['empty-scripts'], function(){
 
 });
 
+gulp.task('copy-index.html', function(){
+    return gulp.src('src/index.html')
+        .pipe(gulp.dest('client'));
+});
+
 gulp.task('build-js', ['copy-vendor', 'copy-js', 'build-index.html-and-app.js']);
 
 
@@ -128,11 +133,23 @@ gulp.task('copy-views', ['empty-views'], function(){
 
 gulp.task('build-html', ['copy-directives', 'copy-views']);
 
-
-
-
 //Build project
 gulp.task('build-project', ['build-styles', 'build-html', 'build-js']);
+
+//This is only used with process.env.NODE_ENV="development". This is used to build the client when developing
+// it is started with the command gulp watch-dev in a cmd cli and it should stay open while developing
+gulp.task('watch-dev', function(){
+    //Javascript
+    gulp.watch('src/scripts/**/*.js', ['copy-js']);
+    gulp.watch('src/vendor/*.js', ['copy-vendor']);
+    //Styles (if you add another css file, it will only be added if modifications are made the the scss file or if added
+    //manually
+    gulp.watch('src/styles/*.scss', ['build-styles']);
+    //Html
+    gulp.watch('src/index.html', ['copy-index.html']);
+    gulp.watch('src/directives/*.html', ['copy-directives']);
+    gulp.watch('src/views/*.html', ['copy-views']);
+});
 
 
 //Start server

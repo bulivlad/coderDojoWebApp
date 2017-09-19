@@ -172,7 +172,6 @@ let storage = multer.diskStorage({
     }
 });
 
-//TODO must check for photo type
 upload =  multer({storage:storage}).single('badge-photo');
 
 module.exports.addBadgesToUsers = function(req, res){

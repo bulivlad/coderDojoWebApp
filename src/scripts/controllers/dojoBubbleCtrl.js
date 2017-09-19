@@ -7,8 +7,6 @@ angular.module("coderDojoTimisoara")
     .controller('dojoBubbleCtrl', function($scope, $location, dataService, helperSvc){
         $scope.bubbleDojos = [];
 
-        //TODO get the dojos for the child, not the user
-
         //Method that retrieves a user's dojos from the server
         var getUsersDojosFromServer = function(){
             dataService.getMyDojos()

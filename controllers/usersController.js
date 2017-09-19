@@ -19,7 +19,6 @@ module.exports.registerUser = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.register} for user (email=${req.body.user.email},
                    alias=${req.body.user.email})`);
     //First we validate and sanitize the user fields received from the client
-    //TODO we need to sanitize the data received from the client
     let errors = validateFields(req, keys.regUserOver14Profile);
     if (errors){
         //If there are errors, we sent them back to the client
@@ -71,7 +70,6 @@ module.exports.registerUsersChild = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.registerChildRoute} for ${helper.getUser(req)}`);
     let childUser = req.body.user;
     let childUserType = childUser.userType;
-    //TODO sanitize the fields for malicious intent
     let errors = validateFields(req, childUserType);
     if (errors){
         res.json({errors: errors})
@@ -81,7 +79,7 @@ module.exports.registerUsersChild = function(req, res){
         //If the sanitization process has not changed anything we continue with the process
         if (areUsersEqual(sanitizedChild, childUser)) {
             //We make sure the alias is unique
-            User.checkIfAliasExists(childUser.alias, function (err, aliasFound) {//TODO make one call for email and alias checking
+            User.checkIfAliasExists(childUser.alias, function (err, aliasFound) {
                 if (err) {
                     logger.error('Error seaching database for alias (' + childUser.alias + ') : ' + err);
                     return res.sendStatus(500);
@@ -145,7 +143,6 @@ module.exports.getUsersChildren = function(req, res){
                     logger.error('Could not get children: ' + err);
                     return res.sendStatus(500);
                 }
-                //TODO remove password from and other private fields from children
                 res.json({children:expandedChildren});
             });
     } else {
@@ -157,13 +154,12 @@ module.exports.getUsersChildren = function(req, res){
 //Method for getting user's parents
 module.exports.getUsersParents = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.getUsersParentsRoute} for ${helper.getUser(req)}`);
-    if(req.user && req.user.parents && req.user.parents.length > 0){//TODO this always returns noParentsError (test why)
+    if(req.user && req.user.parents && req.user.parents.length > 0){
         User.find({_id: {$in: req.user.parents}}, {password: false, creationDate: false},function(err, expandedParents){
             if (err){
                 logger.error('Could not get parents: ' + err);
                 return res.sendStatus(500);
             }
-            //TODO remove password from and other private fields from children
             res.json({parents:expandedParents});
         });
     } else {
@@ -176,16 +172,13 @@ module.exports.getUsersParents = function(req, res){
 module.exports.getChildsParents = function(req, res){
     logger.debug(`Entering UsersRoute: ${keys.getChildsParentsRoute} for ${helper.getUser(req)}`);
     let parents = req.body.parents;
-    //TODO add check that the current user is the parent of the child asking for parents
-    logger.silly(`Parents to search for ${parents}`);
     User.find({_id: {$in: parents}},
-        {password: false, creationDate: false, children:false, parents:false, badges:false, notifications: false},//TODO add proper levels of information
+        {password: false, creationDate: false, children:false, parents:false, badges:false, notifications: false},
         function(err, childsParents){
             if (err){
                 logger.error('Could not get parents: ' + err);
                 return res.sendStatus(500);
             }
-            //TODO remove password from and other private fields from children
             res.json({parents:childsParents});
         });
 };
@@ -267,7 +260,6 @@ module.exports.getUsersNotifications = function(req, res){
             logger.error(`Error searching database for notifications for ${helper.getUser(req)}:` + err);
             return res.sendStatus(500);
         }
-        //TODO remove this check, as this situation should not arise
         if(user){
             logger.debug(`Notifications for ${helper.getUser(req)} are: ` + JSON.stringify(user.notifications));
             let usersNotifications = user.notifications ? user.notifications.notifications: [];
@@ -567,7 +559,6 @@ let storage = multer.diskStorage({
     }
 });
 
-//TODO must check for photo type
 upload =  multer({storage:storage}).single('user-photo');
 
 

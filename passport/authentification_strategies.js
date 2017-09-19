@@ -19,7 +19,7 @@ let initializeStrategies = function(){
             //First we search the database for a user with the given email (or alias)
             User.findUserByEmailOrAlias(email, function (err, user) {
                 if (err) {
-                    logger.error('Error finding user in the database')
+                    logger.error('Error finding user in the database');
                     done(err);
                 } else {
                     if (!user) {
@@ -56,14 +56,13 @@ let initializeStrategies = function(){
             done(null, {_id:user._id, email:user.email});
         } else {
             logger.error(`No user found for serialization`);
-            done(new Error('No user'));
+            done(Error('No user'));
         }
     });
 
     passport.deserializeUser(function(user, done){
         User.findUserByIdForDeserialization(user._id, function(err, user){
             if (err){
-                //TODO check what done(err) propagates
                 logger.error(`Error searching for user (${user.email}) in database: ` + err);
                 done(err);
             }else {

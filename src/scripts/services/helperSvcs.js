@@ -474,8 +474,7 @@ angular.module('coderDojoTimisoara')
             if(callback){
                 callback();
             }
-            //TODO think of all possible problems and add decisions for them (like when the server does not answer because
-            // of high latency)
+
         };
 
         //Method for getting a dojo from a list of dojos

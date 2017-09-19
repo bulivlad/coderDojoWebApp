@@ -323,3 +323,7 @@ module.exports.getChangeUserPasswordInfo = function(userId, callback){
 module.exports.changeUsersPassword = function(newPasswordHash, userId, callback){
     User.findOneAndUpdate({_id:userId}, {$set: {password: newPasswordHash}}, callback);
 };
+
+module.exports.getUsersEmail = function(userId, callback){
+    User.findOne({_id:userId}, {email:true}, callback);
+}

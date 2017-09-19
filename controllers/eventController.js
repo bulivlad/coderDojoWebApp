@@ -1098,7 +1098,6 @@ function sendInvitesForEventToDojoMembers(data){
             let members = dojo[arrayName];
             for(let j = 0; j < members.length; j++){
                 let member = members[j];
-                //TODO also add email notifications
                 User.addNotificationForUser(member, notification, function(err){
                     if(err){
                         logger.error(`Error adding notification ${JSON.stringify(notification)} user (_id=${member}) ` +

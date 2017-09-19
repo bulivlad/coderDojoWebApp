@@ -44,7 +44,7 @@ angular.module("coderDojoTimisoara")
                         }
 
                         //getting users notifications
-                        getNotificationsForUser(true);//TODO move this to the main controller
+                        getNotificationsForUser(true);
                         //reset notification info bubble
 
                         //getting users dojos
@@ -264,8 +264,10 @@ angular.module("coderDojoTimisoara")
                     $scope.initializeEditProfilesController();
 
                 } else if($scope.isCurrentView(keys.editChildUnder14Profile) || $scope.isCurrentView(keys.editChildOver14Profile)){
+                    //Logically we should go back to the edited child's profile, but since it has been edited and not saved
+                    // it would have wrong information. Safer to go back to the parent's page.
                     resetInitializations();
-                    $scope.setView(keys.viewUsersChildProfile);//TODO need to ad refresh for this user as it could have been modified
+                    $scope.initializeEditProfilesController();
                 }
             }
 
@@ -424,7 +426,6 @@ angular.module("coderDojoTimisoara")
                 }
             }
             else if($scope.isCurrentView(keys.viewUserProfile)){
-                //TODO go to parent's child profile
                 parent.children = [];
                 parent.children.push($scope.myProfile.user);
                 //We clone the child to avoid json circular exceptions when converting for saving
@@ -625,7 +626,6 @@ angular.module("coderDojoTimisoara")
                     .then(function(response){
                         communicationsPermitted = true;
                         if(response.data.errors){
-                            //TODO check if this is a valid action
                             if(response.data.errors === keys.notAuthorizedError){
                                 $scope.showNotAuthorizedError();
                             } else {

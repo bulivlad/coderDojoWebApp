@@ -3,6 +3,7 @@
  */
 
 const express = require("express"),
+    logger = require('./logger/logger'),
     path = require("path"),
     routes = require('./routes/index'),
     usersRoute = require('./routes/usersRoute'),
@@ -16,7 +17,6 @@ const express = require("express"),
     cookieParser = require('cookie-parser'),
     passport = require('passport'),
     passportLocal =   require('passport-local'),
-    logger = require('./logger/logger'),
     validator = require('./validator/validator'),
     helper = require('./auxiliary/helper'),
     morgan = require('morgan');
@@ -43,6 +43,7 @@ let app = express();
 if(!process.env.NODE_ENV){
     app.use(morgan('dev'));
 }
+console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 
 ////Body parser middleware
 app.use(bodyParser.json());

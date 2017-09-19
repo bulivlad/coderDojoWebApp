@@ -9,6 +9,7 @@ const Event = require('../models/eventModel');
 const logger = require('winston');
 const validator = require('validator');
 const helper  = require('./helperController');
+const emailSender = require('../emailServer/emailServer');
 
 //Method for adding a new dojo (only the admin can do that)
 module.exports.addDojo = function(req, res){
@@ -462,7 +463,10 @@ module.exports.acceptPendingMember = function(req, res){
                             return res.sendStatus(500);
                         }
                         if(dojo){
-                            //After removing the user from pending members, we send him/her a notification of this
+                            //We send a success flag because the dojo editing worked at this point
+                            res.json({success: true});
+                            //After sending the reply to the user accepting the request, we notify the user that was accepted
+                            //of the fact
                             let notification = {};
                             notification.typeOfNot = keys.infoNotification;
                             notification.data = {
@@ -473,7 +477,8 @@ module.exports.acceptPendingMember = function(req, res){
                                     logger.error(`Error adding notification for user id=${userToAcceptId}`);
                                 }
                             });
-                            res.json({success: true});
+                            emailSender.sendMailForAcceptanceToDojo(userToAcceptId, typeOfUser, dojo.name);
+
                             //After the user was accepted in the dojo, we add the user's children to the dojo
                             User.getUsersAndHisChildren(userToAcceptId, function(err, addedUser){
                                 if(err){

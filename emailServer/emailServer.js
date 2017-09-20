@@ -11,7 +11,7 @@ let clientId = process.env.MAIL_CLIENT_ID;
 let clientSecred = process.env.MAIL_CLIENT_SECRET;
 let refreshToken = process.env.MAIL_REFRESH_TOKEN;
 
-logger.debug(`Initialize emailServer\nmailUser=${mailUser}\nclientId=${clientId}\nclientSecred=${clientSecred}\nrefreshToken=${refreshToken}`);
+let mailerInfoAvailable = mailUser && clientId && clientSecred && refreshToken;
 
 let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -25,11 +25,16 @@ let transporter = nodemailer.createTransport({
 });
 
 function sendMail(mailOptions, errMessage){
-    transporter.sendMail(mailOptions, function(err, res){
-        if(err){
-          logger.error(`${errMessage}: ${err}`);
-        }
-    })
+    if(mailerInfoAvailable){
+        transporter.sendMail(mailOptions, function(err, res){
+            if(err){
+                logger.error(`${errMessage}: ${err}`);
+            }
+        })
+    } else {
+        logger.debug(`Mailer info not available: mailUser=${mailUser},  clientId=${clientId},  clientSecred=${clientSecred},  refreshToken=${refreshToken}`)
+    }
+
 }
 
 module.exports.sendMailForAcceptanceToDojo = function(userId, typeOfUser, dojoName){

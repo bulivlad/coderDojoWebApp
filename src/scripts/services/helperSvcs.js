@@ -105,6 +105,10 @@ angular.module('coderDojoTimisoara')
                 errors.lastName = 'Numele de familie este necesar';
                 hasErrors = true;
             }
+            if (!user.alias || user.alias === '' || !this.isAliasValid(user.alias)){
+                errors.alias = 'Alias-ul este necesar si poate conține doar caractere [A-Z,a-z,0-9]';
+                hasErrors = true;
+            }
             if(!user.address || user.address === ''){
                 errors.address = 'Lipseste adresa';
                 hasErrors = true;
@@ -131,7 +135,7 @@ angular.module('coderDojoTimisoara')
 
             //Register user over 14 by himself/herself
             if (validationForWhat === keys.regUserOver14Profile){
-                hasErrors = this.checkPasswords(user, errors);
+                hasErrors = hasErrors || this.checkPasswords(user, errors);
 
                 if (user.birthDate && !this.isAgeGreaterThen14(user.birthDate)){
                     errors.birthDate = 'Ne pare rau, trebuie sa ai peste 14 ani pentru a iti creea cont';
@@ -181,7 +185,7 @@ angular.module('coderDojoTimisoara')
 
                 //If a password was filled, we check it is valid
                 if(user.password || user.password2){
-                    hasErrors =  this.checkPasswords(user, errors);
+                    hasErrors = hasErrors || this.checkPasswords(user, errors);
                 }
             }
 

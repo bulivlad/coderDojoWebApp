@@ -43,20 +43,34 @@ module.exports.registerUser = function(req, res){
                     res.json({errors:errors});
                     logger.info("An account with this email already exists: " + (req.body.user.email));
                 } else {
-                    //If there are no errors
-                    //We remove password2, as this was only check for the user to make sure they typed the password correctly
-                    user.password2 = undefined;
-                    let newUser = new User(user);
-                    //We save the user
-                    User.createUser(newUser, function(err, user){
-                        if(err){
-                            logger.error('Error saving user in the database:' + err);
+                    User.checkIfAliasExists(user.alias, function(err, result){
+                        if (err){
+                            logger.error(`Error seaching for existing email (${user.email}) for registering user: ` + err);
                             return res.sendStatus(500);
                         }
-                        //If there was no error, the user was created
-                        logger.debug('User created:', user.email);
-                        res.json({success:true});
-                    });
+                        if (result){
+                            //If we already find an entry with this alias we send an error to the client that the alias is already in use
+                            errors = [];
+                            errors.push(createServerError('alias', 'Alias existent pentru un alt utilizator'));
+                            res.json({errors:errors});
+                            logger.info("An account with this alias already exists: " + (req.body.user.alias));
+                        } else {
+                            //If there are no errors
+                            //We remove password2, as this was only check for the user to make sure they typed the password correctly
+                            user.password2 = undefined;
+                            let newUser = new User(user);
+                            //We save the user
+                            User.createUser(newUser, function(err, user){
+                                if(err){
+                                    logger.error('Error saving user in the database:' + err);
+                                    return res.sendStatus(500);
+                                }
+                                //If there was no error, the user was created
+                                logger.debug('User created:', user.email);
+                                res.json({success:true});
+                            });
+                        }
+                    })
                 }
             });
         } else {
@@ -931,6 +945,7 @@ function validateFields(req, validationForWhat){
     //Validation
     req.checkBody("user.firstName", "Prenumele este necesar").notEmpty();
     req.checkBody("user.lastName", "Numele de familie este necesar").notEmpty();
+    req.checkBody("user.alias", "Alias-ul este necesar").notEmpty();
 
     req.checkBody('user.birthDate', 'Ziua de nastere nu este completa').isDate();
     let isDate = req.body.user.birthDate ? true: false;

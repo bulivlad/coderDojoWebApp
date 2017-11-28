@@ -91,6 +91,9 @@ angular.module("coderDojoTimisoara")
             if(user.phone !== sanitizedUser.phone){
                 $scope.register.sanitize.phone = true;
             }
+            if(user.alias !== sanitizedUser.alias){
+                $scope.register.sanitize.alias = true;
+            }
         };
 
         var resetValues = function(register){
@@ -102,6 +105,7 @@ angular.module("coderDojoTimisoara")
             register.phone = '';
             register.address = '';
             register.birthDate = '';
+            register.alias = '';
         };
 
         resetValues($scope.register);

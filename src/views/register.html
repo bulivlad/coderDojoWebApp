@@ -26,6 +26,14 @@
                 <p class="info" ng-if="info.firstNameInfo">Prenumele este obligatoriu, trebuie sa fie doar litere, si maxim 50 de caractere.</p>
             </div>
 
+            <div class="input_and_error">
+                <input type="text" placeholder="Alias" title="Alias" name="alias" ng-model="register.user.alias" autocomplete="off"
+                       ng-focus="register.errors.alias = undefined; info.aliasInfo = true" ng-blur="info.aliasInfo = false"
+                       maxlength="50" ng-class="{sanitized: register.sanitize.alias}">
+                <p class="error" ng-if="register.errors.alias">{{register.errors.alias}}</p>
+                <p class="info" ng-if="info.aliasInfo">Alias-ul este obligatoriu, trebuie sa fie doar litere si cifre, si maxim 50 de caractere.</p>
+            </div>
+
             <div class="input_and_error input_and_error_date_container">
                 <input type="text" id="datepicker" title="Data nasterii" placeholder="Data nașterii" name="birthDateForm" autocomplete="off"
                        ng-model="register.user.birthDate" ng-focus="register.errors.birthDate = undefined; info.birthdateInfo = true;"

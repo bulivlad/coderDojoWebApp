@@ -12,7 +12,7 @@ angular.module("coderDojoTimisoara")
                         changeYear: true,
                         dayNamesMin:keys.daysOfWeekShort,
                         monthNamesShort:keys.months,
-                        dateFormat: 'd M yy'
+                        dateFormat: 'M/d/yy'
                     });
                 } );
                 if(callback){
